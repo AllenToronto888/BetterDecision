@@ -1,16 +1,16 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-  Alert,
-  Linking,
+    Alert,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const SettingsScreen = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
@@ -32,6 +32,18 @@ const SettingsScreen = () => {
             Alert.alert('Success', 'Cache cleared successfully');
           },
         },
+      ]
+    );
+  };
+
+  const openSavedItems = () => {
+    // Note: In a real app, you'd navigate to SavedItemsScreen here
+    Alert.alert(
+      'Saved Items',
+      'Access your saved calculations, comparisons, and decisions.',
+      [
+        { text: 'OK' },
+        { text: 'Open Saved Items', onPress: () => console.log('Navigate to SavedItemsScreen') }
       ]
     );
   };
@@ -76,99 +88,107 @@ const SettingsScreen = () => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>Settings</Text>
-        <Text style={[styles.headerSubtitle, { color: theme.tabBarInactive }]}>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Settings</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.colors.tabBarInactive }]}>
           Customize your app experience
         </Text>
       </View>
       
-      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Appearance</Text>
+      <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Appearance</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="brightness-6" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Dark Mode</Text>
+            <MaterialIcons name="brightness-6" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Dark Mode</Text>
           </View>
           <Switch
             value={isDarkMode}
             onValueChange={toggleTheme}
-            trackColor={{ false: theme.border, true: theme.primary }}
-            thumbColor={theme.background}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+            thumbColor={theme.colors.background}
           />
         </View>
         
         <TouchableOpacity style={styles.settingRow}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="color-lens" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Custom Theme</Text>
+            <MaterialIcons name="color-lens" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Custom Theme</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
-      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Data Management</Text>
+      <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Data Management</Text>
+        
+        <TouchableOpacity style={styles.settingRow} onPress={openSavedItems}>
+          <View style={styles.settingLabelContainer}>
+            <MaterialIcons name="bookmark" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Saved Items</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+        </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={clearCache}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="cleaning-services" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Clear Cache</Text>
+            <MaterialIcons name="cleaning-services" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Clear Cache</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={clearSavedComparisons}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="delete" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Clear Saved Comparisons</Text>
+            <MaterialIcons name="delete" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Clear Saved Comparisons</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
-      <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>App</Text>
+      <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>App</Text>
         
         <TouchableOpacity style={styles.settingRow} onPress={rateApp}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="star" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Rate App</Text>
+            <MaterialIcons name="star" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Rate App</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={openPrivacyPolicy}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="privacy-tip" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Privacy Policy</Text>
+            <MaterialIcons name="privacy-tip" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Privacy Policy</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={openTermsOfService}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="description" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Terms of Service</Text>
+            <MaterialIcons name="description" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Terms of Service</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={contactUs}>
           <View style={styles.settingLabelContainer}>
-            <Icon name="mail" size={24} color={theme.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Contact Us</Text>
+            <MaterialIcons name="mail" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Contact Us</Text>
           </View>
-          <Icon name="chevron-right" size={24} color={theme.tabBarInactive} />
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
       <View style={styles.versionContainer}>
-        <Text style={[styles.versionText, { color: theme.tabBarInactive }]}>
+        <Text style={[styles.versionText, { color: theme.colors.tabBarInactive }]}>
           Better Decision v1.0.0
         </Text>
       </View>

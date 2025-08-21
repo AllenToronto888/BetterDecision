@@ -1,16 +1,16 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Criterion {
   id: string;
@@ -146,35 +146,35 @@ const DetailComparisonScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
         <TextInput
-          style={[styles.titleInput, { color: theme.text }]}
+          style={[styles.titleInput, { color: theme.colors.text }]}
           value={title}
           onChangeText={setTitle}
           placeholder="Comparison Title"
-          placeholderTextColor={theme.tabBarInactive}
+          placeholderTextColor={theme.colors.tabBarInactive}
         />
         
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View>
             <View style={styles.tableHeader}>
-              <View style={[styles.criterionCell, { backgroundColor: theme.card }]}>
-                <Text style={[styles.headerText, { color: theme.text }]}>Criteria</Text>
+              <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
+                <Text style={[styles.headerText, { color: theme.colors.text }]}>Criteria</Text>
               </View>
               
               {options.map((option, index) => (
                 <View 
                   key={option.id} 
-                  style={[styles.optionHeaderCell, { backgroundColor: theme.card }]}
+                  style={[styles.optionHeaderCell, { backgroundColor: theme.colors.card }]}
                 >
                   <TextInput
-                    style={[styles.optionInput, { color: theme.text }]}
+                    style={[styles.optionInput, { color: theme.colors.text }]}
                     value={option.name}
                     onChangeText={(text) => updateOption(option.id, text)}
                     placeholder={`Product ${index + 1}`}
-                    placeholderTextColor={theme.tabBarInactive}
+                    placeholderTextColor={theme.colors.tabBarInactive}
                   />
                   
                   {options.length > 1 && (
@@ -182,29 +182,29 @@ const DetailComparisonScreen = () => {
                       style={styles.deleteButton}
                       onPress={() => removeOption(option.id)}
                     >
-                      <Icon name="close" size={16} color={theme.danger} />
+                      <MaterialIcons name="close" size={16} color={theme.danger} />
                     </TouchableOpacity>
                   )}
                 </View>
               ))}
               
               <TouchableOpacity
-                style={[styles.addCell, { backgroundColor: theme.primary }]}
+                style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
                 onPress={addOption}
               >
-                <Icon name="add" size={24} color="#FFFFFF" />
+                <MaterialIcons name="add" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
             
             {criteria.map((criterion) => (
               <View key={criterion.id} style={styles.tableRow}>
-                <View style={[styles.criterionCell, { backgroundColor: theme.card }]}>
+                <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
                   <TextInput
-                    style={[styles.criterionInput, { color: theme.text }]}
+                    style={[styles.criterionInput, { color: theme.colors.text }]}
                     value={criterion.text}
                     onChangeText={(text) => updateCriterion(criterion.id, text)}
                     placeholder="Enter criterion"
-                    placeholderTextColor={theme.tabBarInactive}
+                    placeholderTextColor={theme.colors.tabBarInactive}
                   />
                   
                   {criteria.length > 1 && (
@@ -212,7 +212,7 @@ const DetailComparisonScreen = () => {
                       style={styles.deleteButton}
                       onPress={() => removeCriterion(criterion.id)}
                     >
-                      <Icon name="close" size={16} color={theme.danger} />
+                      <MaterialIcons name="close" size={16} color={theme.danger} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -220,14 +220,14 @@ const DetailComparisonScreen = () => {
                 {options.map((option) => (
                   <View
                     key={`${criterion.id}-${option.id}`}
-                    style={[styles.comparisonCell, { backgroundColor: theme.card }]}
+                    style={[styles.comparisonCell, { backgroundColor: theme.colors.card }]}
                   >
                     <TextInput
-                      style={[styles.cellInput, { color: theme.text }]}
+                      style={[styles.cellInput, { color: theme.colors.text }]}
                       value={getCellText(criterion.id, option.id)}
                       onChangeText={(text) => updateCellText(criterion.id, option.id, text)}
                       placeholder="Enter details"
-                      placeholderTextColor={theme.tabBarInactive}
+                      placeholderTextColor={theme.colors.tabBarInactive}
                       multiline
                     />
                   </View>
@@ -237,10 +237,10 @@ const DetailComparisonScreen = () => {
             
             <View style={styles.tableRow}>
               <TouchableOpacity
-                style={[styles.addCriterionButton, { backgroundColor: theme.primary }]}
+                style={[styles.addCriterionButton, { backgroundColor: theme.colors.primary }]}
                 onPress={addCriterion}
               >
-                <Icon name="add" size={24} color="#FFFFFF" />
+                <MaterialIcons name="add" size={24} color="#FFFFFF" />
                 <Text style={styles.addButtonText}>Add Criterion</Text>
               </TouchableOpacity>
             </View>
@@ -249,16 +249,16 @@ const DetailComparisonScreen = () => {
         
         <View style={styles.actionButtons}>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: theme.primary }]}
+            style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
           >
-            <Icon name="save" size={20} color="#FFFFFF" />
+            <MaterialIcons name="save" size={20} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Save</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: theme.secondary }]}
           >
-            <Icon name="share" size={20} color="#FFFFFF" />
+            <MaterialIcons name="share" size={20} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Share</Text>
           </TouchableOpacity>
         </View>

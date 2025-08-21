@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import DatePicker from 'react-native-date-picker';
+import { useTheme } from '../../context/ThemeContext';
 
 const DayCounterScreen = () => {
   const { theme } = useTheme();
@@ -77,19 +77,19 @@ const DayCounterScreen = () => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.cardTitle, { color: theme.text }]}>From</Text>
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>From</Text>
         <TouchableOpacity
-          style={[styles.dateButton, { backgroundColor: theme.background }]}
+          style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
           onPress={() => setStartDateOpen(true)}
         >
-          <Text style={[styles.dateText, { color: theme.text }]}>
+          <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(startDate)}
           </Text>
-          <Icon name="calendar-today" size={20} color={theme.primary} />
+          <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
         <DatePicker
@@ -106,15 +106,15 @@ const DayCounterScreen = () => {
           }}
         />
         
-        <Text style={[styles.cardTitle, { color: theme.text, marginTop: 16 }]}>To</Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>To</Text>
         <TouchableOpacity
-          style={[styles.dateButton, { backgroundColor: theme.background }]}
+          style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
           onPress={() => setEndDateOpen(true)}
         >
-          <Text style={[styles.dateText, { color: theme.text }]}>
+          <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(endDate)}
           </Text>
-          <Icon name="calendar-today" size={20} color={theme.primary} />
+          <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
         <DatePicker
@@ -133,52 +133,52 @@ const DayCounterScreen = () => {
         />
         
         <View style={styles.switchRow}>
-          <Text style={[styles.switchLabel, { color: theme.text }]}>Include end date</Text>
+          <Text style={[styles.switchLabel, { color: theme.colors.text }]}>Include end date</Text>
           <Switch
             value={includeEndDate}
             onValueChange={setIncludeEndDate}
-            trackColor={{ false: theme.border, true: theme.primary }}
-            thumbColor={theme.background}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+            thumbColor={theme.colors.background}
           />
         </View>
       </View>
       
-      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.cardTitle, { color: theme.text }]}>Time between</Text>
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Time between</Text>
         <View style={styles.resultRow}>
-          <View style={[styles.resultContainer, { backgroundColor: theme.background }]}>
-            <Text style={[styles.resultValue, { color: theme.text }]}>
+          <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
+            <Text style={[styles.resultValue, { color: theme.colors.text }]}>
               {daysDifference.toFixed(timeUnit === 'days' ? 0 : 1)}
             </Text>
           </View>
           <TouchableOpacity
-            style={[styles.unitButton, { backgroundColor: theme.primary }]}
+            style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
             onPress={nextTimeUnit}
           >
             <Text style={styles.unitButtonText}>{timeUnit}</Text>
-            <Icon name="arrow-drop-down" size={20} color="#FFFFFF" />
+            <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
       
       {timeUnit !== 'days' && (
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Working Time</Text>
+        <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Working Time</Text>
           <View style={styles.workingTimeContainer}>
-            <Text style={[styles.workingTimeText, { color: theme.text }]}>
+            <Text style={[styles.workingTimeText, { color: theme.colors.text }]}>
               Working time
             </Text>
             <View style={styles.resultRow}>
-              <View style={[styles.resultContainer, { backgroundColor: theme.background, flex: 1 }]}>
-                <Text style={[styles.resultValue, { color: theme.text }]}>
+              <View style={[styles.resultContainer, { backgroundColor: theme.colors.background, flex: 1 }]}>
+                <Text style={[styles.resultValue, { color: theme.colors.text }]}>
                   {Math.max(0, Math.floor(daysDifference * 5 / 7)).toString()}
                 </Text>
               </View>
               <TouchableOpacity
-                style={[styles.unitButton, { backgroundColor: theme.primary }]}
+                style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
               >
                 <Text style={styles.unitButtonText}>days</Text>
-                <Icon name="arrow-drop-down" size={20} color="#FFFFFF" />
+                <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </View>

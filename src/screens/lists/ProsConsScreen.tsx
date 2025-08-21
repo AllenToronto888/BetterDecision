@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button, Typography, useTheme } from '../../components';
 
 interface Item {
   id: string;
@@ -94,8 +92,8 @@ const ProsConsScreen = () => {
         style={[
           styles.itemContainer, 
           { 
-            backgroundColor: theme.card, 
-            borderColor: isPro ? theme.primary : theme.danger 
+            backgroundColor: theme.colors.card, 
+            borderColor: isPro ? theme.colors.primary : theme.colors.danger 
           }
         ]}
       >
@@ -105,28 +103,28 @@ const ProsConsScreen = () => {
               style={[
                 styles.weightButton, 
                 { 
-                  backgroundColor: isPro ? theme.primary : theme.danger,
+                  backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
                   opacity: item.weight <= 1 ? 0.5 : 1
                 }
               ]}
               onPress={() => changeWeight(isPro, item.id, false)}
               disabled={item.weight <= 1}
             >
-              <Icon name="remove" size={16} color="#FFFFFF" />
+              <MaterialIcons name="remove" size={16} color="#FFFFFF" />
             </TouchableOpacity>
             <Text style={[styles.weightText, { color: theme.text }]}>{item.weight}</Text>
             <TouchableOpacity
               style={[
                 styles.weightButton, 
                 { 
-                  backgroundColor: isPro ? theme.primary : theme.danger,
+                  backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
                   opacity: item.weight >= 10 ? 0.5 : 1
                 }
               ]}
               onPress={() => changeWeight(isPro, item.id, true)}
               disabled={item.weight >= 10}
             >
-              <Icon name="add" size={16} color="#FFFFFF" />
+              <MaterialIcons name="add" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
           
@@ -134,16 +132,16 @@ const ProsConsScreen = () => {
             style={styles.deleteButton}
             onPress={() => removeItem(isPro, item.id)}
           >
-            <Icon name="delete" size={20} color={theme.tabBarInactive} />
+            <MaterialIcons name="delete" size={20} color={theme.colors.tabBarInactive} />
           </TouchableOpacity>
         </View>
         
         <TextInput
-          style={[styles.itemInput, { color: theme.text }]}
+                      style={[styles.itemInput, { color: theme.colors.text }]}
           value={item.text}
           onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
           placeholder={isPro ? "Add a pro..." : "Add a con..."}
-          placeholderTextColor={theme.tabBarInactive}
+          placeholderTextColor={theme.colors.tabBarInactive}
           multiline
         />
       </View>
@@ -156,26 +154,26 @@ const ProsConsScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.titleContainer}>
           <TextInput
-            style={[styles.titleInput, { color: theme.text }]}
+            style={[styles.titleInput, { color: theme.colors.text }]}
             value={title}
             onChangeText={setTitle}
             placeholder="What are you deciding?"
-            placeholderTextColor={theme.tabBarInactive}
+            placeholderTextColor={theme.colors.tabBarInactive}
           />
           <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-            <Icon name="edit" size={24} color={theme.primary} />
+            <MaterialIcons name="edit" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
         
         <View style={styles.emojiContainer}>
-          <Text style={styles.emoji}>
+          <Typography variant="h1" style={styles.emoji}>
             {totalProsWeight > totalConsWeight ? '😊' : totalProsWeight < totalConsWeight ? '😕' : '😐'}
-          </Text>
+          </Typography>
         </View>
         
         <View style={styles.scoreContainer}>
@@ -183,47 +181,47 @@ const ProsConsScreen = () => {
             style={[
               styles.scoreBar, 
               { 
-                backgroundColor: theme.primary,
+                backgroundColor: theme.colors.primary,
                 flex: totalProsWeight,
               }
             ]}
           >
-            <Text style={styles.scoreText}>{totalProsWeight}</Text>
+            <Typography variant="button" color="text" style={styles.scoreText}>{totalProsWeight}</Typography>
           </View>
           <View 
             style={[
               styles.scoreBar, 
               { 
-                backgroundColor: theme.danger,
+                backgroundColor: theme.colors.danger,
                 flex: totalConsWeight,
               }
             ]}
           >
-            <Text style={styles.scoreText}>{totalConsWeight}</Text>
+            <Typography variant="button" color="text" style={styles.scoreText}>{totalConsWeight}</Typography>
           </View>
         </View>
         
         <View style={styles.listsContainer}>
-          <Text style={[styles.listTitle, { color: theme.text }]}>Pros</Text>
-          <Text style={[styles.listTitle, { color: theme.text }]}>Cons</Text>
+          <Typography variant="h5" color="text" style={styles.listTitle}>Pros</Typography>
+          <Typography variant="h5" color="text" style={styles.listTitle}>Cons</Typography>
         </View>
         
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: theme.primary }]}
+          <Button
+            title="Add Pro"
+            variant="primary"
+            icon="add"
             onPress={() => addItem(true)}
-          >
-            <Icon name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add Pro</Text>
-          </TouchableOpacity>
+            style={styles.addButton}
+          />
           
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: theme.danger }]}
+          <Button
+            title="Add Con"
+            variant="danger"
+            icon="add"
             onPress={() => addItem(false)}
-          >
-            <Icon name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add Con</Text>
-          </TouchableOpacity>
+            style={styles.addButton}
+          />
         </View>
         
         <View style={styles.itemsContainer}>
@@ -296,17 +294,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 4,
     marginHorizontal: 4,
-  },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    marginLeft: 8,
   },
   itemsContainer: {
     flexDirection: 'row',

@@ -1,15 +1,15 @@
-import React, { useState, useRef } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Easing,
+    Animated,
+    Easing,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface DiceConfig {
   count: number;
@@ -123,47 +123,47 @@ const DiceScreen = () => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <View style={[styles.configCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.configTitle, { color: theme.text }]}>Dice Configuration</Text>
+      <View style={[styles.configCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.configTitle, { color: theme.colors.text }]}>Dice Configuration</Text>
         
         <View style={styles.configRow}>
-          <Text style={[styles.configLabel, { color: theme.text }]}>Number of Dice:</Text>
+          <Text style={[styles.configLabel, { color: theme.colors.text }]}>Number of Dice:</Text>
           <View style={styles.counterContainer}>
             <TouchableOpacity
               style={[
                 styles.counterButton, 
                 { 
-                  backgroundColor: theme.primary,
+                  backgroundColor: theme.colors.primary,
                   opacity: config.count <= 1 ? 0.5 : 1,
                 }
               ]}
               onPress={() => updateCount(false)}
               disabled={config.count <= 1}
             >
-              <Icon name="remove" size={20} color="#FFFFFF" />
+              <MaterialIcons name="remove" size={20} color="#FFFFFF" />
             </TouchableOpacity>
-            <Text style={[styles.counterText, { color: theme.text }]}>{config.count}</Text>
+            <Text style={[styles.counterText, { color: theme.colors.text }]}>{config.count}</Text>
             <TouchableOpacity
               style={[
                 styles.counterButton, 
                 { 
-                  backgroundColor: theme.primary,
+                  backgroundColor: theme.colors.primary,
                   opacity: config.count >= 6 ? 0.5 : 1,
                 }
               ]}
               onPress={() => updateCount(true)}
               disabled={config.count >= 6}
             >
-              <Icon name="add" size={20} color="#FFFFFF" />
+              <MaterialIcons name="add" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
         
         <View style={styles.configRow}>
-          <Text style={[styles.configLabel, { color: theme.text }]}>Sides per Die:</Text>
+          <Text style={[styles.configLabel, { color: theme.colors.text }]}>Sides per Die:</Text>
           <View style={styles.sidesContainer}>
             {sideOptions.map((sides) => (
               <TouchableOpacity
@@ -171,8 +171,8 @@ const DiceScreen = () => {
                 style={[
                   styles.sideButton,
                   { 
-                    backgroundColor: config.sides === sides ? theme.primary : theme.background,
-                    borderColor: theme.border,
+                    backgroundColor: config.sides === sides ? theme.colors.primary : theme.colors.background,
+                    borderColor: theme.colors.border,
                   },
                 ]}
                 onPress={() => updateSides(sides)}
@@ -180,7 +180,7 @@ const DiceScreen = () => {
                 <Text
                   style={[
                     styles.sideButtonText,
-                    { color: config.sides === sides ? '#FFFFFF' : theme.text },
+                    { color: config.sides === sides ? '#FFFFFF' : theme.colors.text },
                   ]}
                 >
                   d{sides}
@@ -192,34 +192,34 @@ const DiceScreen = () => {
       </View>
       
       <TouchableOpacity
-        style={[styles.rollButton, { backgroundColor: theme.primary }]}
+        style={[styles.rollButton, { backgroundColor: theme.colors.primary }]}
         onPress={rollDice}
         disabled={isRolling}
       >
-        <Icon name="casino" size={24} color="#FFFFFF" />
+        <MaterialIcons name="casino" size={24} color="#FFFFFF" />
         <Text style={styles.rollButtonText}>Roll Dice</Text>
       </TouchableOpacity>
       
       {results.length > 0 && (
-        <View style={[styles.resultCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.resultTitle, { color: theme.text }]}>Results</Text>
+        <View style={[styles.resultCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.resultTitle, { color: theme.colors.text }]}>Results</Text>
           
           <View style={styles.diceContainer}>
             {results.map(renderDie)}
           </View>
           
           <View style={styles.sumContainer}>
-            <Text style={[styles.sumLabel, { color: theme.tabBarInactive }]}>Total:</Text>
-            <Text style={[styles.sumValue, { color: theme.text }]}>{sum}</Text>
+            <Text style={[styles.sumLabel, { color: theme.colors.tabBarInactive }]}>Total:</Text>
+            <Text style={[styles.sumValue, { color: theme.colors.text }]}>{sum}</Text>
           </View>
         </View>
       )}
       
-      <View style={[styles.historyCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <Text style={[styles.historyTitle, { color: theme.text }]}>History</Text>
+      <View style={[styles.historyCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.historyTitle, { color: theme.colors.text }]}>History</Text>
         
         {/* This would be populated with historical rolls */}
-        <Text style={[styles.emptyHistoryText, { color: theme.tabBarInactive }]}>
+        <Text style={[styles.emptyHistoryText, { color: theme.colors.tabBarInactive }]}>
           No previous rolls
         </Text>
       </View>

@@ -1,12 +1,12 @@
-import React from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 // Screens
 import CalculatorsScreen from '../screens/calculators/CalculatorsScreen';
-import ListsScreen from '../screens/lists/ListsScreen';
 import FortuneScreen from '../screens/fortune/FortuneScreen';
+import ListsScreen from '../screens/lists/ListsScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
@@ -18,14 +18,14 @@ const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: theme.primary,
+          backgroundColor: theme.colors.primary,
         },
         headerTintColor: '#fff',
         tabBarStyle: {
-          backgroundColor: theme.tabBar,
+          backgroundColor: theme.colors.tabBar,
         },
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.tabBarInactive,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.tabBarInactive,
       }}
     >
       <Tab.Screen 
@@ -33,7 +33,7 @@ const MainNavigator = () => {
         component={CalculatorsScreen} 
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="calculate" color={color} size={size} />
+            <MaterialIcons name="calculate" color={color} size={size} />
           ),
         }}
       />
@@ -42,7 +42,7 @@ const MainNavigator = () => {
         component={ListsScreen} 
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="list" color={color} size={size} />
+            <MaterialIcons name="list" color={color} size={size} />
           ),
         }}
       />
@@ -51,7 +51,7 @@ const MainNavigator = () => {
         component={FortuneScreen} 
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="casino" color={color} size={size} />
+            <MaterialIcons name="casino" color={color} size={size} />
           ),
         }}
       />
@@ -60,7 +60,7 @@ const MainNavigator = () => {
         component={SettingsScreen} 
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="settings" color={color} size={size} />
+            <MaterialIcons name="settings" color={color} size={size} />
           ),
         }}
       />

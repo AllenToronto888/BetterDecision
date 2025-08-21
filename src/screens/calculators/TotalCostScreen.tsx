@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Switch,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button, Typography, useTheme } from '../../components';
 
 interface CostItem {
   id: string;
@@ -50,6 +50,17 @@ const TotalCostScreen = () => {
     });
 
     setTotalCost(total);
+  };
+
+  const clearAll = () => {
+    setBasePrice('');
+    setProductName('');
+    setAdditionalCosts([
+      { id: '1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
+      { id: '2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
+    ]);
+    setCompareEnabled(false);
+    setTotalCost(0);
   };
 
   const updateCostItem = (id: string, field: keyof CostItem, value: any) => {
@@ -91,53 +102,53 @@ const TotalCostScreen = () => {
     return (
       <View 
         key={item.id} 
-        style={[styles.costItem, { backgroundColor: theme.card, borderColor: theme.border }]}
+        style={[styles.costItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
       >
         <View style={styles.costItemHeader}>
           <View style={styles.costItemIcon}>
-            <Icon name={getIconForCostType(item.type)} size={24} color={theme.primary} />
+            <MaterialIcons name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
           </View>
           <TextInput
-            style={[styles.costItemLabel, { color: theme.text }]}
+            style={[styles.costItemLabel, { color: theme.colors.text }]}
             value={item.label}
             onChangeText={(value) => updateCostItem(item.id, 'label', value)}
             placeholder="Label"
-            placeholderTextColor={theme.tabBarInactive}
+            placeholderTextColor={theme.colors.tabBarInactive}
           />
           <TouchableOpacity 
             style={styles.deleteButton}
             onPress={() => removeCostItem(item.id)}
           >
-            <Icon name="close" size={20} color={theme.danger} />
+            <MaterialIcons name="close" size={20} color={theme.colors.danger} />
           </TouchableOpacity>
         </View>
         
         <View style={styles.costItemContent}>
           <View style={styles.inputContainer}>
             {item.isPercentage ? (
-              <Text style={[styles.inputPrefix, { color: theme.text }]}>%</Text>
+              <Text style={[styles.inputPrefix, { color: theme.colors.text }]}>%</Text>
             ) : (
-              <Text style={[styles.inputPrefix, { color: theme.text }]}>$</Text>
+              <Text style={[styles.inputPrefix, { color: theme.colors.text }]}>$</Text>
             )}
             <TextInput
-              style={[styles.costInput, { backgroundColor: theme.background, color: theme.text }]}
+              style={[styles.costInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
               value={item.value}
               onChangeText={(value) => updateCostItem(item.id, 'value', value)}
               keyboardType="numeric"
               placeholder="0.00"
-              placeholderTextColor={theme.tabBarInactive}
+              placeholderTextColor={theme.colors.tabBarInactive}
             />
           </View>
           
           <View style={styles.switchContainer}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>
+            <Text style={[styles.switchLabel, { color: theme.colors.text }]}>
               {item.isPercentage ? '%' : '$'}
             </Text>
             <Switch
               value={item.isPercentage}
               onValueChange={(value) => updateCostItem(item.id, 'isPercentage', value)}
-              trackColor={{ false: theme.border, true: theme.primary }}
-              thumbColor={theme.background}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
             />
           </View>
         </View>
@@ -151,83 +162,86 @@ const TotalCostScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Total Cost</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.tabBarInactive }]}>
+          <Typography variant="h3" color="text" style={styles.headerTitle}>Total Cost</Typography>
+          <Typography variant="body2" color="textSecondary" style={styles.headerSubtitle}>
             Find the real price before you buy
-          </Text>
+          </Typography>
         </View>
         
-        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Purchase Price</Text>
+        <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Purchase Price</Text>
           
           <TextInput
-            style={[styles.nameInput, { backgroundColor: theme.background, color: theme.text }]}
+            style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
             value={productName}
             onChangeText={setProductName}
             placeholder="Product name (optional)"
-            placeholderTextColor={theme.tabBarInactive}
+            placeholderTextColor={theme.colors.tabBarInactive}
           />
           
           <View style={styles.basePriceContainer}>
-            <Text style={[styles.currencySymbol, { color: theme.text }]}>$</Text>
+            <Text style={[styles.currencySymbol, { color: theme.colors.text }]}>$</Text>
             <TextInput
-              style={[styles.basePriceInput, { backgroundColor: theme.background, color: theme.text }]}
+              style={[styles.basePriceInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
               value={basePrice}
               onChangeText={setBasePrice}
               keyboardType="numeric"
               placeholder="Enter base price"
-              placeholderTextColor={theme.tabBarInactive}
+              placeholderTextColor={theme.colors.tabBarInactive}
             />
           </View>
         </View>
         
-        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Extra Costs</Text>
+        <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Extra Costs</Text>
           
           {additionalCosts.map(renderCostItem)}
           
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: theme.primary }]}
+          <Button
+            title="Add Another Cost"
+            variant="primary"
+            icon="add"
             onPress={addCostItem}
-          >
-            <Icon name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add Another Cost</Text>
-          </TouchableOpacity>
+            style={styles.addButton}
+          />
         </View>
         
-        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <View style={styles.compareContainer}>
-            <Text style={[styles.compareText, { color: theme.text }]}>
+            <Text style={[styles.compareText, { color: theme.colors.text }]}>
               Compare With Another Item?
             </Text>
             <Switch
               value={compareEnabled}
               onValueChange={setCompareEnabled}
-              trackColor={{ false: theme.border, true: theme.primary }}
-              thumbColor={theme.background}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={theme.colors.background}
             />
           </View>
         </View>
         
-        <TouchableOpacity
-          style={[styles.calculateButton, { backgroundColor: theme.primary }]}
-        >
-          <Text style={styles.calculateButtonText}>Calculate</Text>
-        </TouchableOpacity>
+        <Button
+          title="Calculate"
+          variant="primary"
+          icon="calculate"
+          style={styles.calculateButton}
+          onPress={() => calculateTotalCost()}
+        />
         
-        <TouchableOpacity
-          style={[styles.clearButton, { borderColor: theme.border }]}
-        >
-          <Text style={[styles.clearButtonText, { color: theme.tabBarInactive }]}>Clear All</Text>
-        </TouchableOpacity>
+        <Button
+          title="Clear All"
+          variant="outline"
+          style={styles.clearButton}
+          onPress={clearAll}
+        />
         
-        <View style={[styles.resultSection, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.resultLabel, { color: theme.tabBarInactive }]}>Total Cost</Text>
-          <Text style={[styles.resultValue, { color: theme.text }]}>
+        <View style={[styles.resultSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>Total Cost</Text>
+          <Text style={[styles.resultValue, { color: theme.colors.text }]}>
             ${totalCost.toFixed(2)}
           </Text>
         </View>

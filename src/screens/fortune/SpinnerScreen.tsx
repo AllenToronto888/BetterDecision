@@ -1,19 +1,19 @@
-import React, { useState, useRef } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Animated,
-  Easing,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
+    Alert,
+    Animated,
+    Easing,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SpinnerOption {
   id: string;
@@ -155,7 +155,7 @@ const SpinnerScreen = () => {
         </Animated.View>
         <View style={styles.wheelCenter}>
           <TouchableOpacity
-            style={[styles.spinButton, { backgroundColor: theme.primary }]}
+            style={[styles.spinButton, { backgroundColor: theme.colors.primary }]}
             onPress={spinWheel}
             disabled={isSpinning}
           >
@@ -173,30 +173,30 @@ const SpinnerScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.titleContainer}>
           <TextInput
-            style={[styles.titleInput, { color: theme.text }]}
+            style={[styles.titleInput, { color: theme.colors.text }]}
             value={title}
             onChangeText={setTitle}
             placeholder="Enter title"
-            placeholderTextColor={theme.tabBarInactive}
+            placeholderTextColor={theme.colors.tabBarInactive}
           />
         </View>
         
         {renderSpinnerWheel()}
         
         {result && (
-          <View style={[styles.resultContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.resultLabel, { color: theme.tabBarInactive }]}>Result:</Text>
-            <Text style={[styles.resultText, { color: theme.text }]}>{result.text}</Text>
+          <View style={[styles.resultContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>Result:</Text>
+            <Text style={[styles.resultText, { color: theme.colors.text }]}>{result.text}</Text>
           </View>
         )}
         
-        <View style={[styles.optionsContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.optionsTitle, { color: theme.text }]}>Options</Text>
+        <View style={[styles.optionsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <Text style={[styles.optionsTitle, { color: theme.colors.text }]}>Options</Text>
           
           {options.map((option) => (
             <View key={option.id} style={styles.optionRow}>
@@ -207,28 +207,28 @@ const SpinnerScreen = () => {
                 ]} 
               />
               <TextInput
-                style={[styles.optionInput, { color: theme.text, backgroundColor: theme.background }]}
+                style={[styles.optionInput, { color: theme.colors.text, backgroundColor: theme.colors.background }]}
                 value={option.text}
                 onChangeText={(text) => updateOption(option.id, text)}
                 placeholder="Enter option"
-                placeholderTextColor={theme.tabBarInactive}
+                placeholderTextColor={theme.colors.tabBarInactive}
               />
               {options.length > 2 && (
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => removeOption(option.id)}
                 >
-                  <Icon name="delete" size={20} color={theme.danger} />
+                  <MaterialIcons name="delete" size={20} color={theme.danger} />
                 </TouchableOpacity>
               )}
             </View>
           ))}
           
           <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: theme.primary }]}
+            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
             onPress={addOption}
           >
-            <Icon name="add" size={20} color="#FFFFFF" />
+            <MaterialIcons name="add" size={20} color="#FFFFFF" />
             <Text style={styles.addButtonText}>Add Option</Text>
           </TouchableOpacity>
         </View>

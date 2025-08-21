@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button, HistoryButton, Save, Share, Typography, useAutoSave, useTheme } from '../../components';
 
 interface Product {
   name: string;
@@ -27,12 +26,30 @@ const UnitCalculatorScreen = () => {
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
   ]);
   const [bestProductIndex, setBestProductIndex] = useState<number | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
+  const [calculatorTitle, setCalculatorTitle] = useState('Unit Price Calculator');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  // Auto-save functionality
+  useAutoSave({
+    data: {
+      products,
+      bestProductIndex,
+      calculationType: 'unit_price',
+    },
+    dataType: 'calculation',
+    enabled: products.some(p => p.price.trim() && p.quantity.trim()),
+    delay: 3000, // Auto-save after 3 seconds of inactivity
+    onSave: (name) => console.log('Auto-saved:', name),
+    onError: (error) => console.error('Auto-save error:', error),
+    onStatusChange: setAutoSaveStatus,
+  });
 
   const unitOptions = ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each'];
 
   useEffect(() => {
     calculateUnitPrices();
-  }, [products]);
+  }, [products.map(p => `${p.price}-${p.quantity}-${p.unit}`).join(',')]);
 
   const calculateUnitPrices = () => {
     const updatedProducts = products.map((product) => {
@@ -60,7 +77,14 @@ const UnitCalculatorScreen = () => {
       return { ...product, unitPrice };
     });
     
-    setProducts(updatedProducts);
+    // Only update if there are actual changes to avoid infinite loop
+    const hasChanges = updatedProducts.some((product, index) => 
+      product.unitPrice !== products[index].unitPrice
+    );
+    
+    if (hasChanges) {
+      setProducts(updatedProducts);
+    }
     
     // Find the best product (lowest unit price)
     let lowestIndex = null;
@@ -92,6 +116,25 @@ const UnitCalculatorScreen = () => {
     setProducts([...products, { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 }]);
   };
 
+  const loadHistoryData = (historyData: any) => {
+    if (historyData.products && Array.isArray(historyData.products)) {
+      setProducts(historyData.products);
+      setBestProductIndex(historyData.bestProductIndex || null);
+      // Also load title if saved
+      if (historyData.title) {
+        setCalculatorTitle(historyData.title);
+      }
+    }
+  };
+
+  const clearAllProducts = () => {
+    setProducts([
+      { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
+      { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
+    ]);
+    setBestProductIndex(null);
+  };
+
   const removeProduct = (index: number) => {
     if (products.length > 2) {
       const updatedProducts = [...products];
@@ -104,26 +147,26 @@ const UnitCalculatorScreen = () => {
     const isBest = index === bestProductIndex && products.length > 1;
     const baseCardStyle = [
       styles.productCard,
-      { backgroundColor: theme.card, borderColor: theme.border },
+      { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
     ];
     const cardStyle = isBest
-      ? [...baseCardStyle, { borderColor: theme.success, borderWidth: 2 }]
+      ? [...baseCardStyle, { borderColor: theme.colors.success, borderWidth: 2 }]
       : baseCardStyle;
 
     return (
       <View key={index} style={cardStyle}>
         {isBest && (
-          <View style={[styles.bestBadge, { backgroundColor: theme.success }]}>
-            <Icon name="check" size={16} color="#FFFFFF" />
-            <Text style={styles.bestBadgeText}>Best!</Text>
+          <View style={[styles.bestBadge, { backgroundColor: theme.colors.success }]}>
+            <MaterialIcons name="check" size={16} color="#FFFFFF" />
+            <Typography variant="caption" style={styles.bestBadgeText}>Best!</Typography>
           </View>
         )}
         
         <View style={styles.row}>
           <TextInput
-            style={[styles.input, { backgroundColor: theme.background, color: theme.text }]}
+            style={[styles.input, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
             placeholder="Product name"
-            placeholderTextColor={theme.tabBarInactive}
+            placeholderTextColor={theme.colors.tabBarInactive}
             value={product.name}
             onChangeText={(value) => updateProduct(index, 'name', value)}
           />
@@ -131,11 +174,11 @@ const UnitCalculatorScreen = () => {
         
         <View style={styles.row}>
           <View style={styles.priceContainer}>
-            <Text style={[styles.currencySymbol, { color: theme.text }]}>$</Text>
+            <Typography variant="body1" color="text" style={styles.currencySymbol}>$</Typography>
             <TextInput
-              style={[styles.priceInput, { backgroundColor: theme.background, color: theme.text }]}
+              style={[styles.priceInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
               placeholder="Price"
-              placeholderTextColor={theme.tabBarInactive}
+              placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.price}
               onChangeText={(value) => updateProduct(index, 'price', value)}
@@ -144,40 +187,45 @@ const UnitCalculatorScreen = () => {
           
           <View style={styles.quantityContainer}>
             <TextInput
-              style={[styles.quantityInput, { backgroundColor: theme.background, color: theme.text }]}
+              style={[styles.quantityInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
               placeholder="Qty"
-              placeholderTextColor={theme.tabBarInactive}
+              placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.quantity}
               onChangeText={(value) => updateProduct(index, 'quantity', value)}
             />
             
             <TouchableOpacity
-              style={[styles.unitButton, { backgroundColor: theme.primary }]}
+              style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => cycleUnit(index)}
             >
-              <Text style={styles.unitButtonText}>{product.unit}</Text>
+              <Typography variant="button" style={styles.unitButtonText}>{product.unit}</Typography>
             </TouchableOpacity>
           </View>
         </View>
         
         <View style={styles.resultContainer}>
-          <Text style={[styles.unitPriceLabel, { color: theme.tabBarInactive }]}>
+          <Typography variant="body2" color="textSecondary" style={styles.unitPriceLabel}>
             Unit Price:
-          </Text>
-          <Text style={[styles.unitPriceValue, { color: isBest ? theme.success : theme.text }]}>
+          </Typography>
+          <Typography 
+            variant="body1" 
+            color={isBest ? "success" : "text"} 
+            style={styles.unitPriceValue}
+            weight="semibold"
+          >
             ${product.unitPrice.toFixed(4)} / {product.unit === 'kg' || product.unit === 'l' ? 
               (product.unit === 'kg' ? 'g' : 'ml') : 
               product.unit}
-          </Text>
+          </Typography>
         </View>
         
         {products.length > 2 && (
           <TouchableOpacity
-            style={[styles.removeButton, { backgroundColor: theme.danger }]}
+            style={[styles.removeButton, { backgroundColor: theme.colors.danger }]}
             onPress={() => removeProduct(index)}
           >
-            <Icon name="delete" size={20} color="#FFFFFF" />
+            <MaterialIcons name="delete" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         )}
       </View>
@@ -190,18 +238,97 @@ const UnitCalculatorScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
       >
+        {/* Header with Editable Title */}
+        <View style={styles.headerRow}>
+          {isEditingTitle ? (
+            <TextInput
+              style={[styles.titleInput, { color: theme.colors.text, borderColor: theme.colors.primary }]}
+              value={calculatorTitle}
+              onChangeText={setCalculatorTitle}
+              onBlur={() => setIsEditingTitle(false)}
+              onSubmitEditing={() => setIsEditingTitle(false)}
+              autoFocus
+              maxLength={50}
+            />
+          ) : (
+            <TouchableOpacity
+              style={styles.titleContainer}
+              onPress={() => setIsEditingTitle(true)}
+            >
+              <Typography variant="h3" color="text" style={styles.screenTitle}>
+                {calculatorTitle}
+              </Typography>
+              <MaterialIcons name="edit" size={20} color={theme.colors.textSecondary} style={styles.editIcon} />
+            </TouchableOpacity>
+          )}
+          <View style={styles.headerActions}>
+            <Save
+              data={{
+                products,
+                bestProductIndex,
+                calculationType: 'unit_price',
+                title: calculatorTitle,
+              }}
+              dataType="calculation"
+              variant="icon"
+              showInput={false}
+              onSaveSuccess={(name) => console.log('Saved as:', name)}
+            />
+            <Share
+              data={{
+                products,
+                bestProductIndex,
+                calculationType: 'unit_price',
+              }}
+              dataType="calculation"
+              title="Unit Price Comparison"
+              variant="icon"
+              onShareSuccess={() => console.log('Copied/Shared successfully')}
+            />
+            <HistoryButton
+              dataType="calculation"
+              onLoadItem={loadHistoryData}
+              variant="icon"
+            />
+          </View>
+        </View>
+
         {products.map(renderProduct)}
         
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: theme.primary }]}
-          onPress={addProduct}
-        >
-          <Icon name="add" size={24} color="#FFFFFF" />
-          <Text style={styles.addButtonText}>Add Product</Text>
-        </TouchableOpacity>
+        <View style={styles.actionButtonsContainer}>
+          <Button
+            title="Add Product"
+            variant="primary"
+            icon="add"
+            onPress={addProduct}
+            style={styles.actionButton}
+          />
+          
+          {products.some(p => p.price.trim() || p.quantity.trim() || p.name.trim()) && (
+            <Button
+              title="Clear All"
+              variant="outline"
+              icon="clear"
+              onPress={clearAllProducts}
+              style={styles.actionButton}
+            />
+          )}
+        </View>
+
+        {/* Auto-save Status */}
+        {products.some(p => p.price.trim() && p.quantity.trim()) && autoSaveStatus !== 'idle' && (
+          <View style={styles.autoSaveStatus}>
+            <Typography variant="caption" color="textSecondary" style={styles.autoSaveText}>
+              {autoSaveStatus === 'pending' && '⏳ Changes detected...'}
+              {autoSaveStatus === 'saving' && '💾 Saving...'}
+              {autoSaveStatus === 'saved' && '✅ Auto-saved!'}
+              {autoSaveStatus === 'error' && '❌ Save failed'}
+            </Typography>
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -308,18 +435,55 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  addButton: {
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 4,
-    marginBottom: 16,
+    marginBottom: 20,
+    paddingHorizontal: 4,
   },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+  titleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  screenTitle: {
+    flex: 1,
+  },
+  editIcon: {
     marginLeft: 8,
+    opacity: 0.6,
+  },
+  titleInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: 'bold',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 8,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    marginTop: 16,
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  autoSaveStatus: {
+    alignItems: 'center',
+    marginTop: 12,
+    paddingVertical: 8,
+  },
+  autoSaveText: {
+    fontStyle: 'italic',
   },
 });
 
