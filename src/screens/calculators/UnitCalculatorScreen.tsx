@@ -1,16 +1,13 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import { Button, CustomHeader, Save, SectionTitle, Share, Typography, useAutoSave, useTheme } from '../../components';
+import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 
 interface Product {
   name: string;
@@ -27,22 +24,31 @@ const UnitCalculatorScreen = () => {
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
   ]);
-  const [bestProductIndex, setBestProductIndex] = useState<number | null>(null);
+  const [bestProductIndexes, setBestProductIndexes] = useState<number[]>([]);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
-  const [calculatorTitle, setCalculatorTitle] = useState('Unit Price Calculator');
+  const [calculatorTitle, setCalculatorTitle] = useState('Unit Price');
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   // Auto-save functionality
   useAutoSave({
     data: {
       products,
-      bestProductIndex,
+      bestProductIndexes,
       calculationType: 'unit_price',
     },
     dataType: 'calculation',
-    enabled: products.some(p => p.price.trim() && p.quantity.trim()),
-    delay: 3000, // Auto-save after 3 seconds of inactivity
-    onSave: (name) => console.log('Auto-saved:', name),
-    onError: (error) => console.error('Auto-save error:', error),
+    enabled: products.some(p => p.price.trim() !== '' && p.quantity.trim() !== ''),
+    delay: 1000, // Auto-save after 1 second of inactivity
+    onSave: (name) => {
+      console.log('Auto-saved:', name);
+      // Force status to saved, then idle after a short delay
+      setTimeout(() => setAutoSaveStatus('idle'), 1500);
+    },
+    onError: (error) => {
+      console.error('Auto-save error:', error);
+      // Force status back to idle after error
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    },
     onStatusChange: setAutoSaveStatus,
   });
 
@@ -51,6 +57,20 @@ const UnitCalculatorScreen = () => {
   useEffect(() => {
     calculateUnitPrices();
   }, [products.map(p => `${p.price}-${p.quantity}-${p.unit}`).join(',')]);
+
+  // Failsafe: Reset auto-save status if it gets stuck in pending for too long
+  useEffect(() => {
+    if (autoSaveStatus === 'pending') {
+      const timeout = setTimeout(() => {
+        console.log('Auto-save timeout - resetting to idle');
+        setAutoSaveStatus('idle');
+      }, 5000); // Reset after 5 seconds if stuck in pending
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [autoSaveStatus]);
+
+
 
   const calculateUnitPrices = () => {
     const updatedProducts = products.map((product) => {
@@ -87,18 +107,37 @@ const UnitCalculatorScreen = () => {
       setProducts(updatedProducts);
     }
     
-    // Find the best product (lowest unit price)
-    let lowestIndex = null;
-    let lowestUnitPrice = Infinity;
-    
-    updatedProducts.forEach((product, index) => {
-      if (product.unitPrice > 0 && product.unitPrice < lowestUnitPrice) {
-        lowestUnitPrice = product.unitPrice;
-        lowestIndex = index;
-      }
+    // Check if ALL products have valid unit prices (price > 0 and quantity > 0)
+    const allProductsHaveValidPrices = updatedProducts.every((product) => {
+      const price = parseFloat(product.price) || 0;
+      const quantity = parseFloat(product.quantity) || 0;
+      return price > 0 && quantity > 0;
     });
     
-    setBestProductIndex(lowestIndex);
+    // Only find the best products if ALL products have valid prices
+    if (allProductsHaveValidPrices && updatedProducts.length > 1) {
+      let lowestUnitPrice = Infinity;
+      
+      // First pass: find the lowest unit price
+      updatedProducts.forEach((product) => {
+        if (product.unitPrice > 0 && product.unitPrice < lowestUnitPrice) {
+          lowestUnitPrice = product.unitPrice;
+        }
+      });
+      
+      // Second pass: find all products with the lowest unit price (handle ties)
+      const bestIndexes: number[] = [];
+      updatedProducts.forEach((product, index) => {
+        if (product.unitPrice > 0 && product.unitPrice === lowestUnitPrice) {
+          bestIndexes.push(index);
+        }
+      });
+      
+      setBestProductIndexes(bestIndexes);
+    } else {
+      // Clear the best products if not all products have valid prices
+      setBestProductIndexes([]);
+    }
   };
 
   const updateProduct = (index: number, field: keyof Product, value: string) => {
@@ -124,7 +163,7 @@ const UnitCalculatorScreen = () => {
       { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
       { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
     ]);
-    setBestProductIndex(null);
+    setBestProductIndexes([]);
   };
 
   const removeProduct = (index: number) => {
@@ -136,31 +175,33 @@ const UnitCalculatorScreen = () => {
   };
 
   const renderProduct = (product: Product, index: number) => {
-    const isBest = index === bestProductIndex && products.length > 1;
+    const isBest = bestProductIndexes.includes(index) && products.length > 1;
     const baseCardStyle = [
       styles.productCard,
-      { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+      { 
+        backgroundColor: theme.colors.card, 
+        borderColor: theme.colors.border,
+      },
     ];
     const cardStyle = isBest
-      ? [...baseCardStyle, { borderColor: theme.colors.success, borderWidth: 2 }]
+      ? [...baseCardStyle, { borderColor: theme.colors.primary, borderWidth: 2 }]
       : baseCardStyle;
 
-    return (
-      <View key={index} style={cardStyle}>
-        {isBest && (
-          <View style={[styles.bestBadge, { backgroundColor: theme.colors.success }]}>
-            <MaterialIcons name="check" size={16} color="#FFFFFF" />
-            <Typography variant="caption" style={styles.bestBadgeText}>Best!</Typography>
-          </View>
-        )}
-        
+    const cardContent = (
+      <View style={cardStyle}>
         <View style={styles.row}>
           <TextInput
-            style={[styles.input, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+            style={[
+              styles.input, 
+              { backgroundColor: theme.colors.background, color: theme.colors.text },
+              focusedInput === `name-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
+            ]}
             placeholder="Product name"
             placeholderTextColor={theme.colors.tabBarInactive}
             value={product.name}
             onChangeText={(value) => updateProduct(index, 'name', value)}
+            onFocus={() => setFocusedInput(`name-${index}`)}
+            onBlur={() => setFocusedInput(null)}
           />
         </View>
         
@@ -168,23 +209,35 @@ const UnitCalculatorScreen = () => {
           <View style={styles.priceContainer}>
             <Typography variant="body1" color="text" style={styles.currencySymbol}>$</Typography>
             <TextInput
-              style={[styles.priceInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+              style={[
+                styles.priceInput, 
+                { backgroundColor: theme.colors.background, color: theme.colors.text },
+                focusedInput === `price-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
+              ]}
               placeholder="Price"
               placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.price}
               onChangeText={(value) => updateProduct(index, 'price', value)}
+              onFocus={() => setFocusedInput(`price-${index}`)}
+              onBlur={() => setFocusedInput(null)}
             />
           </View>
           
           <View style={styles.quantityContainer}>
             <TextInput
-              style={[styles.quantityInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+              style={[
+                styles.quantityInput, 
+                { backgroundColor: theme.colors.background, color: theme.colors.text },
+                focusedInput === `quantity-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
+              ]}
               placeholder="Qty"
               placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.quantity}
               onChangeText={(value) => updateProduct(index, 'quantity', value)}
+              onFocus={() => setFocusedInput(`quantity-${index}`)}
+              onBlur={() => setFocusedInput(null)}
             />
             
             <TouchableOpacity
@@ -202,25 +255,27 @@ const UnitCalculatorScreen = () => {
           </Typography>
           <Typography 
             variant="body1" 
-            color={isBest ? "success" : "text"} 
+            color={isBest ? "primary" : "text"} 
             style={styles.unitPriceValue}
             weight="semibold"
           >
-            ${product.unitPrice.toFixed(4)} / {product.unit === 'kg' || product.unit === 'l' ? 
+            ${product.unitPrice.toFixed(2)} / {product.unit === 'kg' || product.unit === 'l' ? 
               (product.unit === 'kg' ? 'g' : 'ml') : 
               product.unit}
           </Typography>
         </View>
         
-        {products.length > 2 && (
-          <TouchableOpacity
-            style={[styles.removeButton, { backgroundColor: theme.colors.danger }]}
-            onPress={() => removeProduct(index)}
-          >
-            <MaterialIcons name="delete" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        )}
       </View>
+    );
+
+    return (
+      <SwipableRow
+        key={index}
+        onDelete={products.length > 2 ? () => removeProduct(index) : undefined}
+        disabled={products.length <= 2}
+      >
+        {cardContent}
+      </SwipableRow>
     );
   };
 
@@ -234,21 +289,18 @@ const UnitCalculatorScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => {
-            // TODO: Implement history functionality
-            console.log('History pressed');
-          }
+          onPress: () => navigation.navigate('SavedItems' as never)
         }}
       />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <ScrollView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        contentContainerStyle={{ 
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 100
+        }}
       >
-        <ScrollView
-          style={[styles.container, { backgroundColor: theme.colors.background }]}
-          contentContainerStyle={styles.contentContainer}
-        >
         {/* Editable Title Section */}
         <SectionTitle
           title={calculatorTitle}
@@ -260,7 +312,7 @@ const UnitCalculatorScreen = () => {
               <Save
                 data={{
                   products,
-                  bestProductIndex,
+                  bestProductIndexes,
                   calculationType: 'unit_price',
                   title: calculatorTitle,
                 }}
@@ -272,7 +324,7 @@ const UnitCalculatorScreen = () => {
               <Share
                 data={{
                   products,
-                  bestProductIndex,
+                  bestProductIndexes,
                   calculationType: 'unit_price',
                 }}
                 dataType="calculation"
@@ -291,6 +343,7 @@ const UnitCalculatorScreen = () => {
             title="Add Product"
             variant="primary"
             icon="add"
+            size="large"
             onPress={addProduct}
             style={styles.actionButton}
           />
@@ -300,6 +353,7 @@ const UnitCalculatorScreen = () => {
               title="Clear All"
               variant="outline"
               icon="clear"
+              size="large"
               onPress={clearAllProducts}
               style={styles.actionButton}
             />
@@ -317,43 +371,20 @@ const UnitCalculatorScreen = () => {
             </Typography>
           </View>
         )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingVertical: 16,
-  },
   productCard: {
     padding: 16,
     borderRadius: 8,
-    marginBottom: 16,
-    marginHorizontal: 24,
+    marginBottom: 0,
     borderWidth: 1,
     position: 'relative',
   },
-  bestBadge: {
-    position: 'absolute',
-    top: 0,
-    left: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderBottomLeftRadius: 4,
-    borderBottomRightRadius: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  bestBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
+
   row: {
     flexDirection: 'row',
     marginBottom: 12,
@@ -363,6 +394,9 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 4,
     paddingHorizontal: 12,
+    fontSize: 18,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   priceContainer: {
     flex: 1,
@@ -381,6 +415,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingLeft: 24,
     paddingRight: 12,
+    fontSize: 18,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   quantityContainer: {
     flex: 1,
@@ -392,16 +429,22 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 12,
     marginRight: 8,
+    fontSize: 18,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   unitButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderRadius: 4,
+    minWidth: 60,
+    height: 48,
   },
   unitButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: 18,
   },
   resultContainer: {
     flexDirection: 'row',
@@ -409,27 +452,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   unitPriceLabel: {
-    fontSize: 14,
+    fontSize: 18,
   },
   unitPriceValue: {
     fontSize: 18,
     fontWeight: 'bold',
   },
-  removeButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
 
   actionButtonsContainer: {
     flexDirection: 'row',
     marginTop: 16,
-    marginHorizontal: 24,
+    marginBottom: 8,
     gap: 12,
   },
   actionButton: {
@@ -438,7 +472,6 @@ const styles = StyleSheet.create({
   autoSaveStatus: {
     alignItems: 'center',
     marginTop: 12,
-    marginHorizontal: 24,
     paddingVertical: 8,
   },
   autoSaveText: {

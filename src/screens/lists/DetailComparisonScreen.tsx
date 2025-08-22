@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -152,9 +152,7 @@ const DetailComparisonScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => {
-            console.log('History pressed');
-          }
+          onPress: () => navigation.navigate('SavedItems' as never)
         }}
       />
 

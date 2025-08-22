@@ -206,7 +206,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    marginHorizontal: 24,
     borderWidth: 1,
   },
   sectionTitle: {

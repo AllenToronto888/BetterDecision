@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -89,9 +89,7 @@ const DayCounterScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => {
-            console.log('History pressed');
-          }
+          onPress: () => navigation.navigate('SavedItems' as never)
         }}
       />
 
@@ -366,19 +364,18 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   card: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    marginHorizontal: 24,
     borderWidth: 1,
   },
   simpleDatePicker: {
     borderRadius: 8,
     padding: 16,
     marginVertical: 16,
-    marginHorizontal: 24,
     borderWidth: 1,
   },
   datePickerTitle: {

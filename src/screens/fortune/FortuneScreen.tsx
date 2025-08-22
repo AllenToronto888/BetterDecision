@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
 
@@ -60,17 +59,17 @@ const FortuneScreen = () => {
       <Stack.Screen 
         name="FortuneHome" 
         component={FortuneHomeScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="Spinner" 
         component={SpinnerScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="Dice" 
         component={DiceScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
     </Stack.Navigator>
   );

@@ -56,7 +56,7 @@ export const spacing = {
 // Define theme colors with typography and spacing
 export const lightTheme = {
   colors: {
-    background: '#FFFFFF',
+    background: '#E7EBEF',
     text: '#000000',
     textSecondary: '#757575',
     primary: '#2196F3',
@@ -77,7 +77,7 @@ export const lightTheme = {
 
 export const darkTheme = {
   colors: {
-    background: '#121212',
+    background: '#E7EBEF',
     text: '#FFFFFF',
     textSecondary: '#AAAAAA',
     primary: '#90CAF9',

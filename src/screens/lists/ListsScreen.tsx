@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
 
 // List screens
+import ComparisonSavedItemsScreen from './ComparisonSavedItemsScreen';
 import DetailComparisonScreen from './DetailComparisonScreen';
 import ProsConsScreen from './ProsConsScreen';
 import QuickComparisonScreen from './QuickComparisonScreen';
@@ -70,22 +70,27 @@ const ListsScreen = () => {
       <Stack.Screen 
         name="ListsHome" 
         component={ListsHomeScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="ProsCons" 
         component={ProsConsScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="QuickComparison" 
         component={QuickComparisonScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="DetailComparison" 
         component={DetailComparisonScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="SavedItems" 
+        component={ComparisonSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
       />
     </Stack.Navigator>
   );

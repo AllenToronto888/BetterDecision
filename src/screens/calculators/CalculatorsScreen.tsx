@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
 
 // Calculator screens
+import CalculatorSavedItemsScreen from './CalculatorSavedItemsScreen';
 import DayCounterScreen from './DayCounterScreen';
 import TotalCostScreen from './TotalCostScreen';
 import UnitCalculatorScreen from './UnitCalculatorScreen';
@@ -69,22 +69,27 @@ const CalculatorsScreen = () => {
       <Stack.Screen 
         name="CalculatorsHome" 
         component={CalculatorsHomeScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="UnitCalculator" 
         component={UnitCalculatorScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="TotalCost" 
         component={TotalCostScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
         name="DayCounter" 
         component={DayCounterScreen} 
-        options={{ headerShown: false }}
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="SavedItems" 
+        component={CalculatorSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
       />
     </Stack.Navigator>
   );

@@ -1,6 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 // Screens
@@ -23,6 +22,7 @@ const MainNavigator = () => {
         headerTintColor: '#fff',
         tabBarStyle: {
           backgroundColor: theme.colors.tabBar,
+          position: 'absolute',
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.tabBarInactive,
