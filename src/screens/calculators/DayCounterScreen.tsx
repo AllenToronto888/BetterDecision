@@ -9,9 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, useTheme } from '../../components';
-// Using custom date picker implementation instead of react-native-date-picker
-// to avoid NativeEventEmitter errors
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
 
 const DayCounterScreen = () => {
   const { theme } = useTheme();
@@ -87,10 +86,6 @@ const DayCounterScreen = () => {
           icon: "chevron-left",
           onPress: () => navigation.goBack()
         }}
-        rightAction={{
-          icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
-        }}
       />
 
       <ScrollView
@@ -103,35 +98,20 @@ const DayCounterScreen = () => {
           editable={true}
           maxLength={50}
           actions={
-            <>
-              <Save
-                data={{
-                  startDate,
-                  endDate,
-                  daysDifference,
-                  timeUnit,
-                  includeEndDate,
-                  calculationType: 'day_counter',
-                  title: calculatorTitle,
-                }}
-                dataType="calculation"
-                variant="icon"
-                showInput={false}
-                onSaveSuccess={(name) => console.log('Saved as:', name)}
-              />
-              <Share
-                data={{
-                  startDate,
-                  endDate,
-                  daysDifference,
-                  calculationType: 'day_counter',
-                }}
-                dataType="calculation"
-                title="Day Counter Result"
-                variant="icon"
-                onShareSuccess={() => console.log('Shared successfully')}
-              />
-            </>
+            <Share
+              data={{
+                startDate,
+                endDate,
+                daysDifference,
+                timeUnit,
+                includeEndDate,
+                calculationType: 'day_counter',
+              }}
+              dataType="calculation"
+              title="Day Counter Result"
+              variant="icon"
+              onShareSuccess={() => console.log('Shared successfully')}
+            />
           }
         />
       <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -147,73 +127,17 @@ const DayCounterScreen = () => {
         </TouchableOpacity>
         
         {startDateOpen && (
-          <View style={[styles.simpleDatePicker, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.datePickerTitle, { color: theme.colors.text }]}>Select Start Date</Text>
-            
-            <View style={styles.dateControls}>
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(startDate);
-                  newDate.setDate(newDate.getDate() - 1);
-                  setStartDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>-1 Day</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(startDate);
-                  newDate.setDate(newDate.getDate() + 1);
-                  setStartDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>+1 Day</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.dateControls}>
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(startDate);
-                  newDate.setMonth(newDate.getMonth() - 1);
-                  setStartDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>-1 Month</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(startDate);
-                  newDate.setMonth(newDate.getMonth() + 1);
-                  setStartDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>+1 Month</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.datePickerActions}>
-              <TouchableOpacity 
-                style={[styles.datePickerAction, { backgroundColor: theme.colors.danger }]}
-                onPress={() => setStartDateOpen(false)}
-              >
-                <Text style={styles.dateButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.datePickerAction, { backgroundColor: theme.colors.success }]}
-                onPress={() => setStartDateOpen(false)}
-              >
-                <Text style={styles.dateButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <DateTimePicker
+            value={startDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setStartDateOpen(false);
+              if (selectedDate) {
+                setStartDate(selectedDate);
+              }
+            }}
+          />
         )}
         
         <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>To</Text>
@@ -228,77 +152,18 @@ const DayCounterScreen = () => {
         </TouchableOpacity>
         
         {endDateOpen && (
-          <View style={[styles.simpleDatePicker, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.datePickerTitle, { color: theme.colors.text }]}>Select End Date</Text>
-            
-            <View style={styles.dateControls}>
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(endDate);
-                  newDate.setDate(newDate.getDate() - 1);
-                  if (newDate >= startDate) {
-                    setEndDate(newDate);
-                  }
-                }}
-              >
-                <Text style={styles.dateButtonText}>-1 Day</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(endDate);
-                  newDate.setDate(newDate.getDate() + 1);
-                  setEndDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>+1 Day</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.dateControls}>
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(endDate);
-                  newDate.setMonth(newDate.getMonth() - 1);
-                  if (newDate >= startDate) {
-                    setEndDate(newDate);
-                  }
-                }}
-              >
-                <Text style={styles.dateButtonText}>-1 Month</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.dateButton, { backgroundColor: theme.colors.primary }]} 
-                onPress={() => {
-                  const newDate = new Date(endDate);
-                  newDate.setMonth(newDate.getMonth() + 1);
-                  setEndDate(newDate);
-                }}
-              >
-                <Text style={styles.dateButtonText}>+1 Month</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.datePickerActions}>
-              <TouchableOpacity 
-                style={[styles.datePickerAction, { backgroundColor: theme.colors.danger }]}
-                onPress={() => setEndDateOpen(false)}
-              >
-                <Text style={styles.dateButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.datePickerAction, { backgroundColor: theme.colors.success }]}
-                onPress={() => setEndDateOpen(false)}
-              >
-                <Text style={styles.dateButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <DateTimePicker
+            value={endDate}
+            mode="date"
+            display="default"
+            minimumDate={startDate}
+            onChange={(event, selectedDate) => {
+              setEndDateOpen(false);
+              if (selectedDate) {
+                setEndDate(selectedDate);
+              }
+            }}
+          />
         )}
         
         <View style={styles.switchRow}>
@@ -372,40 +237,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
   },
-  simpleDatePicker: {
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 16,
-    borderWidth: 1,
-  },
-  datePickerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  dateControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  datePickerActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  datePickerAction: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  dateButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
+
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
