@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { Card } from '../../components';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, CustomHeader, useTheme } from '../../components';
 
 // Calculator screens
 import DayCounterScreen from './DayCounterScreen';
@@ -12,6 +12,8 @@ const Stack = createNativeStackNavigator();
 
 // Home screen for Calculators tab
 const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
+  const { theme } = useTheme();
+  
   const calculatorOptions = [
     {
       title: 'Unit Calculator',
@@ -37,47 +39,52 @@ const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
   ];
   
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {calculatorOptions.map((option, index) => (
-        <Card
-          key={index}
-          title={option.title}
-          description={option.description}
-          icon={option.icon}
-          iconColor={option.color}
-          onPress={() => navigation.navigate(option.screen)}
-        />
-      ))}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader title="Calculators" />
+      
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        contentContainerStyle={styles.contentContainer}
+      >
+        {calculatorOptions.map((option, index) => (
+          <Card
+            key={index}
+            title={option.title}
+            description={option.description}
+            icon={option.icon}
+            iconColor={option.color}
+            onPress={() => navigation.navigate(option.screen)}
+          />
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
 // Main navigator for Calculators tab
 const CalculatorsScreen = () => {
+  console.log('DEBUG: CalculatorsScreen navigator initializing');
   return (
     <Stack.Navigator>
       <Stack.Screen 
         name="CalculatorsHome" 
         component={CalculatorsHomeScreen} 
-        options={{ title: 'Calculators' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="UnitCalculator" 
         component={UnitCalculatorScreen} 
-        options={{ title: 'Unit Calculator' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="TotalCost" 
         component={TotalCostScreen} 
-        options={{ title: 'Total Cost' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="DayCounter" 
         component={DayCounterScreen} 
-        options={{ title: 'Day Counter' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <MaterialIcons
               name={leftAction.icon as any}
-              size={24}
+              size={28}
               color={leftAction.disabled ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF'}
             />
           </TouchableOpacity>
@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <MaterialIcons
               name={action.icon as any}
-              size={24}
+              size={28}
               color={action.disabled ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF'}
             />
           </TouchableOpacity>

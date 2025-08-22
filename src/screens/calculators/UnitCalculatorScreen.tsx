@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -9,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Button, HistoryButton, Save, Share, Typography, useAutoSave, useTheme } from '../../components';
+import { Button, CustomHeader, Save, SectionTitle, Share, Typography, useAutoSave, useTheme } from '../../components';
 
 interface Product {
   name: string;
@@ -21,6 +22,7 @@ interface Product {
 
 const UnitCalculatorScreen = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   const [products, setProducts] = useState<Product[]>([
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
@@ -28,7 +30,6 @@ const UnitCalculatorScreen = () => {
   const [bestProductIndex, setBestProductIndex] = useState<number | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   const [calculatorTitle, setCalculatorTitle] = useState('Unit Price Calculator');
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   // Auto-save functionality
   useAutoSave({
@@ -116,16 +117,7 @@ const UnitCalculatorScreen = () => {
     setProducts([...products, { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 }]);
   };
 
-  const loadHistoryData = (historyData: any) => {
-    if (historyData.products && Array.isArray(historyData.products)) {
-      setProducts(historyData.products);
-      setBestProductIndex(historyData.bestProductIndex || null);
-      // Also load title if saved
-      if (historyData.title) {
-        setCalculatorTitle(historyData.title);
-      }
-    }
-  };
+  // Removed loadHistoryData function as HistoryButton is no longer used in the component
 
   const clearAllProducts = () => {
     setProducts([
@@ -233,68 +225,64 @@ const UnitCalculatorScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Unit Calculator"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            // TODO: Implement history functionality
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Header with Editable Title */}
-        <View style={styles.headerRow}>
-          {isEditingTitle ? (
-            <TextInput
-              style={[styles.titleInput, { color: theme.colors.text, borderColor: theme.colors.primary }]}
-              value={calculatorTitle}
-              onChangeText={setCalculatorTitle}
-              onBlur={() => setIsEditingTitle(false)}
-              onSubmitEditing={() => setIsEditingTitle(false)}
-              autoFocus
-              maxLength={50}
-            />
-          ) : (
-            <TouchableOpacity
-              style={styles.titleContainer}
-              onPress={() => setIsEditingTitle(true)}
-            >
-              <Typography variant="h3" color="text" style={styles.screenTitle}>
-                {calculatorTitle}
-              </Typography>
-              <MaterialIcons name="edit" size={20} color={theme.colors.textSecondary} style={styles.editIcon} />
-            </TouchableOpacity>
-          )}
-          <View style={styles.headerActions}>
-            <Save
-              data={{
-                products,
-                bestProductIndex,
-                calculationType: 'unit_price',
-                title: calculatorTitle,
-              }}
-              dataType="calculation"
-              variant="icon"
-              showInput={false}
-              onSaveSuccess={(name) => console.log('Saved as:', name)}
-            />
-            <Share
-              data={{
-                products,
-                bestProductIndex,
-                calculationType: 'unit_price',
-              }}
-              dataType="calculation"
-              title="Unit Price Comparison"
-              variant="icon"
-              onShareSuccess={() => console.log('Copied/Shared successfully')}
-            />
-            <HistoryButton
-              dataType="calculation"
-              onLoadItem={loadHistoryData}
-              variant="icon"
-            />
-          </View>
-        </View>
+        <ScrollView
+          style={[styles.container, { backgroundColor: theme.colors.background }]}
+          contentContainerStyle={styles.contentContainer}
+        >
+        {/* Editable Title Section */}
+        <SectionTitle
+          title={calculatorTitle}
+          onTitleChange={setCalculatorTitle}
+          editable={true}
+          maxLength={50}
+          actions={
+            <>
+              <Save
+                data={{
+                  products,
+                  bestProductIndex,
+                  calculationType: 'unit_price',
+                  title: calculatorTitle,
+                }}
+                dataType="calculation"
+                variant="icon"
+                showInput={false}
+                onSaveSuccess={(name) => console.log('Saved as:', name)}
+              />
+              <Share
+                data={{
+                  products,
+                  bestProductIndex,
+                  calculationType: 'unit_price',
+                }}
+                dataType="calculation"
+                title="Unit Price Comparison"
+                variant="icon"
+                onShareSuccess={() => console.log('Copied/Shared successfully')}
+              />
+            </>
+          }
+        />
 
         {products.map(renderProduct)}
         
@@ -329,8 +317,9 @@ const UnitCalculatorScreen = () => {
             </Typography>
           </View>
         )}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -339,12 +328,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    paddingVertical: 16,
   },
   productCard: {
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
     position: 'relative',
   },
@@ -435,43 +425,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  titleContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  screenTitle: {
-    flex: 1,
-  },
-  editIcon: {
-    marginLeft: 8,
-    opacity: 0.6,
-  },
-  titleInput: {
-    flex: 1,
-    fontSize: 24,
-    fontWeight: 'bold',
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 8,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+
   actionButtonsContainer: {
     flexDirection: 'row',
     marginTop: 16,
+    marginHorizontal: 24,
     gap: 12,
   },
   actionButton: {
@@ -480,6 +438,7 @@ const styles = StyleSheet.create({
   autoSaveStatus: {
     alignItems: 'center',
     marginTop: 12,
+    marginHorizontal: 24,
     paddingVertical: 8,
   },
   autoSaveText: {

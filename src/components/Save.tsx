@@ -205,7 +205,7 @@ export const Save: React.FC<SaveComponentProps> = ({
         >
           <MaterialIcons 
             name="save" 
-            size={24} 
+            size={28} 
             color={isSaving ? theme.colors.tabBarInactive : theme.colors.primary} 
           />
         </TouchableOpacity>
@@ -274,7 +274,7 @@ export const useSavedItems = (dataType: string) => {
 
 const styles = StyleSheet.create({
   iconButton: {
-    padding: 8,
+    padding: 4,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',

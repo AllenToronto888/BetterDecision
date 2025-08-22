@@ -32,6 +32,7 @@ const MainNavigator = () => {
         name="Calculators" 
         component={CalculatorsScreen} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="calculate" color={color} size={size} />
           ),
@@ -41,6 +42,7 @@ const MainNavigator = () => {
         name="Lists" 
         component={ListsScreen} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="list" color={color} size={size} />
           ),
@@ -50,6 +52,7 @@ const MainNavigator = () => {
         name="Fortune" 
         component={FortuneScreen} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="casino" color={color} size={size} />
           ),
@@ -59,6 +62,7 @@ const MainNavigator = () => {
         name="Settings" 
         component={SettingsScreen} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="settings" color={color} size={size} />
           ),

@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -10,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
+import { CustomHeader, Save, SectionTitle, Share, useTheme } from '../../components';
 
 interface Criterion {
   id: string;
@@ -30,7 +31,8 @@ interface ComparisonCell {
 
 const QuickComparisonScreen = () => {
   const { theme } = useTheme();
-  const [title, setTitle] = useState('');
+  const navigation = useNavigation();
+  const [title, setTitle] = useState('Quick Comparison');
   const [criteria, setCriteria] = useState<Criterion[]>([
     { id: '1', text: 'Gutes Preis/Leistung' },
     { id: '2', text: 'Zentral gelegen' },
@@ -186,21 +188,64 @@ const QuickComparisonScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Quick Comparison"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <TextInput
-          style={[styles.titleInput, { color: theme.colors.text }]}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Comparison Title"
-          placeholderTextColor={theme.colors.tabBarInactive}
-        />
+        <ScrollView
+          style={[styles.container, { backgroundColor: theme.colors.background }]}
+          contentContainerStyle={styles.contentContainer}
+        >
+          <SectionTitle
+            title={title}
+            onTitleChange={setTitle}
+            editable={true}
+            maxLength={100}
+            actions={
+              <>
+                <Save
+                  data={{
+                    title,
+                    criteria,
+                    options,
+                    cells: comparisonData,
+                    comparisonType: 'quick_comparison',
+                  }}
+                  dataType="comparison"
+                  variant="icon"
+                  showInput={false}
+                  onSaveSuccess={(name) => console.log('Saved as:', name)}
+                />
+                <Share
+                  data={{
+                    title,
+                    criteria,
+                    options,
+                    cells: comparisonData,
+                  }}
+                  dataType="comparison"
+                  title="Quick Comparison Result"
+                  variant="icon"
+                  onShareSuccess={() => console.log('Shared successfully')}
+                />
+              </>
+            }
+          />
         
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View>
@@ -285,8 +330,9 @@ const QuickComparisonScreen = () => {
             </View>
           </View>
         </ScrollView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -295,12 +341,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
-  },
-  titleInput: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   tableHeader: {
     flexDirection: 'row',

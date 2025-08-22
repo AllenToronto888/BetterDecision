@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { Card } from '../../components';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, CustomHeader, useTheme } from '../../components';
 
 // Fortune screens
 import DiceScreen from './DiceScreen';
@@ -11,6 +11,8 @@ const Stack = createNativeStackNavigator();
 
 // Home screen for Fortune tab
 const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
+  const { theme } = useTheme();
+  
   const fortuneOptions = [
     {
       title: 'Spinner',
@@ -29,10 +31,13 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   ];
   
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader title="Fortune" />
+      
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        contentContainerStyle={styles.contentContainer}
+      >
       {fortuneOptions.map((option, index) => (
         <Card
           key={index}
@@ -43,7 +48,8 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
           onPress={() => navigation.navigate(option.screen)}
         />
       ))}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -54,17 +60,17 @@ const FortuneScreen = () => {
       <Stack.Screen 
         name="FortuneHome" 
         component={FortuneHomeScreen} 
-        options={{ title: 'Fortune' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="Spinner" 
         component={SpinnerScreen} 
-        options={{ title: 'Spinner' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="Dice" 
         component={DiceScreen} 
-        options={{ title: 'Dice' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -76,6 +82,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
+    paddingHorizontal: 24,
   },
 });
 

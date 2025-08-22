@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -10,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
+import { CustomHeader, Save, SectionTitle, Share, useTheme } from '../../components';
 
 interface Criterion {
   id: string;
@@ -30,7 +31,8 @@ interface ComparisonCell {
 
 const DetailComparisonScreen = () => {
   const { theme } = useTheme();
-  const [title, setTitle] = useState('');
+  const navigation = useNavigation();
+  const [title, setTitle] = useState('Detail Comparison');
   const [criteria, setCriteria] = useState<Criterion[]>([
     { id: '1', text: 'Price' },
     { id: '2', text: 'Features' },
@@ -141,21 +143,64 @@ const DetailComparisonScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Detail Comparison"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <TextInput
-          style={[styles.titleInput, { color: theme.colors.text }]}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Comparison Title"
-          placeholderTextColor={theme.colors.tabBarInactive}
-        />
+        <ScrollView
+          style={[styles.container, { backgroundColor: theme.colors.background }]}
+          contentContainerStyle={styles.contentContainer}
+        >
+          <SectionTitle
+            title={title}
+            onTitleChange={setTitle}
+            editable={true}
+            maxLength={100}
+            actions={
+              <>
+                <Save
+                  data={{
+                    title,
+                    criteria,
+                    options,
+                    cells: comparisonData,
+                    comparisonType: 'detail_comparison',
+                  }}
+                  dataType="comparison"
+                  variant="icon"
+                  showInput={false}
+                  onSaveSuccess={(name) => console.log('Saved as:', name)}
+                />
+                <Share
+                  data={{
+                    title,
+                    criteria,
+                    options,
+                    cells: comparisonData,
+                  }}
+                  dataType="comparison"
+                  title="Detail Comparison Result"
+                  variant="icon"
+                  onShareSuccess={() => console.log('Shared successfully')}
+                />
+              </>
+            }
+          />
         
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View>
@@ -182,7 +227,7 @@ const DetailComparisonScreen = () => {
                       style={styles.deleteButton}
                       onPress={() => removeOption(option.id)}
                     >
-                      <MaterialIcons name="close" size={16} color={theme.danger} />
+                      <MaterialIcons name="close" size={16} color={theme.colors.danger} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -212,7 +257,7 @@ const DetailComparisonScreen = () => {
                       style={styles.deleteButton}
                       onPress={() => removeCriterion(criterion.id)}
                     >
-                      <MaterialIcons name="close" size={16} color={theme.danger} />
+                      <MaterialIcons name="close" size={16} color={theme.colors.danger} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -246,24 +291,9 @@ const DetailComparisonScreen = () => {
             </View>
           </View>
         </ScrollView>
-        
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
-          >
-            <MaterialIcons name="save" size={20} color="#FFFFFF" />
-            <Text style={styles.actionButtonText}>Save</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: theme.secondary }]}
-          >
-            <MaterialIcons name="share" size={20} color="#FFFFFF" />
-            <Text style={styles.actionButtonText}>Share</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -272,12 +302,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
-  },
-  titleInput: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   tableHeader: {
     flexDirection: 'row',

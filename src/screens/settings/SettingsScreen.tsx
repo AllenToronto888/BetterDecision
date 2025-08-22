@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
+import { CustomHeader, useTheme } from '../../components';
 
 const SettingsScreen = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
@@ -87,16 +87,13 @@ const SettingsScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.contentContainer}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Settings</Text>
-        <Text style={[styles.headerSubtitle, { color: theme.colors.tabBarInactive }]}>
-          Customize your app experience
-        </Text>
-      </View>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader title="Settings" />
+      
+      <ScrollView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        contentContainerStyle={styles.contentContainer}
+      >
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Appearance</Text>
@@ -192,7 +189,8 @@ const SettingsScreen = () => {
           Better Decision v1.0.0
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -201,22 +199,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerSubtitle: {
-    fontSize: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   section: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
   },
   sectionTitle: {

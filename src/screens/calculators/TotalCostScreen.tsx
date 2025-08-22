@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -11,7 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Button, Typography, useTheme } from '../../components';
+import { Button, CustomHeader, Save, SectionTitle, Share, useTheme } from '../../components';
 
 interface CostItem {
   id: string;
@@ -23,8 +24,10 @@ interface CostItem {
 
 const TotalCostScreen = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   const [basePrice, setBasePrice] = useState('');
   const [productName, setProductName] = useState('');
+  const [calculatorTitle, setCalculatorTitle] = useState('Total Cost Calculator');
   const [additionalCosts, setAdditionalCosts] = useState<CostItem[]>([
     { id: '1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
     { id: '2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
@@ -157,20 +160,65 @@ const TotalCostScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Total Cost"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.header}>
-          <Typography variant="h3" color="text" style={styles.headerTitle}>Total Cost</Typography>
-          <Typography variant="body2" color="textSecondary" style={styles.headerSubtitle}>
-            Find the real price before you buy
-          </Typography>
-        </View>
+        <ScrollView
+          style={[styles.container, { backgroundColor: theme.colors.background }]}
+          contentContainerStyle={styles.contentContainer}
+        >
+          <SectionTitle
+            title={calculatorTitle}
+            onTitleChange={setCalculatorTitle}
+            editable={true}
+            maxLength={50}
+            actions={
+              <>
+                <Save
+                  data={{
+                    basePrice,
+                    productName,
+                    additionalCosts,
+                    totalCost,
+                    calculationType: 'total_cost',
+                    title: calculatorTitle,
+                  }}
+                  dataType="calculation"
+                  variant="icon"
+                  showInput={false}
+                  onSaveSuccess={(name) => console.log('Saved as:', name)}
+                />
+                <Share
+                  data={{
+                    basePrice,
+                    additionalCosts,
+                    totalCost,
+                    calculationType: 'total_cost',
+                  }}
+                  dataType="calculation"
+                  title="Total Cost Calculation"
+                  variant="icon"
+                  onShareSuccess={() => console.log('Shared successfully')}
+                />
+              </>
+            }
+          />
         
         <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Purchase Price</Text>
@@ -245,8 +293,9 @@ const TotalCostScreen = () => {
             ${totalCost.toFixed(2)}
           </Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -255,22 +304,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerSubtitle: {
-    fontSize: 14,
+    paddingVertical: 16,
   },
   section: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
   },
   sectionTitle: {
@@ -379,6 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+    marginHorizontal: 24,
   },
   calculateButtonText: {
     color: '#FFFFFF',
@@ -391,6 +432,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
   },
   clearButtonText: {
@@ -400,6 +442,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
   },
   resultLabel: {

@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {
     Animated,
@@ -9,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
+import { CustomHeader, useTheme } from '../../components';
 
 interface DiceConfig {
   count: number;
@@ -24,6 +25,7 @@ interface DiceResult {
 
 const DiceScreen = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   const [config, setConfig] = useState<DiceConfig>({ count: 2, sides: 6 });
   const [results, setResults] = useState<DiceResult[]>([]);
   const [sum, setSum] = useState(0);
@@ -122,10 +124,26 @@ const DiceScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Dice"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <ScrollView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        contentContainerStyle={styles.contentContainer}
+      >
+
       <View style={[styles.configCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.configTitle, { color: theme.colors.text }]}>Dice Configuration</Text>
         
@@ -223,7 +241,8 @@ const DiceScreen = () => {
           No previous rolls
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -232,12 +251,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   configCard: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    marginHorizontal: 24,
     borderWidth: 1,
   },
   configTitle: {

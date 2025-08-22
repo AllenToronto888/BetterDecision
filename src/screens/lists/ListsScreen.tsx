@@ -1,17 +1,21 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { Card } from '../../components';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Card, CustomHeader, useTheme } from '../../components';
 
 // List screens
 import DetailComparisonScreen from './DetailComparisonScreen';
 import ProsConsScreen from './ProsConsScreen';
 import QuickComparisonScreen from './QuickComparisonScreen';
 
+// Placeholder removed - using real ProsConsScreen now
+
 const Stack = createNativeStackNavigator();
 
 // Home screen for Lists tab
 const ListsHomeScreen = ({ navigation }: { navigation: any }) => {
+  const { theme } = useTheme();
+  
   const listOptions = [
     {
       title: 'Pros & Cons',
@@ -37,10 +41,13 @@ const ListsHomeScreen = ({ navigation }: { navigation: any }) => {
   ];
   
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader title="Lists" />
+      
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        contentContainerStyle={styles.contentContainer}
+      >
       {listOptions.map((option, index) => (
         <Card
           key={index}
@@ -51,7 +58,8 @@ const ListsHomeScreen = ({ navigation }: { navigation: any }) => {
           onPress={() => navigation.navigate(option.screen)}
         />
       ))}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -62,22 +70,22 @@ const ListsScreen = () => {
       <Stack.Screen 
         name="ListsHome" 
         component={ListsHomeScreen} 
-        options={{ title: 'Lists' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="ProsCons" 
         component={ProsConsScreen} 
-        options={{ title: 'Pros & Cons' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="QuickComparison" 
         component={QuickComparisonScreen} 
-        options={{ title: 'Quick Comparison' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="DetailComparison" 
         component={DetailComparisonScreen} 
-        options={{ title: 'Detail Comparison' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

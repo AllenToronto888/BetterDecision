@@ -202,31 +202,17 @@ export const Share: React.FC<ShareComponentProps> = ({
 
   if (variant === 'icon') {
     return (
-      <View style={styles.iconContainer}>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleShare}
-          disabled={isSharing}
-        >
-          <MaterialIcons 
-            name="share" 
-            size={24} 
-            color={isSharing ? theme.colors.tabBarInactive : theme.colors.primary} 
-          />
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleCopyToClipboard}
-          disabled={isSharing}
-        >
-          <MaterialIcons 
-            name="content-copy" 
-            size={22} 
-            color={isSharing ? theme.colors.tabBarInactive : theme.colors.textSecondary} 
-          />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={handleShare}
+        disabled={isSharing}
+      >
+        <MaterialIcons 
+          name="share" 
+          size={28} 
+          color={isSharing ? theme.colors.tabBarInactive : theme.colors.primary} 
+        />
+      </TouchableOpacity>
     );
   }
 
@@ -311,11 +297,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconButton: {
-    padding: 8,
+    padding: 4,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 2,
   },
   buttonContainer: {
     flexDirection: 'row',

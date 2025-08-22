@@ -1,15 +1,18 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
     StyleSheet,
+    Text,
     TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
-import { Button, Typography, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, Typography, useTheme } from '../../components';
+// Import Button directly from its file to avoid "Cannot call a class as a function" error
 
 interface Item {
   id: string;
@@ -19,6 +22,7 @@ interface Item {
 
 const ProsConsScreen = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   const [title, setTitle] = useState('Should I take this job?');
   const [pros, setPros] = useState<Item[]>([
     { id: '1', text: 'Clear career path', weight: 5 },
@@ -149,26 +153,66 @@ const ProsConsScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <CustomHeader
+        title="Pros & Cons"
+        leftAction={{
+          icon: "chevron-left",
+          onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "history",
+          onPress: () => {
+            console.log('History pressed');
+          }
+        }}
+      />
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.titleContainer}>
-          <TextInput
-            style={[styles.titleInput, { color: theme.colors.text }]}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="What are you deciding?"
-            placeholderTextColor={theme.colors.tabBarInactive}
+        <ScrollView
+          style={[styles.container, { backgroundColor: theme.colors.background }]}
+          contentContainerStyle={styles.contentContainer}
+        >
+          <SectionTitle
+            title={title}
+            onTitleChange={setTitle}
+            editable={true}
+            maxLength={100}
+            actions={
+              <>
+                <Save
+                  data={{
+                    title,
+                    pros,
+                    cons,
+                    totalProsWeight,
+                    totalConsWeight,
+                    comparisonType: 'pros_cons',
+                  }}
+                  dataType="comparison"
+                  variant="icon"
+                  showInput={false}
+                  onSaveSuccess={(name) => console.log('Saved as:', name)}
+                />
+                <Share
+                  data={{
+                    title,
+                    pros,
+                    cons,
+                    totalProsWeight,
+                    totalConsWeight,
+                  }}
+                  dataType="comparison"
+                  title="Pros & Cons Analysis"
+                  variant="icon"
+                  onShareSuccess={() => console.log('Shared successfully')}
+                />
+              </>
+            }
           />
-          <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-            <MaterialIcons name="edit" size={24} color={theme.colors.primary} />
-          </TouchableOpacity>
-        </View>
         
         <View style={styles.emojiContainer}>
           <Typography variant="h1" style={styles.emoji}>
@@ -207,21 +251,22 @@ const ProsConsScreen = () => {
         </View>
         
         <View style={styles.buttonsContainer}>
-          <Button
-            title="Add Pro"
-            variant="primary"
-            icon="add"
+          {/* Use TouchableOpacity instead of Button to avoid potential class error */}
+          <TouchableOpacity
+            style={[styles.customButton, { backgroundColor: theme.colors.primary }]}
             onPress={() => addItem(true)}
-            style={styles.addButton}
-          />
+          >
+            <MaterialIcons name="add" size={20} color="#FFFFFF" />
+            <Text style={styles.buttonText}>Add Pro</Text>
+          </TouchableOpacity>
           
-          <Button
-            title="Add Con"
-            variant="danger"
-            icon="add"
+          <TouchableOpacity
+            style={[styles.customButton, { backgroundColor: theme.colors.danger }]}
             onPress={() => addItem(false)}
-            style={styles.addButton}
-          />
+          >
+            <MaterialIcons name="add" size={20} color="#FFFFFF" />
+            <Text style={styles.buttonText}>Add Con</Text>
+          </TouchableOpacity>
         </View>
         
         <View style={styles.itemsContainer}>
@@ -233,8 +278,9 @@ const ProsConsScreen = () => {
             {cons.map(item => renderItem(item, false))}
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -243,22 +289,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  titleInput: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   emojiContainer: {
     alignItems: 'center',
     marginBottom: 16,
+    marginHorizontal: 24,
   },
   emoji: {
     fontSize: 48,
@@ -295,6 +332,20 @@ const styles = StyleSheet.create({
   addButton: {
     flex: 1,
     marginHorizontal: 4,
+  },
+  customButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 8,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
   itemsContainer: {
     flexDirection: 'row',
