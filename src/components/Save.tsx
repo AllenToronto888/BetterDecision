@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { saveProsConsList, saveQuickComparison } from '../utils/storage';
 import { Button } from './Button';
 import { Typography } from './Typography';
 
@@ -77,27 +78,55 @@ export const Save: React.FC<SaveComponentProps> = ({
         throw new Error('Please enter a name for your saved item');
       }
 
-      const storageKey = generateStorageKey(dataType);
-      const existingData = await AsyncStorage.getItem(storageKey);
-      const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
-
-      // Check for duplicate names
-      const duplicateExists = existingItems.some(item => item.name.toLowerCase() === name.trim().toLowerCase());
-      if (duplicateExists) {
-        throw new Error('An item with this name already exists. Please choose a different name.');
+      // Handle Quick Comparison data specifically
+      if (dataType === 'comparison' && data.comparisonType === 'quick_comparison') {
+        const quickComparisonData = {
+          id: Date.now().toString(),
+          title: name.trim(),
+          date: new Date().toISOString(),
+          criteria: data.criteria,
+          options: data.options,
+          comparisonData: data.comparisonData,
+        };
+        
+        await saveQuickComparison(quickComparisonData);
+      } 
+      // Handle Pros & Cons data
+      else if (dataType === 'decision' && data.type === 'pros_cons') {
+        const prosConsData = {
+          id: Date.now().toString(),
+          title: name.trim(),
+          date: new Date().toISOString(),
+          pros: data.pros || [],
+          cons: data.cons || [],
+        };
+        
+        await saveProsConsList(prosConsData);
       }
+      // Fallback to generic storage for other types
+      else {
+        const storageKey = generateStorageKey(dataType);
+        const existingData = await AsyncStorage.getItem(storageKey);
+        const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
 
-      const newItem: SavedItem = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        data,
-        type: dataType,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+        // Check for duplicate names
+        const duplicateExists = existingItems.some(item => item.name.toLowerCase() === name.trim().toLowerCase());
+        if (duplicateExists) {
+          throw new Error('An item with this name already exists. Please choose a different name.');
+        }
 
-      const updatedItems = [newItem, ...existingItems];
-      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedItems));
+        const newItem: SavedItem = {
+          id: Date.now().toString(),
+          name: name.trim(),
+          data,
+          type: dataType,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        const updatedItems = [newItem, ...existingItems];
+        await AsyncStorage.setItem(storageKey, JSON.stringify(updatedItems));
+      }
 
       onSaveSuccess?.(name.trim());
       setIsModalVisible(false);

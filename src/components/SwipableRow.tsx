@@ -34,6 +34,8 @@ interface SwipableRowProps {
   }>;
   disabled?: boolean;
   onSwipeChange?: (isSwiping: boolean) => void;
+  style?: any;
+  contentStyle?: any;
 }
 
 export const SwipableRow: React.FC<SwipableRowProps> = ({
@@ -44,6 +46,8 @@ export const SwipableRow: React.FC<SwipableRowProps> = ({
   rightActions,
   disabled = false,
   onSwipeChange,
+  style,
+  contentStyle,
 }) => {
   const { theme } = useTheme();
   const translateX = useRef(new Animated.Value(0)).current;
@@ -156,7 +160,7 @@ export const SwipableRow: React.FC<SwipableRowProps> = ({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }, style]}>
       {/* Left Actions */}
       {finalLeftActions.length > 0 && (
         <View style={[styles.actionsContainer, styles.leftActionsContainer]}>
@@ -185,6 +189,7 @@ export const SwipableRow: React.FC<SwipableRowProps> = ({
               backgroundColor: theme.colors.card,
               borderRadius: isSwipedOpen ? 0 : 8,
             },
+            contentStyle,
           ]}
         >
           {children}

@@ -2,16 +2,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
 
 interface Criterion {
   id: string;
@@ -62,6 +62,7 @@ const QuickComparisonScreen = () => {
     { criterionId: '5', optionId: '2', status: 'no' },
     { criterionId: '5', optionId: '3', status: 'yes' },
   ]);
+  const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
   
   const addCriterion = () => {
     const newId = criteria.length > 0 
@@ -132,6 +133,23 @@ const QuickComparisonScreen = () => {
     if (options.length > 1) {
       setOptions(options.filter(option => option.id !== id));
       setComparisonData(comparisonData.filter(cell => cell.optionId !== id));
+    }
+  };
+
+  const clearAllCriteria = () => {
+    if (criteria.length > 0) {
+      // Keep only the first criterion and clear its text
+      const firstCriterion = { ...criteria[0], text: '' };
+      setCriteria([firstCriterion]);
+      
+      // Remove all comparison data and create new cells for the first criterion
+      const newCells = options.map(option => ({
+        criterionId: firstCriterion.id,
+        optionId: option.id,
+        status: 'no' as 'yes' | 'no' | 'partial',
+      }));
+      
+      setComparisonData(newCells);
     }
   };
   
@@ -221,13 +239,13 @@ const QuickComparisonScreen = () => {
                     title,
                     criteria,
                     options,
-                    cells: comparisonData,
+                    comparisonData,
                     comparisonType: 'quick_comparison',
                   }}
                   dataType="comparison"
                   variant="icon"
                   showInput={false}
-                  onSaveSuccess={(name) => console.log('Saved as:', name)}
+                  onSaveSuccess={(name: string) => console.log('Saved as:', name)}
                 />
                 <Share
                   data={{
@@ -245,79 +263,119 @@ const QuickComparisonScreen = () => {
             }
           />
         
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View>
-            <View style={styles.tableHeader}>
-              <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
-                <Text style={[styles.headerText, { color: theme.colors.text }]}>Criteria</Text>
-              </View>
-              
-              {options.map((option, index) => (
-                <View 
-                  key={option.id} 
-                  style={[styles.optionHeaderCell, { backgroundColor: theme.colors.card }]}
-                >
-                  <TextInput
-                    style={[styles.optionInput, { color: theme.colors.text }]}
-                    value={option.name}
-                    onChangeText={(text) => updateOption(option.id, text)}
-                    placeholder={`Option ${index + 1}`}
-                    placeholderTextColor={theme.colors.tabBarInactive}
-                  />
-                  
-                  {options.length > 1 && (
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => removeOption(option.id)}
-                    >
-                      <MaterialIcons name="close" size={16} color={theme.danger} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-              
-              <TouchableOpacity
-                style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
-                onPress={addOption}
-              >
-                <MaterialIcons name="add" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
+        <View style={styles.tableContainer}>
+          {/* Fixed Criteria Column */}
+          <View style={styles.criteriaColumn}>
+            <View 
+              style={[styles.criterionHeaderCell, { backgroundColor: theme.colors.card }]}
+
+            >
+              <Text style={[styles.headerText, { color: theme.colors.text }]}>Criteria</Text>
             </View>
             
             {criteria.map((criterion) => (
-              <View key={criterion.id} style={styles.tableRow}>
-                <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
-                  <TextInput
-                    style={[styles.criterionInput, { color: theme.colors.text }]}
-                    value={criterion.text}
-                    onChangeText={(text) => updateCriterion(criterion.id, text)}
-                    placeholder="Enter criterion"
-                    placeholderTextColor={theme.colors.tabBarInactive}
-                  />
-                  
-                  {criteria.length > 1 && (
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => removeCriterion(criterion.id)}
-                    >
-                      <MaterialIcons name="close" size={16} color={theme.danger} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                
-                {options.map((option) => (
-                  <TouchableOpacity
-                    key={`${criterion.id}-${option.id}`}
-                    style={[styles.comparisonCell, { backgroundColor: theme.colors.card }]}
-                    onPress={() => toggleCellStatus(criterion.id, option.id)}
-                  >
-                    {getCellIcon(getCellStatus(criterion.id, option.id))}
-                  </TouchableOpacity>
-                ))}
+              <View
+                key={criterion.id}
+                onLayout={(event) => {
+                  const { height } = event.nativeEvent.layout;
+                  setRowHeights(prev => ({...prev, [criterion.id]: height}));
+                }}
+              >
+                <SwipableRow
+                  key={criterion.id}
+                  onDelete={criteria.length > 1 ? () => removeCriterion(criterion.id) : undefined}
+                  leftActions={criteria.length > 1 ? [{
+                    icon: 'delete',
+                    color: theme.colors.danger,
+                    onPress: () => removeCriterion(criterion.id),
+                  }] : undefined}
+                  style={styles.swipeableRowOverride}
+                  contentStyle={styles.swipeableContentOverride}
+                >
+                  <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
+                    <TextInput
+                      style={[styles.criterionInput, { color: theme.colors.text }]}
+                      value={criterion.text}
+                      onChangeText={(text) => updateCriterion(criterion.id, text)}
+                      placeholder="Enter criterion"
+                      placeholderTextColor={theme.colors.tabBarInactive}
+                      multiline={true}
+                      textAlignVertical="top"
+                    />
+                  </View>
+                </SwipableRow>
               </View>
             ))}
             
-            <View style={styles.tableRow}>
+            <View style={styles.criterionCell}>
+              <TouchableOpacity
+                style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
+                onPress={clearAllCriteria}
+              >
+                <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
+                <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>Clear All</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          {/* Scrollable Options Column */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.optionsScrollView}>
+            <View>
+              <View style={styles.optionsHeader}>
+                {options.map((option, index) => (
+                  <View 
+                    key={option.id} 
+                    style={[styles.optionHeaderCell, { backgroundColor: theme.colors.card }]}
+
+                  >
+                    <TextInput
+                      style={[styles.optionInput, { color: theme.colors.text }]}
+                      value={option.name}
+                      onChangeText={(text) => updateOption(option.id, text)}
+                      placeholder={`Option ${index + 1}`}
+                      placeholderTextColor={theme.colors.tabBarInactive}
+                    />
+                    
+                    {options.length > 1 && (
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => removeOption(option.id)}
+                      >
+                        <MaterialIcons name="close" size={16} color={theme.colors.danger} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+                
+                <TouchableOpacity
+                  style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
+                  onPress={addOption}
+                >
+                  <MaterialIcons name="add" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+              
+              {criteria.map((criterion) => (
+                <View 
+                  key={criterion.id} 
+                  style={[
+                    styles.optionsRow, 
+                    { height: rowHeights[criterion.id] || 48 }
+                  ]}
+                >
+                  {options.map((option, optionIndex) => (
+                    <TouchableOpacity
+                      key={`${criterion.id}-${option.id}`}
+                      style={[styles.comparisonCell, { backgroundColor: theme.colors.card }]}
+                      onPress={() => toggleCellStatus(criterion.id, option.id)}
+
+                    >
+                      {getCellIcon(getCellStatus(criterion.id, option.id))}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ))}
+              
               <TouchableOpacity
                 style={[styles.addCriterionButton, { backgroundColor: theme.colors.primary }]}
                 onPress={addCriterion}
@@ -326,8 +384,8 @@ const QuickComparisonScreen = () => {
                 <Text style={styles.addButtonText}>Add Criterion</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -341,20 +399,50 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    paddingBottom: 100,
   },
-  tableHeader: {
+  tableContainer: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  criteriaColumn: {
+    width: 150,
+    marginRight: 8,
+  },
+  swipeableRowOverride: {
+    marginBottom: 8,
+    borderRadius: 4,
+  },
+  swipeableContentOverride: {
+    borderRadius: 4,
+  },
+  criterionHeaderCell: {
+    height: 48,
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 8,
+    justifyContent: 'center',
+  },
+  criterionCell: {
+    minHeight: 48,
+    padding: 8,
+    borderRadius: 4,
+    justifyContent: 'center',
+    flex: 1,
+  },
+  optionsScrollView: {
+    flex: 1,
+  },
+  optionsHeader: {
     flexDirection: 'row',
     marginBottom: 8,
   },
-  criterionCell: {
-    width: 150,
-    padding: 8,
-    borderRadius: 4,
-    marginRight: 4,
-    justifyContent: 'center',
+  optionsRow: {
+    flexDirection: 'row',
   },
   optionHeaderCell: {
-    width: 100,
+    width: 108,
+    height: 48,
     padding: 8,
     borderRadius: 4,
     marginRight: 4,
@@ -368,21 +456,24 @@ const styles = StyleSheet.create({
   },
   addCell: {
     width: 40,
-    height: 40,
+    height: 48,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  tableRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
+  criterionInput: {
+    width: '100%',
+    textAlignVertical: 'top',
+    minHeight: 24,
+    flex: 1,
+    fontSize: 16,
   },
-  criterionInput: {},
   comparisonCell: {
-    width: 100,
-    height: 40,
+    width: 108,
+    height: 60,
     borderRadius: 4,
     marginRight: 4,
+    marginBottom: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -391,12 +482,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 8,
     borderRadius: 4,
-    flex: 1,
+    marginTop: 8,
   },
   addButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  clearAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+    width: '100%',
+  },
+  clearAllButtonText: {
+    fontWeight: 'bold',
+    marginLeft: 4,
+    fontSize: 14,
   },
   deleteButton: {
     position: 'absolute',

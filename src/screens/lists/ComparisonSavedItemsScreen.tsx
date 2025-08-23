@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Button, CustomHeader, Share, Typography, useSavedItems, useTheme } from '../../components';
+import { Button, CustomHeader, Share, Typography, useTheme } from '../../components';
+import { deleteQuickComparison, getQuickComparisons } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
@@ -24,13 +25,44 @@ const ComparisonSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    savedItems,
-    isLoading,
-    loadSavedItems,
-    deleteSavedItem,
-  } = useSavedItems('comparison');
+  const loadSavedItems = async () => {
+    try {
+      setIsLoading(true);
+      const quickComparisons = await getQuickComparisons();
+      // Convert to the expected format for the UI
+      const formattedItems = quickComparisons.map(comparison => ({
+        id: comparison.id,
+        name: comparison.title,
+        data: {
+          title: comparison.title,
+          criteria: comparison.criteria,
+          options: comparison.options,
+          comparisonData: comparison.comparisonData,
+        },
+        type: 'comparison',
+        createdAt: comparison.date,
+        updatedAt: comparison.date,
+      }));
+      setSavedItems(formattedItems);
+    } catch (error) {
+      console.error('Failed to load saved comparisons:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteSavedItem = async (id: string) => {
+    try {
+      await deleteQuickComparison(id);
+      await loadSavedItems(); // Reload the list
+    } catch (error) {
+      console.error('Failed to delete comparison:', error);
+      throw error;
+    }
+  };
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -103,10 +135,28 @@ const ComparisonSavedItemsScreen: React.FC = () => {
       item.data.options.forEach((option: any, index: number) => {
         details += `${index + 1}. ${option.name || `Option ${index + 1}`}\n`;
       });
+      
       details += `\n📏 CRITERIA (${item.data.criteria.length}):\n`;
       item.data.criteria.forEach((criterion: any, index: number) => {
-        details += `${index + 1}. ${criterion.name || `Criterion ${index + 1}`} (Weight: ${criterion.weight || 1})\n`;
+        details += `${index + 1}. ${criterion.text || `Criterion ${index + 1}`}\n`;
       });
+      
+      // Show comparison results
+      if (item.data.comparisonData && item.data.comparisonData.length > 0) {
+        details += `\n📊 COMPARISON RESULTS:\n`;
+        item.data.options.forEach((option: any) => {
+          details += `\n${option.name}:\n`;
+          item.data.criteria.forEach((criterion: any) => {
+            const cell = item.data.comparisonData.find((cell: any) => 
+              cell.criterionId === criterion.id && cell.optionId === option.id
+            );
+            const status = cell ? cell.status : 'no';
+            const emoji = status === 'yes' ? '✅' : status === 'partial' ? '⚠️' : '❌';
+            details += `  ${emoji} ${criterion.text}\n`;
+          });
+        });
+      }
+      
       return details;
     }
     
@@ -195,7 +245,7 @@ const ComparisonSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header - Same style as other screens */}
       <CustomHeader
-        title="Saved Comparisons"
+        title="Saved Pros and Cons"
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -203,10 +253,14 @@ const ComparisonSavedItemsScreen: React.FC = () => {
       />
 
       {/* Content */}
-      <FlatList
-        data={savedItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSavedItem}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingVertical: 16,
+          paddingHorizontal: 24,
+          paddingBottom: 80,
+        }}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
@@ -214,13 +268,20 @@ const ComparisonSavedItemsScreen: React.FC = () => {
             tintColor={theme.colors.primary}
           />
         }
-        contentContainerStyle={[
-          styles.listContainer,
-          savedItems.length === 0 && styles.listContainerEmpty,
-        ]}
-        ListEmptyComponent={renderEmptyState}
-        showsVerticalScrollIndicator={false}
-      />
+      >
+        <FlatList
+          data={savedItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderSavedItem}
+          contentContainerStyle={[
+            styles.listContainer,
+            savedItems.length === 0 && styles.listContainerEmpty,
+          ]}
+          ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+        />
+      </ScrollView>
     </View>
   );
 };

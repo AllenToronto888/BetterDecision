@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, Typography, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useTheme } from '../../components';
 // Import Button directly from its file to avoid "Cannot call a class as a function" error
 
 interface Item {
@@ -42,7 +42,7 @@ const ProsConsScreen = () => {
       ? (Math.max(...items.map(item => parseInt(item.id))) + 1).toString()
       : '1';
     
-    const newItem = { id: newId, text: '', weight: 1 };
+    const newItem = { id: newId, text: '', weight: 0 };
     
     if (isPro) {
       setPros([...pros, newItem]);
@@ -84,71 +84,73 @@ const ProsConsScreen = () => {
     
     if (item) {
       let newWeight = increment ? item.weight + 1 : item.weight - 1;
-      newWeight = Math.max(1, Math.min(10, newWeight));
+      newWeight = Math.max(0, Math.min(10, newWeight));
       updateItem(isPro, id, 'weight', newWeight);
     }
   };
   
+  const clearAll = () => {
+    setPros([]);
+    setCons([]);
+  };
+  
   const renderItem = (item: Item, isPro: boolean) => {
     return (
-      <View 
-        key={item.id} 
-        style={[
-          styles.itemContainer, 
-          { 
-            backgroundColor: theme.colors.card, 
-            borderColor: isPro ? theme.colors.primary : theme.colors.danger 
-          }
-        ]}
+      <SwipableRow
+        key={item.id}
+        onDelete={() => removeItem(isPro, item.id)}
       >
-        <View style={styles.itemHeader}>
-          <View style={styles.weightControls}>
-            <TouchableOpacity
-              style={[
-                styles.weightButton, 
-                { 
-                  backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
-                  opacity: item.weight <= 1 ? 0.5 : 1
-                }
-              ]}
-              onPress={() => changeWeight(isPro, item.id, false)}
-              disabled={item.weight <= 1}
-            >
-              <MaterialIcons name="remove" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
-            <Text style={[styles.weightText, { color: theme.text }]}>{item.weight}</Text>
-            <TouchableOpacity
-              style={[
-                styles.weightButton, 
-                { 
-                  backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
-                  opacity: item.weight >= 10 ? 0.5 : 1
-                }
-              ]}
-              onPress={() => changeWeight(isPro, item.id, true)}
-              disabled={item.weight >= 10}
-            >
-              <MaterialIcons name="add" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
+        <View 
+          style={[
+            styles.itemContainer, 
+            { 
+              backgroundColor: theme.colors.card, 
+              borderColor: isPro ? theme.colors.primary : theme.colors.danger 
+            }
+          ]}
+        >
+          <View style={styles.itemHeader}>
+            <View style={styles.weightControls}>
+              <TouchableOpacity
+                style={[
+                  styles.weightButton, 
+                  { 
+                    backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
+                    opacity: item.weight <= 0 ? 0.5 : 1
+                  }
+                ]}
+                onPress={() => changeWeight(isPro, item.id, false)}
+                disabled={item.weight <= 0}
+              >
+                <MaterialIcons name="remove" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Text style={[styles.weightText, { color: theme.colors.text }]}>{item.weight}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.weightButton, 
+                  { 
+                    backgroundColor: isPro ? theme.colors.primary : theme.colors.danger,
+                    opacity: item.weight >= 10 ? 0.5 : 1
+                  }
+                ]}
+                onPress={() => changeWeight(isPro, item.id, true)}
+                disabled={item.weight >= 10}
+              >
+                <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           </View>
           
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => removeItem(isPro, item.id)}
-          >
-            <MaterialIcons name="delete" size={20} color={theme.colors.tabBarInactive} />
-          </TouchableOpacity>
+          <TextInput
+            style={[styles.itemInput, { color: theme.colors.text }]}
+            value={item.text}
+            onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
+            placeholder={isPro ? "Add a pro..." : "Add a con..."}
+            placeholderTextColor={theme.colors.tabBarInactive}
+            multiline
+          />
         </View>
-        
-        <TextInput
-                      style={[styles.itemInput, { color: theme.colors.text }]}
-          value={item.text}
-          onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
-          placeholder={isPro ? "Add a pro..." : "Add a con..."}
-          placeholderTextColor={theme.colors.tabBarInactive}
-          multiline
-        />
-      </View>
+      </SwipableRow>
     );
   };
 
@@ -212,10 +214,11 @@ const ProsConsScreen = () => {
             }
           />
         
-        <View style={styles.emojiContainer}>
-          <Typography variant="h1" style={styles.emoji}>
-            {totalProsWeight > totalConsWeight ? '😊' : totalProsWeight < totalConsWeight ? '😕' : '😐'}
-          </Typography>
+
+        
+        <View style={styles.labelsContainer}>
+          <Typography variant="h5" color="text" style={styles.listTitle}>Pros</Typography>
+          <Typography variant="h5" color="text" style={styles.listTitle}>Cons</Typography>
         </View>
         
         <View style={styles.scoreContainer}>
@@ -228,7 +231,7 @@ const ProsConsScreen = () => {
               }
             ]}
           >
-            <Typography variant="button" color="text" style={styles.scoreText}>{totalProsWeight}</Typography>
+            <Typography variant="button" style={styles.scoreNumber}>{totalProsWeight}</Typography>
           </View>
           <View 
             style={[
@@ -239,41 +242,41 @@ const ProsConsScreen = () => {
               }
             ]}
           >
-            <Typography variant="button" color="text" style={styles.scoreText}>{totalConsWeight}</Typography>
+            <Typography variant="button" style={styles.scoreNumber}>{totalConsWeight}</Typography>
           </View>
-        </View>
-        
-        <View style={styles.listsContainer}>
-          <Typography variant="h5" color="text" style={styles.listTitle}>Pros</Typography>
-          <Typography variant="h5" color="text" style={styles.listTitle}>Cons</Typography>
-        </View>
-        
-        <View style={styles.buttonsContainer}>
-          {/* Use TouchableOpacity instead of Button to avoid potential class error */}
-          <TouchableOpacity
-            style={[styles.customButton, { backgroundColor: theme.colors.primary }]}
-            onPress={() => addItem(true)}
-          >
-            <MaterialIcons name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Add Pro</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.customButton, { backgroundColor: theme.colors.danger }]}
-            onPress={() => addItem(false)}
-          >
-            <MaterialIcons name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Add Con</Text>
-          </TouchableOpacity>
         </View>
         
         <View style={styles.itemsContainer}>
           <View style={styles.column}>
             {pros.map(item => renderItem(item, true))}
+            <TouchableOpacity
+              style={[styles.columnButton, { backgroundColor: theme.colors.primary }]}
+              onPress={() => addItem(true)}
+            >
+              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Text style={styles.buttonText}>Add Pros</Text>
+            </TouchableOpacity>
           </View>
           
           <View style={styles.column}>
             {cons.map(item => renderItem(item, false))}
+            <TouchableOpacity
+              style={[styles.columnButton, { backgroundColor: theme.colors.danger }]}
+              onPress={() => addItem(false)}
+            >
+              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Text style={styles.buttonText}>Add Cons</Text>
+            </TouchableOpacity>
+            
+            {(pros.length > 0 || cons.length > 0) && (
+              <TouchableOpacity
+                style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
+                onPress={clearAll}
+              >
+                <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
+                <Text style={[styles.clearAllText, { color: theme.colors.primary }]}>Clear All</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
         </ScrollView>
@@ -289,14 +292,19 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    paddingBottom: 80,
   },
-  emojiContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-    marginHorizontal: 24,
+
+
+  labelsContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
   },
-  emoji: {
-    fontSize: 48,
+  listTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -309,54 +317,54 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scoreText: {
+  scoreNumber: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-  },
-  listsContainer: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  listTitle: {
-    flex: 1,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
-  buttonsContainer: {
+
+  columnButton: {
     flexDirection: 'row',
-    marginBottom: 16,
-  },
-  addButton: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  customButton: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 12,
+    paddingVertical: 10,
+    paddingLeft: 12,
+    paddingRight: 8,
     borderRadius: 8,
-    marginHorizontal: 8,
+    marginBottom: 4,
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
   },
+  clearAllButton: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingLeft: 12,
+    paddingRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  clearAllText: {
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
   itemsContainer: {
     flexDirection: 'row',
+    gap: 8,
   },
   column: {
     flex: 1,
-    marginHorizontal: 4,
   },
   itemContainer: {
     borderRadius: 4,
     padding: 8,
-    marginBottom: 12,
     borderLeftWidth: 4,
+    marginBottom: -8,
   },
   itemHeader: {
     flexDirection: 'row',
@@ -369,22 +377,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   weightButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   weightText: {
-    marginHorizontal: 8,
+    marginHorizontal: 12,
     fontWeight: 'bold',
+    fontSize: 18,
+    minWidth: 24,
+    textAlign: 'center',
   },
-  deleteButton: {
-    padding: 4,
-  },
+
+
   itemInput: {
     minHeight: 40,
   },
 });
 
 export default ProsConsScreen;
+

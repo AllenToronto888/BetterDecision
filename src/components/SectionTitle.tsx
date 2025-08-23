@@ -61,7 +61,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
             onPress={() => editable && setIsEditing(true)}
             disabled={!editable}
           >
-            <Typography variant="h3" color="text" style={styles.screenTitle}>
+            <Typography variant="h4" color="text" style={styles.screenTitle}>
               {localTitle}
             </Typography>
             {editable && (
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     flex: 1,
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     borderWidth: 1,
     borderRadius: 4,
