@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useSavedItems, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface SavedItem {
   id: string;
@@ -22,6 +23,7 @@ interface SavedItem {
 
 const UnitCalculatorSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -36,6 +38,17 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
   const unitCalculatorItems = savedItems.filter(item => 
     item.data.calculationType === 'unit_price'
   );
+  
+  // Debug logging
+  console.log('🔍 DEBUG: Total savedItems:', savedItems.length);
+  console.log('🔍 DEBUG: Unit calculator items:', unitCalculatorItems.length);
+  console.log('🔍 DEBUG: All saved items:', savedItems.map(item => ({
+    id: item.id,
+    name: item.name,
+    type: item.type,
+    calculationType: item.data?.calculationType,
+    isAutoSaved: item.data?.isAutoSaved
+  })));
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -46,19 +59,21 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
 
   const handleDeleteItem = (item: SavedItem) => {
     Alert.alert(
-      'Delete Item',
-      `Are you sure you want to delete "${item.name}"?`,
+      t('deleteItem'),
+      `${t('areYouSureDeleteItem')} "${item.name}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteSavedItem(item.id);
-              Alert.alert('Deleted', 'Item removed successfully');
+              // Refresh the data after deletion
+              await loadSavedItems();
+              Alert.alert(t('deleted'), t('itemRemovedSuccessfully'));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete item');
+              Alert.alert(t('error'), t('failedToDeleteItem'));
             }
           },
         },
@@ -66,35 +81,22 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
     );
   };
 
-  const handleClearAll = () => {
-    if (unitCalculatorItems.length === 0) {
-      Alert.alert('No Items', 'There are no saved unit calculations to clear.');
-      return;
+  const { handleClearAll } = useDeleteAll({
+    items: unitCalculatorItems,
+    storageConfig: {
+      type: 'filter',
+      storageKey: 'saved_calculations',
+      calculationType: 'unit_price'
+    },
+    onDeleteSuccess: loadSavedItems,
+    alertConfig: {
+      noItemsMessage: t('noSavedCalculationsToClear'),
+      confirmTitle: t('clearAllUnitCalculations'),
+      itemTypePlural: t('savedUnitCalculations'),
+      successMessage: t('allUnitCalculationsCleared'),
+      errorMessage: t('failedToClearAll')
     }
-
-    Alert.alert(
-      'Clear All Unit Calculations',
-      `Are you sure you want to delete all ${unitCalculatorItems.length} saved unit calculations? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Delete all unit calculator items one by one
-              for (const item of unitCalculatorItems) {
-                await deleteSavedItem(item.id);
-              }
-              Alert.alert('Success', 'All unit calculations cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear all unit calculations');
-            }
-          },
-        },
-      ]
-    );
-  };
+  });
 
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -112,9 +114,9 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
       
       item.data.products.forEach((product: any, index: number) => {
         const isBest = item.data.bestProductIndexes?.includes(index);
-        details += `${isBest ? '⭐ ' : ''}${product.name || `Item ${index + 1}`}\n`;
-        details += `   Price: $${product.price} for ${product.quantity}${product.unit}\n`;
-        details += `   Unit Price: $${product.unitPrice?.toFixed(4)}/`;
+        details += `${isBest ? '⭐ ' : ''}${product.name || `${t('item')} ${index + 1}`}\n`;
+        details += `   ${t('price')}: $${product.price} for ${product.quantity}${product.unit}\n`;
+        details += `   ${t('unitPrice')}: $${product.unitPrice?.toFixed(4)}/`;
         
         // Show appropriate unit for display
         if (product.unit === 'kg' || product.unit === 'l') {
@@ -128,7 +130,7 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
       return details.trim();
     }
     
-    return 'Unit price calculation data';
+    return t('unitPriceComparison');
   };
 
   const renderSavedItem = ({ item }: { item: SavedItem }) => {
@@ -198,10 +200,10 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
         color={theme.colors.tabBarInactive}
       />
       <Typography variant="h6" color="textSecondary" style={styles.emptyTitle}>
-        No Unit Calculations Saved
+{t('noUnitCalculationsSaved')}
       </Typography>
       <Typography variant="body2" color="textSecondary" style={styles.emptyDescription}>
-        Your saved unit price calculations will appear here.
+        {t('savedCalculationsWillAppearHere')}
       </Typography>
     </View>
   );
@@ -210,7 +212,7 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <CustomHeader
-        title="Saved Unit Price"
+        title={t('savedUnitPrice')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()

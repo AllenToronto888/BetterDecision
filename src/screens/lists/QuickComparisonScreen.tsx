@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface Criterion {
   id: string;
@@ -31,15 +32,16 @@ interface ComparisonCell {
 
 const QuickComparisonScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [title, setTitle] = useState('Quick Comparison');
+  const [title, setTitle] = useState(t('quickComparison'));
   const [criteria, setCriteria] = useState<Criterion[]>([
-    { id: '1', text: 'Criteria 1' },
-    { id: '2', text: 'Criteria 2' },
+    { id: '1', text: `${t('criteria')} 1` },
+    { id: '2', text: `${t('criteria')} 2` },
   ]);
   const [options, setOptions] = useState<Option[]>([
-    { id: '1', name: 'Option 1' },
-    { id: '2', name: 'Option 2' },
+    { id: '1', name: `${t('options')} 1` },
+    { id: '2', name: `${t('options')} 2` },
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
@@ -50,6 +52,35 @@ const QuickComparisonScreen = () => {
     { criterionId: '2', optionId: '2', status: 'partial' },
   ]);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
+  
+  // Update translations when language changes
+  useEffect(() => {
+    setTitle(t('quickComparison'));
+    setCriteria(prevCriteria => 
+      prevCriteria.map((criterion, index) => ({
+        ...criterion,
+        text: criterion.text.startsWith('Criteria') || 
+              criterion.text.startsWith('标准') || 
+              criterion.text.startsWith('標準') || 
+              criterion.text.startsWith('Critères') || 
+              criterion.text.startsWith('条件') || 
+              criterion.text.includes('Criteria') ? 
+              `${t('criteria')} ${index + 1}` : criterion.text
+      }))
+    );
+    setOptions(prevOptions => 
+      prevOptions.map((option, index) => ({
+        ...option,
+        name: option.name.startsWith('Option') || 
+              option.name.startsWith('选项') || 
+              option.name.startsWith('選項') || 
+              option.name.startsWith('Options') || 
+              option.name.startsWith('オプション') || 
+              option.name.includes('Option') ? 
+              `${t('options')} ${index + 1}` : option.name
+      }))
+    );
+  }, [t]);
   
   const addCriterion = () => {
     const newId = criteria.length > 0 
@@ -74,7 +105,7 @@ const QuickComparisonScreen = () => {
       ? (Math.max(...options.map(item => parseInt(item.id))) + 1).toString()
       : '1';
     
-    const newOption = { id: newId, name: `Option ${newId}` };
+    const newOption = { id: newId, name: `${t('options')} ${newId}` };
     setOptions([...options, newOption]);
     
     // Add cells for the new option
@@ -197,7 +228,7 @@ const QuickComparisonScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Quick Comparison"
+        title={t('quickComparison')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -246,7 +277,7 @@ const QuickComparisonScreen = () => {
                     notes,
                   }}
                   dataType="comparison"
-                  title="Quick Comparison Result"
+                  title={t('quickComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
                 />
@@ -261,7 +292,7 @@ const QuickComparisonScreen = () => {
               style={[styles.criterionHeaderCell, { backgroundColor: theme.colors.card }]}
 
             >
-              <Text style={[styles.headerText, { color: theme.colors.text }]}>Criteria</Text>
+              <Text style={[styles.headerText, { color: theme.colors.text }]}>{t('criteria')}</Text>
             </View>
             
             {criteria.map((criterion) => (
@@ -288,7 +319,7 @@ const QuickComparisonScreen = () => {
                       style={[styles.criterionInput, { color: theme.colors.text }]}
                       value={criterion.text}
                       onChangeText={(text) => updateCriterion(criterion.id, text)}
-                      placeholder="Enter criterion"
+                      placeholder={t('enterCriterion')}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       multiline={true}
                       textAlignVertical="top"
@@ -304,7 +335,7 @@ const QuickComparisonScreen = () => {
                 onPress={clearAllCriteria}
               >
                 <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
-                <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>Clear All</Text>
+                <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -323,7 +354,7 @@ const QuickComparisonScreen = () => {
                       style={[styles.optionInput, { color: theme.colors.text }]}
                       value={option.name}
                       onChangeText={(text) => updateOption(option.id, text)}
-                      placeholder={`Option ${index + 1}`}
+                      placeholder={`${t('options')} ${index + 1}`}
                       placeholderTextColor={theme.colors.tabBarInactive}
                     />
                     
@@ -372,7 +403,7 @@ const QuickComparisonScreen = () => {
                 onPress={addCriterion}
               >
                 <MaterialIcons name="add" size={20} color="#FFFFFF" />
-                <Text style={styles.addButtonText}>Add Criterion</Text>
+                <Text style={styles.addButtonText}>{t('addCriterion')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -386,7 +417,7 @@ const QuickComparisonScreen = () => {
           >
             <View style={styles.notesHeaderLeft}>
               <MaterialIcons name="note" size={20} color={theme.colors.primary} />
-              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>{t('notes')}</Text>
               {notes.trim() && !notesExpanded && (
                 <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
                   <Text style={styles.notesBadgeText}>•</Text>
@@ -410,7 +441,7 @@ const QuickComparisonScreen = () => {
                 }]}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Add notes about this comparison..."
+                placeholder={t('addNotesAboutComparison')}
                 placeholderTextColor={theme.colors.tabBarInactive}
                 multiline
                 textAlignVertical="top"

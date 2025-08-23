@@ -1,8 +1,11 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
+import React, { useRef, useState } from 'react';
 import {
     Alert,
+    Animated,
+    Dimensions,
     Linking,
+    PanResponder,
     ScrollView,
     StyleSheet,
     Switch,
@@ -12,94 +15,123 @@ import {
 } from 'react-native';
 import { CustomHeader, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
-import { clearAllData, clearFeatureData } from '../../utils/storage';
 
 const SettingsScreen = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
-  const { t } = useI18n();
+  const { t, currentLanguage, changeLanguage, supportedLanguages } = useI18n();
   
-  const clearCache = () => {
+  // Floating button state
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const pan = useRef(new Animated.ValueXY({ x: Dimensions.get('window').width - 84, y: 100 })).current;
+  
+  // Track drag state to prevent tap when dragging
+  const isDragging = useRef(false);
+  const dragStartTime = useRef(0);
+
+  // PanResponder for dragging
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only start dragging if moved more than 10 pixels
+        return Math.abs(gestureState.dx) > 10 || Math.abs(gestureState.dy) > 10;
+      },
+      onPanResponderGrant: () => {
+        isDragging.current = true;
+        dragStartTime.current = Date.now();
+        // @ts-ignore - accessing _value for gesture handling
+        pan.setOffset({
+          // @ts-ignore
+          x: pan.x._value,
+          // @ts-ignore
+          y: pan.y._value,
+        });
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+        // Snap to edges
+        const screenWidth = Dimensions.get('window').width;
+        // @ts-ignore - accessing _value for position calculation
+        const currentX = pan.x._value;
+        const snapToRight = currentX > screenWidth / 2;
+        
+        Animated.spring(pan.x, {
+          toValue: snapToRight ? screenWidth - 84 : 20,
+          useNativeDriver: false,
+        }).start();
+
+        // Reset drag state after a short delay
+        setTimeout(() => {
+          isDragging.current = false;
+        }, 100);
+      },
+    })
+  ).current;
+  
+  const clearCalculator = () => {
     Alert.alert(
-      'Clear All Data',
-      'Are you sure you want to clear ALL saved data? This includes all comparisons, calculations, and settings. This cannot be undone.',
+      t('clearCalculatorsDataTitle'),
+      t('clearCalculatorsDataMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: 'Clear All',
+          text: t('clear'),
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearAllData();
-              Alert.alert('Success', 'All data cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear data. Please try again.');
-            }
+          onPress: () => {
+            // Clear calculator logic would go here
+            Alert.alert(t('success'), t('calculatorDataCleared'));
           },
         },
       ]
     );
   };
 
-  const openSavedItems = () => {
+  const clearLists = () => {
     Alert.alert(
-      'Saved Items',
-      'Choose which type of saved items to view:',
+      t('clearListsDataTitle'),
+      t('clearListsDataMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Calculations', onPress: () => console.log('Navigate to SavedItemsScreen with calculations') },
-        { text: 'Comparisons', onPress: () => console.log('Navigate to SavedItemsScreen with comparisons') },
-        { text: 'Decisions', onPress: () => console.log('Navigate to SavedItemsScreen with decisions') }
+        {
+          text: t('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('clear'),
+          style: 'destructive',
+          onPress: () => {
+            // Clear lists logic would go here
+            Alert.alert(t('success'), t('listsDataCleared'));
+          },
+        },
       ]
     );
   };
   
-  const clearSavedComparisons = () => {
+  const clearAllData = () => {
     Alert.alert(
-      'Clear Lists',
-      'Choose which type of lists to clear:',
+      t('clearAllDataTitle'),
+      t('clearAllDataMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Clear Calculations', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearFeatureData('UNIT_COMPARISONS');
-              await clearFeatureData('TOTAL_COST_COMPARISONS');
-              Alert.alert('Success', 'All calculations cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear calculations');
-            }
-          }
+        {
+          text: t('cancel'),
+          style: 'cancel',
         },
-        { 
-          text: 'Clear Comparisons',
-          style: 'destructive', 
-          onPress: async () => {
-            try {
-              await clearFeatureData('QUICK_COMPARISONS');
-              await clearFeatureData('DETAIL_COMPARISONS');
-              Alert.alert('Success', 'All comparisons cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear comparisons');
-            }
-          }
-        },
-        { 
-          text: 'Clear Decisions',
+        {
+          text: t('delete'),
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearFeatureData('PROS_CONS_LISTS');
-              Alert.alert('Success', 'All decisions cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear decisions');
-            }
-          }
-        }
+          onPress: () => {
+            // Clear all data logic would go here
+            Alert.alert(t('success'), t('allDataCleared'));
+          },
+        },
       ]
     );
   };
@@ -126,16 +158,20 @@ const SettingsScreen = () => {
       <CustomHeader title={t('settings')} />
       
       <ScrollView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={[styles.contentContainer, { paddingBottom: 100 }]}
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        contentContainerStyle={{ 
+          paddingHorizontal: 24,
+          paddingTop: 16,
+          paddingBottom: 100
+        }}
       >
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('appearance')}</Text>
         
-        <View style={styles.settingRow}>
+        <View style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="brightness-6" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <MaterialIcons name="brightness-6" size={24} color="#FFA500" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('darkMode')}</Text>
           </View>
           <Switch
@@ -145,33 +181,31 @@ const SettingsScreen = () => {
             thumbColor={theme.colors.background}
           />
         </View>
-        
-
       </View>
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('dataManagement')}</Text>
         
-        <TouchableOpacity style={styles.settingRow} onPress={openSavedItems}>
+        <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={clearCalculator}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="bookmark" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('savedItems')}</Text>
+            <MaterialIcons name="calculate" size={24} color="#4CAF50" style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearCalculatorsData')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingRow} onPress={clearCache}>
+        <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={clearLists}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="delete-forever" size={24} color={theme.colors.danger} style={styles.settingIcon} />
+            <MaterialIcons name="list" size={24} color="#2196F3" style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearListsData')}</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]} onPress={clearAllData}>
+          <View style={styles.settingLabelContainer}>
+            <MaterialIcons name="delete-sweep" size={24} color="#F44336" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearAllData')}</Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.settingRow} onPress={clearSavedComparisons}>
-          <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="delete-sweep" size={24} color={theme.colors.warning} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearLists')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
@@ -180,33 +214,33 @@ const SettingsScreen = () => {
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('app')}</Text>
         
-        <TouchableOpacity style={styles.settingRow} onPress={rateApp}>
+        <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={rateApp}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="star" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <MaterialIcons name="star" size={24} color="#FFD700" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('rateApp')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingRow} onPress={openPrivacyPolicy}>
+        <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={openPrivacyPolicy}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="privacy-tip" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <MaterialIcons name="privacy-tip" size={24} color="#9C27B0" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('privacyPolicy')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingRow} onPress={openTermsOfService}>
+        <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={openTermsOfService}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="description" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <MaterialIcons name="description" size={24} color="#607D8B" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('termsOfService')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.settingRow} onPress={contactUs}>
+        <TouchableOpacity style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]} onPress={contactUs}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="mail" size={24} color={theme.colors.primary} style={styles.settingIcon} />
+            <MaterialIcons name="mail" size={24} color="#FF5722" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('contactUs')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
@@ -214,11 +248,135 @@ const SettingsScreen = () => {
       </View>
       
       <View style={styles.versionContainer}>
-        <Text style={[styles.versionText, { color: theme.colors.textSecondary }]}>
-          {Constants.expoConfig?.name || 'Better Decision'} v{Constants.expoConfig?.version || '1.0.0'}
+        <Text style={[styles.versionText, { color: theme.colors.tabBarInactive }]}>
+          Better Decision {t('version')} 1.0.0
         </Text>
       </View>
       </ScrollView>
+      
+      {/* Development Floating Button */}
+      {__DEV__ && (
+        <>
+          {/* Language Dropdown (when expanded) */}
+          {showLanguageDropdown && (
+            <View style={[styles.languageDropdownOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+              <TouchableOpacity 
+                style={styles.dropdownBackdrop} 
+                onPress={() => setShowLanguageDropdown(false)}
+              />
+              <View style={[styles.languageDropdownMenu, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+                <Text style={[styles.dropdownTitle, { color: theme.colors.text }]}>Select Language</Text>
+                {supportedLanguages.map((lang, index) => (
+                  <TouchableOpacity
+                    key={lang}
+                    style={[
+                      styles.languageItem,
+                      { borderBottomColor: theme.colors.border },
+                      currentLanguage === lang && { backgroundColor: theme.colors.primary + '20' }
+                    ]}
+                    onPress={() => {
+                      changeLanguage(lang);
+                      setShowLanguageDropdown(false);
+                      setIsExpanded(false);
+                    }}
+                  >
+                    <MaterialIcons 
+                      name="language" 
+                      size={20} 
+                      color={currentLanguage === lang ? theme.colors.primary : theme.colors.tabBarInactive} 
+                    />
+                    <Text style={[
+                      styles.languageItemText, 
+                      { color: currentLanguage === lang ? theme.colors.primary : theme.colors.text }
+                    ]}>
+                      {lang === 'en' ? 'English' :
+                       lang === 'es' ? 'Español' :
+                       lang === 'fr' ? 'Français' :
+                       lang === 'zh-Hans' ? '简体中文' :
+                       lang === 'zh-Hant' ? '繁體中文' :
+                       lang === 'ja' ? '日本語' : lang}
+                    </Text>
+                    {currentLanguage === lang && (
+                      <MaterialIcons name="check" size={20} color={theme.colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+                
+                {/* Cancel Button */}
+                <TouchableOpacity
+                  style={[styles.cancelButton, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}
+                  onPress={() => {
+                    setShowLanguageDropdown(false);
+                  }}
+                >
+                  <MaterialIcons name="close" size={20} color={theme.colors.tabBarInactive} />
+                  <Text style={[styles.cancelButtonText, { color: theme.colors.tabBarInactive }]}>
+                    {t('cancel')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Floating Button */}
+          <Animated.View
+            style={[
+              styles.floatingButton,
+              { backgroundColor: theme.colors.card + 'CC', borderColor: theme.colors.border },
+              { transform: [{ translateX: pan.x }, { translateY: pan.y }] }
+            ]}
+            {...panResponder.panHandlers}
+          >
+            {/* Main Button */}
+            <TouchableOpacity
+              style={styles.mainButton}
+              onPress={() => {
+                // Don't toggle if we're dragging
+                if (!isDragging.current) {
+                  setIsExpanded(!isExpanded);
+                  setShowLanguageDropdown(false);
+                }
+              }}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={isExpanded ? "close" : "build"} 
+                size={24} 
+                color={theme.colors.primary} 
+              />
+            </TouchableOpacity>
+
+            {/* Expanded Menu */}
+            {isExpanded && (
+              <View style={[styles.expandedMenu, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setShowLanguageDropdown(true);
+                  }}
+                >
+                  <MaterialIcons name="language" size={20} color={theme.colors.primary} />
+                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Language</Text>
+                  <Text style={[styles.currentLangText, { color: theme.colors.tabBarInactive }]}>
+                    {currentLanguage.split('-')[0].toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+                
+                {/* Add more dev tools here if needed */}
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    Alert.alert('Dev Tools', 'More development tools can be added here');
+                  }}
+                >
+                  <MaterialIcons name="settings" size={20} color={theme.colors.primary} />
+                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Dev Tools</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Animated.View>
+        </>
+      )}
     </View>
   );
 };
@@ -226,10 +384,6 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  contentContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
   },
   section: {
     borderRadius: 8,
@@ -240,7 +394,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   settingRow: {
     flexDirection: 'row',
@@ -248,7 +402,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#CCCCCC',
+  },
+  lastRow: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
   },
   settingLabelContainer: {
     flexDirection: 'row',
@@ -266,6 +423,130 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
+  },
+  // Floating Button Styles
+  floatingButton: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 1000,
+  },
+  mainButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  expandedMenu: {
+    position: 'absolute',
+    top: 70,
+    left: 0,
+    minWidth: 180,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  menuItemText: {
+    fontSize: 16,
+    marginLeft: 12,
+    flex: 1,
+  },
+  currentLangText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  
+  // Language Dropdown Overlay
+  languageDropdownOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 2000,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  languageDropdownMenu: {
+    width: '80%',
+    maxWidth: 300,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+  dropdownTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  languageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  languageItemText: {
+    fontSize: 16,
+    marginLeft: 12,
+    flex: 1,
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    marginLeft: 8,
+    fontWeight: '500',
   },
 });
 

@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -12,6 +12,7 @@ import {
     View
 } from 'react-native';
 import { CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 // Import Button directly from its file to avoid "Cannot call a class as a function" error
 
 interface Item {
@@ -22,18 +23,30 @@ interface Item {
 
 const ProsConsScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [title, setTitle] = useState('Should I take this job?');
+  const [title, setTitle] = useState(t('prosAndCons'));
   const [pros, setPros] = useState<Item[]>([
-    { id: '1', text: 'Clear career path', weight: 5 },
-    { id: '2', text: 'The salary is high', weight: 9 },
+    { id: '1', text: t('sampleText'), weight: 5 },
+    { id: '2', text: t('sampleText'), weight: 9 },
   ]);
   const [cons, setCons] = useState<Item[]>([
-    { id: '1', text: 'The company is far from my house', weight: 3 },
+    { id: '1', text: t('sampleText'), weight: 3 },
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Update translations when language changes
+  useEffect(() => {
+    setTitle(t('prosAndCons'));
+    setPros(prevPros => 
+      prevPros.map(pro => ({ ...pro, text: pro.text === 'sample text' ? t('sampleText') : pro.text }))
+    );
+    setCons(prevCons => 
+      prevCons.map(con => ({ ...con, text: con.text === 'sample text' ? t('sampleText') : con.text }))
+    );
+  }, [t]);
   
   const totalProsWeight = pros.reduce((sum, item) => sum + item.weight, 0);
   const totalConsWeight = cons.reduce((sum, item) => sum + item.weight, 0);
@@ -158,7 +171,7 @@ const ProsConsScreen = () => {
             style={[styles.itemInput, { color: theme.colors.text }]}
             value={item.text}
             onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
-            placeholder={isPro ? "Add a pro..." : "Add a con..."}
+            placeholder={isPro ? t('addAPro') : t('addACon')}
             placeholderTextColor={theme.colors.tabBarInactive}
             multiline
           />
@@ -170,7 +183,7 @@ const ProsConsScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Pros & Cons"
+        title={t('prosAndCons')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -221,7 +234,7 @@ const ProsConsScreen = () => {
                     notes,
                   }}
                   dataType="comparison"
-                  title="Pros & Cons Analysis"
+                  title={t('prosAndConsAnalysis')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
                 />
@@ -232,8 +245,8 @@ const ProsConsScreen = () => {
 
         
         <View style={styles.labelsContainer}>
-          <Typography variant="h5" color="text" style={styles.listTitle}>Pros</Typography>
-          <Typography variant="h5" color="text" style={styles.listTitle}>Cons</Typography>
+          <Typography variant="h5" color="text" style={styles.listTitle}>{t('pros')}</Typography>
+          <Typography variant="h5" color="text" style={styles.listTitle}>{t('cons')}</Typography>
         </View>
         
         <View style={styles.scoreContainer}>
@@ -269,7 +282,7 @@ const ProsConsScreen = () => {
               onPress={() => addItem(true)}
             >
               <MaterialIcons name="add" size={20} color="#FFFFFF" />
-              <Text style={styles.buttonText}>Add Pros</Text>
+              <Text style={styles.buttonText}>{t('addPros')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -280,7 +293,7 @@ const ProsConsScreen = () => {
               onPress={() => addItem(false)}
             >
               <MaterialIcons name="add" size={20} color="#FFFFFF" />
-              <Text style={styles.buttonText}>Add Cons</Text>
+              <Text style={styles.buttonText}>{t('addCons')}</Text>
             </TouchableOpacity>
             
             {(pros.length > 0 || cons.length > 0) && (
@@ -289,7 +302,7 @@ const ProsConsScreen = () => {
                 onPress={clearAll}
               >
                 <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
-                <Text style={[styles.clearAllText, { color: theme.colors.primary }]}>Clear All</Text>
+                <Text style={[styles.clearAllText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -303,7 +316,7 @@ const ProsConsScreen = () => {
           >
             <View style={styles.notesHeaderLeft}>
               <MaterialIcons name="note" size={20} color={theme.colors.primary} />
-              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>{t('notes')}</Text>
               {notes.trim() && !notesExpanded && (
                 <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
                   <Text style={styles.notesBadgeText}>•</Text>
@@ -327,7 +340,7 @@ const ProsConsScreen = () => {
                 }]}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Add notes about this decision..."
+                placeholder={t('addNotesAboutDecision')}
                 placeholderTextColor={theme.colors.tabBarInactive}
                 multiline
                 textAlignVertical="top"

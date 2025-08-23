@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -12,6 +12,7 @@ import {
     View,
 } from 'react-native';
 import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface Criterion {
   id: string;
@@ -31,25 +32,54 @@ interface ComparisonCell {
 
 const DetailComparisonScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [title, setTitle] = useState('Detail Comparison');
+  const [title, setTitle] = useState(t('detailComparison'));
   const [criteria, setCriteria] = useState<Criterion[]>([
-    { id: '1', text: 'Price' },
-    { id: '2', text: 'Features' },
+    { id: '1', text: t('price') },
+    { id: '2', text: t('features') },
   ]);
   const [options, setOptions] = useState<Option[]>([
-    { id: '1', name: 'Product A' },
-    { id: '2', name: 'Product B' },
+    { id: '1', name: `${t('product')} A` },
+    { id: '2', name: `${t('product')} B` },
   ]);
   const [comparisonData, setComparisonData] = useState<ComparisonCell[]>([
     { criterionId: '1', optionId: '1', text: '$499' },
     { criterionId: '1', optionId: '2', text: '$599' },
-    { criterionId: '2', optionId: '1', text: 'Basic' },
-    { criterionId: '2', optionId: '2', text: 'Premium' },
+    { criterionId: '2', optionId: '1', text: t('basic') },
+    { criterionId: '2', optionId: '2', text: t('premium') },
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
+  
+  // Update translations when language changes
+  useEffect(() => {
+    setTitle(t('detailComparison'));
+    setCriteria(prevCriteria => 
+      prevCriteria.map((criterion, index) => ({
+        ...criterion,
+        text: criterion.text === 'Price' || criterion.text === '价格' || criterion.text === '價格' || criterion.text === 'Prix' || criterion.text === 'Precio' ? t('price') :
+              criterion.text === 'Features' || criterion.text === '功能' || criterion.text === '機能' || criterion.text === 'Caractéristiques' || criterion.text === 'Características' ? t('features') :
+              criterion.text
+      }))
+    );
+    setOptions(prevOptions => 
+      prevOptions.map((option, index) => ({
+        ...option,
+        name: option.name.startsWith('Product') || option.name.startsWith('产品') || option.name.startsWith('產品') || option.name.startsWith('Produit') || option.name.startsWith('Producto') ? 
+              `${t('product')} ${option.name.slice(-1)}` : option.name
+      }))
+    );
+    setComparisonData(prevData => 
+      prevData.map(cell => ({
+        ...cell,
+        text: cell.text === 'Basic' || cell.text === '基础' || cell.text === '基礎' || cell.text === 'Basique' || cell.text === 'Básico' ? t('basic') :
+              cell.text === 'Premium' || cell.text === '高级' || cell.text === '高級' || cell.text === 'Premium' || cell.text === 'Premium' ? t('premium') :
+              cell.text
+      }))
+    );
+  }, [t]);
   
   const addCriterion = () => {
     const newId = criteria.length > 0 
@@ -74,7 +104,7 @@ const DetailComparisonScreen = () => {
       ? (Math.max(...options.map(item => parseInt(item.id))) + 1).toString()
       : '1';
     
-    const newOption = { id: newId, name: `Product ${newId}` };
+    const newOption = { id: newId, name: `${t('product')} ${newId}` };
     setOptions([...options, newOption]);
     
     // Add cells for the new option
@@ -160,7 +190,7 @@ const DetailComparisonScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Detail Comparison"
+        title={t('detailComparison')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -209,7 +239,7 @@ const DetailComparisonScreen = () => {
                     notes,
                   }}
                   dataType="comparison"
-                  title="Detail Comparison Result"
+                  title={t('detailComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
                 />
@@ -248,7 +278,7 @@ const DetailComparisonScreen = () => {
                       style={[styles.criterionInput, { color: theme.colors.text }]}
                       value={criterion.text}
                       onChangeText={(text) => updateCriterion(criterion.id, text)}
-                      placeholder="Enter criterion"
+                      placeholder={t('enterCriterion')}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       multiline={true}
                       textAlignVertical="top"
@@ -264,7 +294,7 @@ const DetailComparisonScreen = () => {
                   onPress={clearAllCriteria}
                 >
                   <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
-                  <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>Clear All</Text>
+                  <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -281,7 +311,7 @@ const DetailComparisonScreen = () => {
                       style={[styles.optionInput, { color: theme.colors.text }]}
                       value={option.name}
                       onChangeText={(text) => updateOption(option.id, text)}
-                      placeholder={`Product ${index + 1}`}
+                      placeholder={`${t('product')} ${index + 1}`}
                       placeholderTextColor={theme.colors.tabBarInactive}
                     />
                     {options.length > 1 && (
@@ -318,7 +348,7 @@ const DetailComparisonScreen = () => {
                         style={[styles.cellInput, { color: theme.colors.text }]}
                         value={getCellText(criterion.id, option.id)}
                         onChangeText={(text) => updateCellText(criterion.id, option.id, text)}
-                        placeholder="Enter details"
+                        placeholder={t('enterDetails')}
                         placeholderTextColor={theme.colors.tabBarInactive}
                         multiline
                       />
@@ -331,7 +361,7 @@ const DetailComparisonScreen = () => {
                   onPress={addCriterion}
                 >
                   <MaterialIcons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.addButtonText}>Add Criterion</Text>
+                  <Text style={styles.addButtonText}>{t('addCriterion')}</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -345,7 +375,7 @@ const DetailComparisonScreen = () => {
             >
               <View style={styles.notesHeaderLeft}>
                 <MaterialIcons name="note" size={20} color={theme.colors.primary} />
-                <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+                <Text style={[styles.notesTitle, { color: theme.colors.text }]}>{t('notes')}</Text>
                 {notes.trim() && !notesExpanded && (
                   <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
                     <Text style={styles.notesBadgeText}>•</Text>
@@ -369,7 +399,7 @@ const DetailComparisonScreen = () => {
                   }]}
                   value={notes}
                   onChangeText={setNotes}
-                  placeholder="Add notes about this comparison..."
+                  placeholder={t('addNotesAboutComparison')}
                   placeholderTextColor={theme.colors.tabBarInactive}
                   multiline
                   textAlignVertical="top"

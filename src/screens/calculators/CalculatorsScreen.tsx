@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 // Calculator screens
 import CalculatorSavedItemsScreen from './CalculatorSavedItemsScreen';
@@ -16,33 +17,34 @@ const Stack = createNativeStackNavigator();
 // Home screen for Calculators tab
 const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   
   const calculatorOptions = [
     {
-      title: 'Unit Calculator',
+      title: t('unitCalculator'),
       icon: 'shopping-cart',
-      description: 'Compare products by unit price',
+      description: t('compareProductsByUnitPrice'),
       screen: 'UnitCalculator',
       color: '#FF9800',
     },
     {
-      title: 'Total Cost',
+      title: t('totalCost'),
       icon: 'attach-money',
-      description: 'Calculate the true cost with additional fees',
+      description: t('calculateTrueCostWithFees'),
       screen: 'TotalCost',
       color: '#4CAF50',
     },
     {
-      title: 'Day Counter',
+      title: t('dayCounter'),
       icon: 'date-range',
-      description: 'Find the number of days between dates',
+      description: t('findDaysBetweenDates'),
       screen: 'DayCounter',
       color: '#2196F3',
     },
     {
-      title: 'Day Countdown',
+      title: t('dayCountdown'),
       icon: 'access-time',
-      description: 'Countdown to a specific date',
+      description: t('countdownToSpecificDate'),
       screen: 'DayCountdown',
       color: '#9C27B0',
     },
@@ -50,7 +52,7 @@ const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
   
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <CustomHeader title="Calculators" />
+      <CustomHeader title={t('calculators')} />
       
       <ScrollView 
         style={[styles.container, { backgroundColor: theme.colors.background }]}

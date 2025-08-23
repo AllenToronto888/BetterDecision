@@ -8,6 +8,7 @@ import {
     View
 } from 'react-native';
 import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface Product {
   name: string;
@@ -19,6 +20,7 @@ interface Product {
 
 const UnitCalculatorScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [products, setProducts] = useState<Product[]>([
     { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
@@ -26,8 +28,13 @@ const UnitCalculatorScreen = () => {
   ]);
   const [bestProductIndexes, setBestProductIndexes] = useState<number[]>([]);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
-  const [calculatorTitle, setCalculatorTitle] = useState('Unit Price');
+  const [calculatorTitle, setCalculatorTitle] = useState(t('unitPrice'));
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+  // Update calculator title when language changes
+  useEffect(() => {
+    setCalculatorTitle(t('unitPrice'));
+  }, [t]);
 
   // Auto-save functionality
   useAutoSave({
@@ -52,10 +59,24 @@ const UnitCalculatorScreen = () => {
     onStatusChange: setAutoSaveStatus,
   });
 
-  // Unit categories
+  // Unit categories with original values and translated labels
   const weightUnits = ['g', 'kg', 'oz', 'lb'];
   const volumeUnits = ['ml', 'l'];
   const countUnits = ['each'];
+  
+  // Unit translation mapping
+  const getUnitLabel = (unit: string) => {
+    const unitMap: Record<string, string> = {
+      'g': t('gram'),
+      'kg': t('kilogram'),
+      'oz': t('ounce'),
+      'lb': t('pound'),
+      'ml': t('milliliter'),
+      'l': t('liter'),
+      'each': t('each')
+    };
+    return unitMap[unit] || unit;
+  };
   
   // Dynamic unit filtering - Product A shows all units, Product B+ are filtered
   const getAvailableUnits = (productIndex: number) => {
@@ -217,7 +238,7 @@ const UnitCalculatorScreen = () => {
               { backgroundColor: theme.colors.background, color: theme.colors.text },
               focusedInput === `name-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
             ]}
-            placeholder="Product name"
+            placeholder={t('productName')}
             placeholderTextColor={theme.colors.tabBarInactive}
             value={product.name}
             onChangeText={(value) => updateProduct(index, 'name', value)}
@@ -235,7 +256,7 @@ const UnitCalculatorScreen = () => {
                 { backgroundColor: theme.colors.background, color: theme.colors.text },
                 focusedInput === `price-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
               ]}
-              placeholder="Price"
+              placeholder={t('price')}
               placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.price}
@@ -252,7 +273,7 @@ const UnitCalculatorScreen = () => {
                 { backgroundColor: theme.colors.background, color: theme.colors.text },
                 focusedInput === `quantity-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
               ]}
-              placeholder="Qty"
+              placeholder={t('quantity')}
               placeholderTextColor={theme.colors.tabBarInactive}
               keyboardType="numeric"
               value={product.quantity}
@@ -265,14 +286,14 @@ const UnitCalculatorScreen = () => {
               style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => cycleUnit(index)}
             >
-              <Typography variant="button" style={styles.unitButtonText}>{product.unit}</Typography>
+              <Typography variant="button" style={styles.unitButtonText}>{getUnitLabel(product.unit)}</Typography>
             </TouchableOpacity>
           </View>
         </View>
         
         <View style={styles.resultContainer}>
           <Typography variant="body2" color="textSecondary" style={styles.unitPriceLabel}>
-            Unit Price:
+{t('unitPrice')}:
           </Typography>
           <Typography 
             variant="body1" 
@@ -280,9 +301,9 @@ const UnitCalculatorScreen = () => {
             style={styles.unitPriceValue}
             weight="semibold"
           >
-            ${product.unitPrice.toFixed(2)} / {product.unit === 'kg' || product.unit === 'l' ? 
-              (product.unit === 'kg' ? 'g' : 'ml') : 
-              product.unit}
+            ${product.unitPrice.toFixed(4)} / {product.unit === 'kg' || product.unit === 'l' ? 
+              (product.unit === 'kg' ? getUnitLabel('g') : getUnitLabel('ml')) : 
+              getUnitLabel(product.unit)}
           </Typography>
         </View>
         
@@ -303,7 +324,7 @@ const UnitCalculatorScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Unit Calculator"
+        title={t('unitCalculator')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -349,7 +370,7 @@ const UnitCalculatorScreen = () => {
                   calculationType: 'unit_price',
                 }}
                 dataType="calculation"
-                title="Unit Price Comparison"
+                title={t('unitPriceComparison')}
                 variant="icon"
                 onShareSuccess={() => console.log('Copied/Shared successfully')}
               />
@@ -361,7 +382,7 @@ const UnitCalculatorScreen = () => {
         
         <View style={styles.actionButtonsContainer}>
           <Button
-            title="Add Product"
+            title={t('addProduct')}
             variant="primary"
             icon="add"
             size="large"
@@ -371,7 +392,7 @@ const UnitCalculatorScreen = () => {
           
           {products.some(p => p.price.trim() || p.quantity.trim() || p.name.trim()) && (
             <Button
-              title="Clear All"
+              title={t('clearAll')}
               variant="outline"
               icon="clear"
               size="large"
@@ -431,7 +452,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   quantityContainer: {
-    flex: 1,
+    flex: 1.3, // Increased from 1 to 1.3 to give quantity more space
     flexDirection: 'row',
   },
   quantityInput: {

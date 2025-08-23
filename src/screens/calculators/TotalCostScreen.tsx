@@ -12,6 +12,7 @@ import {
     View
 } from 'react-native';
 import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface CostItem {
   id: string;
@@ -23,21 +24,36 @@ interface CostItem {
 
 const TotalCostScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [basePrice, setBasePrice] = useState('');
   const [productName, setProductName] = useState('');
-  const [calculatorTitle, setCalculatorTitle] = useState('Total Cost');
+  const [calculatorTitle, setCalculatorTitle] = useState(t('totalCost'));
   const [additionalCosts, setAdditionalCosts] = useState<CostItem[]>([
-    { id: '1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
-    { id: '2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
+    { id: '1', type: 'shipping', label: t('shipping'), value: '', isPercentage: false },
+    { id: '2', type: 'tax', label: t('taxes'), value: '', isPercentage: true },
   ]);
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
+  
+  // Update calculator title when language changes
+  useEffect(() => {
+    setCalculatorTitle(t('totalCost'));
+    // Update additional costs labels when language changes
+    setAdditionalCosts(prev => prev.map(cost => ({
+      ...cost,
+      label: cost.type === 'shipping' ? t('shipping') : t('taxes')
+    })));
+    setComparisonAdditionalCosts(prev => prev.map(cost => ({
+      ...cost,
+      label: cost.type === 'shipping' ? t('shipping') : t('taxes')
+    })));
+  }, [t]);
   const [comparisonPrice, setComparisonPrice] = useState('');
   const [comparisonName, setComparisonName] = useState('');
   const [comparisonAdditionalCosts, setComparisonAdditionalCosts] = useState<CostItem[]>([
-    { id: 'c1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
-    { id: 'c2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
+    { id: 'c1', type: 'shipping', label: t('shipping'), value: '', isPercentage: false },
+    { id: 'c2', type: 'tax', label: t('taxes'), value: '', isPercentage: true },
   ]);
   const [comparisonTotalCost, setComparisonTotalCost] = useState(0);
 
@@ -99,7 +115,7 @@ const TotalCostScreen = () => {
     const newId = (Math.max(...additionalCosts.map((cost) => parseInt(cost.id))) + 1).toString();
     setAdditionalCosts([
       ...additionalCosts,
-      { id: newId, type: 'custom', label: 'Other', value: '', isPercentage: false },
+      { id: newId, type: 'custom', label: t('other'), value: '', isPercentage: false },
     ]);
   };
 
@@ -153,12 +169,12 @@ const TotalCostScreen = () => {
             style={[styles.costItemLabel, { color: theme.colors.text }]}
             value={item.label}
             onChangeText={(value) => updateCostItem(item.id, 'label', value)}
-            placeholder="Label"
+            placeholder={t('label')}
             placeholderTextColor={theme.colors.tabBarInactive}
           />
           {item.isPercentage && (
             <Text style={[styles.percentageHelper, { color: theme.colors.tabBarInactive }]}>
-              % of base price
+{t('percentOfBasePrice')}
             </Text>
           )}
         </View>
@@ -218,12 +234,12 @@ const TotalCostScreen = () => {
             style={[styles.costItemLabel, { color: theme.colors.text }]}
             value={item.label}
             onChangeText={(value) => updateComparisonCostItem(item.id, 'label', value)}
-            placeholder="Label"
+            placeholder={t('label')}
             placeholderTextColor={theme.colors.tabBarInactive}
           />
           {item.isPercentage && (
             <Text style={[styles.percentageHelper, { color: theme.colors.tabBarInactive }]}>
-              % of base price
+{t('percentOfBasePrice')}
             </Text>
           )}
         </View>
@@ -275,7 +291,7 @@ const TotalCostScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Total Cost"
+        title={t('totalCost')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -328,7 +344,7 @@ const TotalCostScreen = () => {
                     calculationType: 'total_cost',
                   }}
                   dataType="calculation"
-                  title="Total Cost Calculation"
+                  title={t('totalCostCalculation')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
                 />
@@ -338,7 +354,7 @@ const TotalCostScreen = () => {
         
           {/* Purchase Price Section */}
           <Typography variant="h5" color="text" style={styles.sectionTitle}>
-            Purchase Price Item 1
+{t('purchasePriceItem1')}
           </Typography>
           
           <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -346,7 +362,7 @@ const TotalCostScreen = () => {
               style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
               value={productName}
               onChangeText={setProductName}
-              placeholder="Product name (optional)"
+              placeholder={t('productNameOptional')}
               placeholderTextColor={theme.colors.tabBarInactive}
             />
             
@@ -357,7 +373,7 @@ const TotalCostScreen = () => {
                 value={basePrice}
                 onChangeText={setBasePrice}
                 keyboardType="numeric"
-                placeholder="Enter base price"
+                placeholder={t('enterBasePrice')}
                 placeholderTextColor={theme.colors.tabBarInactive}
               />
             </View>
@@ -365,14 +381,14 @@ const TotalCostScreen = () => {
           
           {/* Extra Costs Section */}
           <Typography variant="h5" color="text" style={styles.sectionTitle}>
-            Extra Costs
+            {t('extraCosts')}
           </Typography>
           
           {additionalCosts.map(renderCostItem)}
           
           <View style={styles.actionButtonsContainer}>
             <Button
-              title="Add Cost"
+              title={t('addCost')}
               variant="primary"
               icon="add"
               size="large"
@@ -382,7 +398,7 @@ const TotalCostScreen = () => {
             
             {(basePrice.trim() || productName.trim() || additionalCosts.some(cost => cost.value.trim())) && (
               <Button
-                title="Clear All"
+                title={t('clearAll')}
                 variant="outline"
                 icon="clear"
                 size="large"
@@ -404,7 +420,7 @@ const TotalCostScreen = () => {
         
         {/* Result Section */}
         <View style={[styles.resultSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>Total Cost</Text>
+          <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>{t('totalCost')}</Text>
           <Text style={[styles.resultValue, { color: theme.colors.text }]}>
             ${totalCost.toFixed(2)}
           </Text>
@@ -414,7 +430,7 @@ const TotalCostScreen = () => {
         <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <View style={styles.compareContainer}>
             <Text style={[styles.compareText, { color: theme.colors.text }]}>
-              Compare With Another Item?
+{t('compareWithAnotherItem')}
             </Text>
             <Switch
               value={compareEnabled}
@@ -435,7 +451,7 @@ const TotalCostScreen = () => {
           <>
             {/* Purchase Price Item 2 Section */}
             <Typography variant="h5" color="text" style={styles.sectionTitle}>
-              Purchase Price Item 2
+{t('purchasePriceItem2')}
             </Typography>
             
             <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -443,7 +459,7 @@ const TotalCostScreen = () => {
                 style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
                 value={comparisonName}
                 onChangeText={setComparisonName}
-                placeholder="Product name (optional)"
+                placeholder={t('productNameOptional')}
                 placeholderTextColor={theme.colors.tabBarInactive}
               />
               
@@ -454,7 +470,7 @@ const TotalCostScreen = () => {
                   value={comparisonPrice}
                   onChangeText={setComparisonPrice}
                   keyboardType="numeric"
-                  placeholder="Enter base price"
+                  placeholder={t('enterBasePrice')}
                   placeholderTextColor={theme.colors.tabBarInactive}
                 />
               </View>
@@ -462,14 +478,14 @@ const TotalCostScreen = () => {
             
             {/* Extra Costs Item 2 Section */}
             <Typography variant="h5" color="text" style={styles.sectionTitle}>
-              Extra Costs Item 2
+              {t('extraCosts')} 2
             </Typography>
             
             {comparisonAdditionalCosts.map(renderComparisonCostItem)}
             
             <View style={styles.actionButtonsContainer}>
               <Button
-                title="Add Cost"
+                title={t('addCost')}
                 variant="primary"
                 icon="add"
                 size="large"
@@ -479,7 +495,7 @@ const TotalCostScreen = () => {
               
               {(comparisonPrice.trim() || comparisonName.trim() || comparisonAdditionalCosts.some(cost => cost.value.trim())) && (
                 <Button
-                  title="Clear All"
+                  title={t('clearAll')}
                   variant="outline"
                   icon="clear"
                   size="large"
@@ -501,7 +517,7 @@ const TotalCostScreen = () => {
             
             {/* Item 2 Total Cost */}
             <View style={[styles.resultSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-              <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>Total Cost</Text>
+              <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>{t('totalCost')}</Text>
               <Text style={[styles.resultValue, { color: theme.colors.text }]}>
                 ${comparisonTotalCost.toFixed(2)}
               </Text>
@@ -509,11 +525,11 @@ const TotalCostScreen = () => {
             
             {/* Comparison Button */}
             <Button
-              title="Compare"
+              title={t('compare')}
               variant="secondary"
               icon="compare"
               size="large"
-              style={[styles.buttonRow, { marginTop: 16, marginBottom: 16 }]}
+              style={styles.buttonRow}
               onPress={calculateComparisonTotalCost}
             />
             

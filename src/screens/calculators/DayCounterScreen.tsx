@@ -11,11 +11,25 @@ import {
     View,
 } from 'react-native';
 import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 const DayCounterScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [calculatorTitle, setCalculatorTitle] = useState('Day Counter');
+  const [calculatorTitle, setCalculatorTitle] = useState(t('dayCounter'));
+  
+  // Function to translate time units
+  const getUnitLabel = (unit: string) => {
+    const unitMap: Record<string, string> = {
+      'days': t('days'),
+      'weeks': t('weeks'),
+      'months': t('months'),
+      'years': t('years')
+    };
+    return unitMap[unit] || unit;
+  };
+  
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(() => {
     const date = new Date();
@@ -32,11 +46,16 @@ const DayCounterScreen = () => {
   
   const timeUnits = ['days', 'weeks', 'months', 'years'];
 
+  // Update calculator title when language changes
+  useEffect(() => {
+    setCalculatorTitle(t('dayCounter'));
+  }, [t]);
+
   useEffect(() => {
     calculateDifference();
   }, [startDate, endDate, includeEndDate, timeUnit]);
 
-  const calculateWorkingDays = (startDate, endDate, includeEndDate) => {
+  const calculateWorkingDays = (startDate: Date, endDate: Date, includeEndDate: boolean) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
@@ -125,7 +144,7 @@ const DayCounterScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Day Counter"
+        title={t('dayCounter')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -152,14 +171,14 @@ const DayCounterScreen = () => {
                 calculationType: 'day_counter',
               }}
               dataType="calculation"
-              title="Day Counter Result"
+              title={t('dayCounterResult')}
               variant="icon"
               onShareSuccess={() => console.log('Shared successfully')}
             />
           }
         />
       <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>From</Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('from')}</Text>
         <TouchableOpacity
           style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
           onPress={() => setStartDateOpen(true)}
@@ -184,7 +203,7 @@ const DayCounterScreen = () => {
           />
         )}
         
-        <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>To</Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>{t('to')}</Text>
         <TouchableOpacity
           style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
           onPress={() => setEndDateOpen(true)}
@@ -211,7 +230,7 @@ const DayCounterScreen = () => {
         )}
         
         <View style={styles.switchRow}>
-          <Text style={[styles.switchLabel, { color: theme.colors.text }]}>Include end date</Text>
+          <Text style={[styles.switchLabel, { color: theme.colors.text }]}>{t('includeEndDate')}</Text>
           <Switch
             value={includeEndDate}
             onValueChange={setIncludeEndDate}
@@ -222,7 +241,7 @@ const DayCounterScreen = () => {
       </View>
       
       <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Time between</Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('timeBetween')}</Text>
         <View style={styles.resultRow}>
           <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
             <Text style={[styles.resultValue, { color: theme.colors.text }]}>
@@ -233,16 +252,16 @@ const DayCounterScreen = () => {
             style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
             onPress={nextTimeUnit}
           >
-            <Text style={styles.unitButtonText}>{timeUnit}</Text>
+            <Text style={styles.unitButtonText}>{getUnitLabel(timeUnit)}</Text>
             <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
       
       <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Working Time</Text>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('workingTime')}</Text>
         <Text style={[styles.helperText, { color: theme.colors.textSecondary }]}>
-          Excludes weekends (Mon-Fri only)
+          {t('excludesWeekends')}
         </Text>
         <View style={styles.workingTimeContainer}>
           <View style={styles.resultRow}>
@@ -254,7 +273,7 @@ const DayCounterScreen = () => {
             <TouchableOpacity
               style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
             >
-              <Text style={styles.unitButtonText}>days</Text>
+              <Text style={styles.unitButtonText}>{t('days')}</Text>
               <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>

@@ -167,7 +167,7 @@ const SpinnerScreen = () => {
             <Text style={styles.spinButtonText}>SPIN</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.pointer} />
+        <View style={[styles.pointer, { borderBottomColor: theme.colors.text }]} />
       </View>
     );
   };
@@ -354,7 +354,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 35,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#000',
     transform: [{ translateY: -15 }, { rotate: '180deg' }],
   },
   resultContainer: {

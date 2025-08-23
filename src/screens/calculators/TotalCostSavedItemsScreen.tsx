@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useSavedItems, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface SavedItem {
   id: string;
@@ -22,6 +23,7 @@ interface SavedItem {
 
 const TotalCostSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -46,19 +48,21 @@ const TotalCostSavedItemsScreen: React.FC = () => {
 
   const handleDeleteItem = (item: SavedItem) => {
     Alert.alert(
-      'Delete Item',
-      `Are you sure you want to delete "${item.name}"?`,
+      t('deleteItem'),
+      `${t('areYouSureDeleteItem')} "${item.name}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteSavedItem(item.id);
-              Alert.alert('Deleted', 'Item removed successfully');
+              // Refresh the data after deletion
+              await loadSavedItems();
+              Alert.alert(t('deleted'), t('itemRemovedSuccessfully'));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete item');
+              Alert.alert(t('error'), t('failedToDeleteItem'));
             }
           },
         },
@@ -66,35 +70,22 @@ const TotalCostSavedItemsScreen: React.FC = () => {
     );
   };
 
-  const handleClearAll = () => {
-    if (totalCostItems.length === 0) {
-      Alert.alert('No Items', 'There are no saved total cost calculations to clear.');
-      return;
+  const { handleClearAll } = useDeleteAll({
+    items: totalCostItems,
+    storageConfig: {
+      type: 'filter',
+      storageKey: 'saved_calculations',
+      calculationType: 'total_cost'
+    },
+    onDeleteSuccess: loadSavedItems,
+    alertConfig: {
+      noItemsMessage: t('noSavedCalculationsToClear'),
+      confirmTitle: t('clearAllTotalCostCalculations'),
+      itemTypePlural: t('savedTotalCostCalculations'),
+      successMessage: t('allTotalCostCalculationsCleared'),
+      errorMessage: t('failedToClearAllTotalCost')
     }
-
-    Alert.alert(
-      'Clear All Total Cost Calculations',
-      `Are you sure you want to delete all ${totalCostItems.length} saved total cost calculations? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Delete all total cost items one by one
-              for (const item of totalCostItems) {
-                await deleteSavedItem(item.id);
-              }
-              Alert.alert('Success', 'All total cost calculations cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear all total cost calculations');
-            }
-          },
-        },
-      ]
-    );
-  };
+  });
 
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -111,15 +102,15 @@ const TotalCostSavedItemsScreen: React.FC = () => {
       let details = '';
       
       // Main Product information
-      const productName = item.data.productName || 'Item 1';
+      const productName = item.data.productName || `${t('item')} 1`;
       const basePrice = parseFloat(item.data.basePrice || '0');
-      details += `Product: ${productName}\n`;
-      details += `Base Price: $${basePrice.toFixed(2)}\n`;
+      details += `${t('product')}: ${productName}\n`;
+      details += `${t('basePrice')}: $${basePrice.toFixed(2)}\n`;
       
       // Main Product additional costs
       const additionalCosts = item.data.additionalCosts || [];
       if (additionalCosts.length > 0) {
-        details += '\nExtra Costs:\n';
+        details += `\n${t('extraCosts')}:\n`;
         additionalCosts.forEach((cost: any) => {
           const value = parseFloat(cost.value || '0');
           if (value > 0) {
@@ -131,23 +122,23 @@ const TotalCostSavedItemsScreen: React.FC = () => {
       
       // Main Product total cost
       const totalCost = item.data.totalCost || 0;
-      details += `\nTotal Cost: $${totalCost.toFixed(2)}`;
+      details += `\n${t('totalCost')}: $${totalCost.toFixed(2)}`;
       
       // Check if comparison mode was enabled
       const compareEnabled = item.data.compareEnabled;
       if (compareEnabled && item.data.comparisonName) {
-        details += '\n\n--- COMPARISON ---\n';
+        details += `\n\n--- ${t('itemComparison').toUpperCase()} ---\n`;
         
         // Comparison Product information
-        const comparisonName = item.data.comparisonName || 'Item 2';
+        const comparisonName = item.data.comparisonName || `${t('item')} 2`;
         const comparisonPrice = parseFloat(item.data.comparisonPrice || '0');
-        details += `Product: ${comparisonName}\n`;
-        details += `Base Price: $${comparisonPrice.toFixed(2)}\n`;
+        details += `${t('product')}: ${comparisonName}\n`;
+        details += `${t('basePrice')}: $${comparisonPrice.toFixed(2)}\n`;
         
         // Comparison Product additional costs
         const comparisonAdditionalCosts = item.data.comparisonAdditionalCosts || [];
         if (comparisonAdditionalCosts.length > 0) {
-          details += '\nExtra Costs:\n';
+          details += `\n${t('extraCosts')}:\n`;
           comparisonAdditionalCosts.forEach((cost: any) => {
             const value = parseFloat(cost.value || '0');
             if (value > 0) {
@@ -159,7 +150,7 @@ const TotalCostSavedItemsScreen: React.FC = () => {
         
         // Comparison Product total cost
         const comparisonTotalCost = item.data.comparisonTotalCost || 0;
-        details += `\nTotal Cost: $${comparisonTotalCost.toFixed(2)}`;
+        details += `\n${t('totalCost')}: $${comparisonTotalCost.toFixed(2)}`;
         
         // Show which is better
         if (totalCost > 0 && comparisonTotalCost > 0) {
@@ -247,10 +238,10 @@ const TotalCostSavedItemsScreen: React.FC = () => {
         color={theme.colors.tabBarInactive}
       />
       <Typography variant="h6" color="textSecondary" style={styles.emptyTitle}>
-        No Total Cost Calculations Saved
+{t('noTotalCostCalculationsSaved')}
       </Typography>
       <Typography variant="body2" color="textSecondary" style={styles.emptyDescription}>
-        Your saved total cost calculations will appear here.
+{t('totalCostCalculationsWillAppearHere')}
       </Typography>
     </View>
   );
@@ -259,7 +250,7 @@ const TotalCostSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <CustomHeader
-        title="Saved Total Cost"
+        title={t('savedTotalCost')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()

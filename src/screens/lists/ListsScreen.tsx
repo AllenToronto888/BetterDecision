@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 // List screens
 import DetailComparisonSavedItemsScreen from './DetailComparisonSavedItemsScreen';
@@ -17,26 +18,27 @@ const Stack = createNativeStackNavigator();
 // Home screen for Lists tab
 const ListsHomeScreen = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   
   const listOptions = [
     {
-      title: 'Pros & Cons',
+      title: t('prosAndCons'),
       icon: 'thumbs-up-down',
-      description: 'Weigh the positives and negatives',
+      description: t('weighPositivesAndNegatives'),
       screen: 'ProsCons',
       color: '#4CAF50',
     },
     {
-      title: 'Quick Comparison',
+      title: t('quickComparison'),
       icon: 'compare',
-      description: 'Simple yes/no/partial comparison',
+      description: t('simpleYesNoPartialComparison'),
       screen: 'QuickComparison',
       color: '#2196F3',
     },
     {
-      title: 'Detail Comparison',
+      title: t('detailComparison'),
       icon: 'table-chart',
-      description: 'Detailed text comparison table',
+      description: t('detailedTextComparisonTable'),
       screen: 'DetailComparison',
       color: '#9C27B0',
     },
@@ -44,7 +46,7 @@ const ListsHomeScreen = ({ navigation }: { navigation: any }) => {
   
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <CustomHeader title="Lists" />
+      <CustomHeader title={t('lists')} />
       
       <ScrollView 
         style={[styles.container, { backgroundColor: theme.colors.background }]}

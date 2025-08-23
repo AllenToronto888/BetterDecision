@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useI18n } from '../i18n';
 import { saveDetailComparison, saveProConsList, saveQuickComparison } from '../utils/storage';
 import { Button } from './Button';
 import { Typography } from './Typography';
@@ -36,6 +37,7 @@ export const Save: React.FC<SaveComponentProps> = ({
   showInput = true,
 }) => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [saveName, setSaveName] = useState(defaultName);
   const [isSaving, setIsSaving] = useState(false);
@@ -153,8 +155,8 @@ export const Save: React.FC<SaveComponentProps> = ({
         setSaveName('');
         
         Alert.alert(
-          'Saved Successfully!',
-          `Your ${dataType} has been saved as "${finalName}".`
+          t('savedSuccessfully'),
+          `${t('calculationSavedAs')} "${finalName}".`
         );
         return; // Exit early since we handled everything here
       }
@@ -164,8 +166,8 @@ export const Save: React.FC<SaveComponentProps> = ({
       setSaveName('');
       
       Alert.alert(
-        'Saved Successfully!',
-        `"${name.trim()}" has been saved.`
+        t('savedSuccessfully'),
+        `"${name.trim()}" ${t('itemSaved')}.`
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save';

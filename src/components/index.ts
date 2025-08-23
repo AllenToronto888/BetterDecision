@@ -3,6 +3,7 @@ export { saveManually, useAutoSave } from './AutoSave';
 export { Button } from './Button';
 export { Card } from './Card';
 export { default as CustomHeader } from './CustomHeader';
+export { useDeleteAll } from './DeleteAllButton';
 export { default as KeyboardAwareContainer } from './KeyboardAwareContainer';
 
 export { Save, useSavedItems } from './Save';

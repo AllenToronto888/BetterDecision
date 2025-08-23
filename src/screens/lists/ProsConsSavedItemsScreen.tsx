@@ -9,8 +9,9 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useTheme } from '../../components';
-import { getProsConsLists } from '../../utils/storage';
+import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
+import { deleteProConsList, getProsConsLists } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
@@ -24,6 +25,7 @@ interface SavedItem {
 
 const ProsConsSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [savedItems, setSavedItems] = useState<any[]>([]);
@@ -69,8 +71,7 @@ const ProsConsSavedItemsScreen: React.FC = () => {
   const deleteSavedItem = async (id: string) => {
     try {
       // Use the storage method for pros & cons
-      const { deleteProsConsList } = await import('../../utils/storage');
-      await deleteProsConsList(id);
+      await deleteProConsList(id);
       await loadSavedItems(); // Reload the list
     } catch (error) {
       console.error('Failed to delete pros & cons list:', error);
@@ -107,35 +108,21 @@ const ProsConsSavedItemsScreen: React.FC = () => {
     );
   };
 
-  const handleClearAll = () => {
-    if (savedItems.length === 0) {
-      Alert.alert('No Items', 'There are no saved pros & cons lists to clear.');
-      return;
+  const { handleClearAll } = useDeleteAll({
+    items: savedItems,
+    storageConfig: {
+      type: 'clear',
+      storageKey: 'better_decision_pros_cons_lists'
+    },
+    onDeleteSuccess: loadSavedItems,
+    alertConfig: {
+      noItemsMessage: t('noProsConsListsSaved'),
+      confirmTitle: t('clearAllProsConsLists'),
+      itemTypePlural: t('savedProsConsLists'),
+      successMessage: t('allProsConsListsCleared'),
+      errorMessage: t('failedToClearAllProsConsLists')
     }
-
-    Alert.alert(
-      'Clear All Pros & Cons Lists',
-      `Are you sure you want to delete all ${savedItems.length} saved pros & cons lists? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Delete all items one by one
-              for (const item of savedItems) {
-                await deleteSavedItem(item.id);
-              }
-              Alert.alert('Success', 'All pros & cons lists cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear all pros & cons lists');
-            }
-          },
-        },
-      ]
-    );
-  };
+  });
 
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -154,30 +141,30 @@ const ProsConsSavedItemsScreen: React.FC = () => {
       const totalProsWeight = item.data.totalProsWeight || 0;
       const totalConsWeight = item.data.totalConsWeight || 0;
       
-      details += `Total Pros Score: ${totalProsWeight}\n`;
-      details += `Total Cons Score: ${totalConsWeight}\n\n`;
+      details += `${t('totalProsScore')}: ${totalProsWeight}\n`;
+      details += `${t('totalConsScore')}: ${totalConsWeight}\n\n`;
       
       if (item.data.pros.length > 0) {
-        details += 'PROS:\n';
+        details += `${t('pros').toUpperCase()}:\n`;
         item.data.pros.forEach((pro: any) => {
-          details += `• ${pro.text} (Weight: ${pro.weight || 1})\n`;
+          details += `• ${pro.text} (${t('weight')}: ${pro.weight || 1})\n`;
         });
       }
       
       if (item.data.cons.length > 0) {
-        details += '\nCONS:\n';
+        details += `\n${t('cons').toUpperCase()}:\n`;
         item.data.cons.forEach((con: any) => {
-          details += `• ${con.text} (Weight: ${con.weight || 1})\n`;
+          details += `• ${con.text} (${t('weight')}: ${con.weight || 1})\n`;
         });
       }
       
       // Add notes if they exist
       if (item.data.notes && item.data.notes.trim()) {
-        details += `\nNOTES:\n${item.data.notes.trim()}\n`;
+        details += `\n${t('notes').toUpperCase()}:\n${item.data.notes.trim()}\n`;
       }
       
-      details += `\nResult: ${totalProsWeight > totalConsWeight ? 'PROS WIN' : 
-                              totalConsWeight > totalProsWeight ? 'CONS WIN' : 'TIE'}`;
+      details += `\n${t('result')}: ${totalProsWeight > totalConsWeight ? t('prosWin') : 
+                              totalConsWeight > totalProsWeight ? t('consWin') : t('tie')}`;
     }
     
     return details.trim();
@@ -250,10 +237,10 @@ const ProsConsSavedItemsScreen: React.FC = () => {
         color={theme.colors.tabBarInactive}
       />
       <Typography variant="h6" color="textSecondary" style={styles.emptyTitle}>
-        No Pros & Cons Lists Saved
+{t('noProsConsListsSaved')}
       </Typography>
       <Typography variant="body2" color="textSecondary" style={styles.emptyDescription}>
-        Your saved pros & cons lists will appear here.
+{t('prosConsListsWillAppearHere')}
       </Typography>
     </View>
   );
@@ -262,7 +249,7 @@ const ProsConsSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <CustomHeader
-        title="Saved Pros & Cons"
+        title={t('savedProsAndCons')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()

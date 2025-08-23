@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -11,6 +11,7 @@ import {
     View,
 } from 'react-native';
 import { Button, CustomHeader, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface DateItem {
   id: string;
@@ -21,12 +22,25 @@ interface DateItem {
 
 const DayCountdownScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [calculatorTitle, setCalculatorTitle] = useState('Day Countdown');
+  const [calculatorTitle, setCalculatorTitle] = useState(t('dayCountdown'));
+  
+  // Function to translate time units
+  const getUnitLabel = (unit: string) => {
+    const unitMap: Record<string, string> = {
+      'days': t('days'),
+      'weeks': t('weeks'),
+      'months': t('months'),
+      'years': t('years')
+    };
+    return unitMap[unit] || unit;
+  };
+  
   const [dates, setDates] = useState<DateItem[]>([
     {
       id: '1',
-      name: 'Important Date 1',
+      name: `${t('importantDate')} 1`,
       date: (() => {
         const date = new Date();
         date.setDate(date.getDate() + 30); // Default to 30 days from now
@@ -38,6 +52,17 @@ const DayCountdownScreen = () => {
   const [timeUnit, setTimeUnit] = useState('days');
   
   const timeUnits = ['days', 'weeks', 'months', 'years'];
+
+  // Update calculator title and initial data when language changes
+  useEffect(() => {
+    setCalculatorTitle(t('dayCountdown'));
+    setDates(prevDates => 
+      prevDates.map((date, index) => ({
+        ...date,
+        name: `${t('importantDate')} ${index + 1}`
+      }))
+    );
+  }, [t]);
 
   const calculateWorkingDays = (startDate: Date, endDate: Date) => {
     const start = new Date(startDate);
@@ -131,7 +156,7 @@ const DayCountdownScreen = () => {
     
     const newDateItem: DateItem = {
       id: Date.now().toString(),
-      name: `Important Date ${dates.length + 1}`,
+      name: `${t('importantDate')} ${dates.length + 1}`,
       date: newDate,
       dateOpen: false,
     };
@@ -158,7 +183,7 @@ const DayCountdownScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Day Countdown"
+        title={t('dayCountdown')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -182,7 +207,7 @@ const DayCountdownScreen = () => {
                 calculationType: 'day_countdown',
               }}
               dataType="calculation"
-              title="Day Countdown"
+              title={t('dayCountdown')}
               variant="icon"
               onShareSuccess={() => console.log('Shared successfully')}
             />
@@ -204,7 +229,7 @@ const DayCountdownScreen = () => {
                     style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
                     value={dateItem.name}
                     onChangeText={(value) => updateDateItem(dateItem.id, 'name', value)}
-                    placeholder="Date name"
+                    placeholder={t('dateName')}
                     placeholderTextColor={theme.colors.tabBarInactive}
                   />
                   
@@ -254,7 +279,7 @@ const DayCountdownScreen = () => {
               {/* Time Remaining Card */}
               <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
-                  {countdown.isPastDate ? 'Time since' : 'Time remaining'}
+                  {countdown.isPastDate ? t('timeSince') : t('timeRemaining')}
                 </Text>
                 <View style={styles.resultRow}>
                   <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
@@ -266,7 +291,7 @@ const DayCountdownScreen = () => {
                     style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
                     onPress={nextTimeUnit}
                   >
-                    <Text style={styles.unitButtonText}>{timeUnit}</Text>
+                    <Text style={styles.unitButtonText}>{getUnitLabel(timeUnit)}</Text>
                     <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -274,9 +299,9 @@ const DayCountdownScreen = () => {
 
               {/* Working Time Card */}
               <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Working Time</Text>
+                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('workingTime')}</Text>
                 <Text style={[styles.helperText, { color: theme.colors.textSecondary }]}>
-                  Excludes weekends (Mon-Fri only)
+                  {t('excludesWeekends')}
                 </Text>
                 <View style={styles.workingTimeContainer}>
                   <View style={styles.resultRow}>
@@ -288,7 +313,7 @@ const DayCountdownScreen = () => {
                     <TouchableOpacity
                       style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
                     >
-                      <Text style={styles.unitButtonText}>days</Text>
+                      <Text style={styles.unitButtonText}>{t('days')}</Text>
                       <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
                     </TouchableOpacity>
                   </View>
@@ -310,7 +335,7 @@ const DayCountdownScreen = () => {
         {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
           <Button
-            title="Add Dates"
+            title={t('addDates')}
             variant="primary"
             icon="add"
             size="large"
@@ -319,7 +344,7 @@ const DayCountdownScreen = () => {
           />
           {dates.length > 0 && (
             <Button
-              title="Clear All"
+              title={t('clearAll')}
               variant="outline"
               icon="clear"
               size="large"

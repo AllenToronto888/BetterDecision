@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 import { deleteDetailComparison, getDetailComparisons } from '../../utils/storage';
 
 interface SavedItem {
@@ -24,6 +25,7 @@ interface SavedItem {
 
 const DetailComparisonSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [savedItems, setSavedItems] = useState<any[]>([]);
@@ -105,35 +107,21 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
     );
   };
 
-  const handleClearAll = () => {
-    if (savedItems.length === 0) {
-      Alert.alert('No Items', 'There are no saved detail items to clear.');
-      return;
+  const { handleClearAll } = useDeleteAll({
+    items: savedItems,
+    storageConfig: {
+      type: 'clear',
+      storageKey: 'better_decision_detail_comparisons'
+    },
+    onDeleteSuccess: loadSavedItems,
+    alertConfig: {
+      noItemsMessage: t('detailItemsWillAppearHere'),
+      confirmTitle: t('clearAllDetail'),
+      itemTypePlural: t('savedDetailItems'),
+      successMessage: t('allDetailItemsCleared'),
+      errorMessage: t('failedToClearAllDetailItems')
     }
-
-    Alert.alert(
-      'Clear All Detail',
-      `Are you sure you want to delete all ${savedItems.length} saved detail items? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Delete all items one by one
-              for (const item of savedItems) {
-                await deleteSavedItem(item.id);
-              }
-              Alert.alert('Success', 'All detail items cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear all detail comparisons');
-            }
-          },
-        },
-      ]
-    );
-  };
+  });
 
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -153,11 +141,11 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
       const options = item.data.options;
       const comparisonData = item.data.comparisonData;
 
-      details += `Criteria: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
-      details += `Options: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
+      details += `${t('criteria')}: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
+      details += `${t('options')}: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
       
       // Show comparison results in table format
-      details += 'Comparison Table:\n';
+      details += `${t('comparisonTable')}:\n`;
       criteria.forEach((criterion: any) => {
         const criterionText = criterion.text || criterion;
         details += `\n${criterionText}:\n`;
@@ -174,7 +162,7 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
       
       // Add notes if they exist
       if (item.data.notes && item.data.notes.trim()) {
-        details += `\n\nNOTES:\n${item.data.notes.trim()}`;
+        details += `\n\n${t('notes').toUpperCase()}:\n${item.data.notes.trim()}`;
       }
     }
     
@@ -248,10 +236,10 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
         color={theme.colors.tabBarInactive}
       />
       <Typography variant="h6" color="textSecondary" style={styles.emptyTitle}>
-        No Detail Saved
+{t('noDetailSaved')}
       </Typography>
       <Typography variant="body2" color="textSecondary" style={styles.emptyDescription}>
-        Your saved detail items will appear here.
+{t('detailItemsWillAppearHere')}
       </Typography>
     </View>
   );
@@ -260,7 +248,7 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <CustomHeader
-        title="Saved Detail"
+        title={t('savedDetail')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()

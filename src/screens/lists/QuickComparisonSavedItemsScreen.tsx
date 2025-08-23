@@ -9,7 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 import { deleteQuickComparison, getQuickComparisons } from '../../utils/storage';
 
 interface SavedItem {
@@ -24,6 +25,7 @@ interface SavedItem {
 
 const QuickComparisonSavedItemsScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [savedItems, setSavedItems] = useState<any[]>([]);
@@ -104,35 +106,21 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
     );
   };
 
-  const handleClearAll = () => {
-    if (savedItems.length === 0) {
-      Alert.alert('No Items', 'There are no saved quick items to clear.');
-      return;
+  const { handleClearAll } = useDeleteAll({
+    items: savedItems,
+    storageConfig: {
+      type: 'clear',
+      storageKey: 'better_decision_quick_comparisons'
+    },
+    onDeleteSuccess: loadSavedItems,
+    alertConfig: {
+      noItemsMessage: t('quickItemsWillAppearHere'),
+      confirmTitle: t('clearAllQuick'),
+      itemTypePlural: t('savedQuickItems'),
+      successMessage: t('allQuickItemsCleared'),
+      errorMessage: t('failedToClearAllQuickItems')
     }
-
-    Alert.alert(
-      'Clear All Quick',
-      `Are you sure you want to delete all ${savedItems.length} saved quick items? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Delete all items one by one
-              for (const item of savedItems) {
-                await deleteSavedItem(item.id);
-              }
-              Alert.alert('Success', 'All quick items cleared successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to clear all quick comparisons');
-            }
-          },
-        },
-      ]
-    );
-  };
+  });
 
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
@@ -152,11 +140,11 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
       const options = item.data.options;
       const comparisonData = item.data.comparisonData;
 
-      details += `Criteria: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
-      details += `Options: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
+      details += `${t('criteria')}: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
+      details += `${t('options')}: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
       
       // Show comparison results
-      details += 'Comparison Results:\n';
+      details += `${t('comparisonResults')}:\n`;
       criteria.forEach((criterion: any, criterionIndex: number) => {
         const criterionText = criterion.text || criterion;
         details += `\n${criterionText}:\n`;
@@ -166,7 +154,7 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
             cell.criterionId === criterion.id && cell.optionId === option.id
           );
           const status = cellData?.status || 'no';
-          const resultText = status === 'yes' ? '✓ Yes' : status === 'no' ? '✗ No' : '◐ Partial';
+          const resultText = status === 'yes' ? `✓ ${t('yes')}` : status === 'no' ? `✗ ${t('no')}` : `◐ ${t('partial')}`;
           details += `  ${optionName}: ${resultText}\n`;
         });
       });
@@ -247,10 +235,10 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
         color={theme.colors.tabBarInactive}
       />
       <Typography variant="h6" color="textSecondary" style={styles.emptyTitle}>
-        No Quick Saved
+{t('noQuickSaved')}
       </Typography>
       <Typography variant="body2" color="textSecondary" style={styles.emptyDescription}>
-        Your saved quick items will appear here.
+{t('quickItemsWillAppearHere')}
       </Typography>
     </View>
   );
@@ -259,7 +247,7 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
       <CustomHeader
-        title="Saved Quick"
+        title={t('savedQuick')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
