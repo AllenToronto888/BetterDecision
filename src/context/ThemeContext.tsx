@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { getAppTheme, saveAppTheme } from '../utils/storage';
 
@@ -77,7 +77,7 @@ export const lightTheme = {
 
 export const darkTheme = {
   colors: {
-    background: '#E7EBEF',
+    background: '#121212',
     text: '#FFFFFF',
     textSecondary: '#AAAAAA',
     primary: '#90CAF9',
@@ -102,11 +102,6 @@ interface ThemeContextProps {
   theme: Theme;
   isDarkMode: boolean;
   toggleTheme: () => void;
-  customColors: {
-    primary: string;
-    secondary: string;
-  } | null;
-  setCustomColors: (colors: { primary: string; secondary: string } | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -114,7 +109,6 @@ const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const colorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
-  const [customColors, setCustomColors] = useState<{ primary: string; secondary: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Load saved theme settings
@@ -124,7 +118,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         const savedTheme = await getAppTheme();
         if (savedTheme) {
           setIsDarkMode(savedTheme.isDarkMode);
-          setCustomColors(savedTheme.customColors || null);
         }
       } catch (error) {
         console.error('Error loading theme:', error);
@@ -136,37 +129,20 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     loadTheme();
   }, []);
   
-  // Get the base theme based on dark mode setting
-  const baseTheme = isDarkMode ? darkTheme : lightTheme;
-  
-  // Apply custom colors if available
-  const theme = customColors
-    ? {
-        ...baseTheme,
-        colors: {
-          ...baseTheme.colors,
-          primary: customColors.primary,
-          secondary: customColors.secondary,
-        }
-      }
-    : baseTheme;
+  // Get the theme based on dark mode setting
+  const theme = isDarkMode ? darkTheme : lightTheme;
   
   // Save theme settings when changed
   useEffect(() => {
     if (!isLoading) {
       saveAppTheme({
         isDarkMode,
-        customColors: customColors || undefined,
       });
     }
-  }, [isDarkMode, customColors, isLoading]);
+  }, [isDarkMode, isLoading]);
   
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
-  };
-  
-  const updateCustomColors = (colors: { primary: string; secondary: string } | null) => {
-    setCustomColors(colors);
   };
   
   if (isLoading) {
@@ -178,9 +154,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       value={{ 
         theme, 
         isDarkMode, 
-        toggleTheme, 
-        customColors, 
-        setCustomColors: updateCustomColors 
+        toggleTheme
       }}
     >
       {children}

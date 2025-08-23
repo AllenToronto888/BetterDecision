@@ -4,8 +4,11 @@ import { Card, CustomHeader, useTheme } from '../../components';
 
 // Calculator screens
 import CalculatorSavedItemsScreen from './CalculatorSavedItemsScreen';
+import DayCountdownScreen from './DayCountdownScreen';
 import DayCounterScreen from './DayCounterScreen';
+import TotalCostSavedItemsScreen from './TotalCostSavedItemsScreen';
 import TotalCostScreen from './TotalCostScreen';
+import UnitCalculatorSavedItemsScreen from './UnitCalculatorSavedItemsScreen';
 import UnitCalculatorScreen from './UnitCalculatorScreen';
 
 const Stack = createNativeStackNavigator();
@@ -35,6 +38,13 @@ const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
       description: 'Find the number of days between dates',
       screen: 'DayCounter',
       color: '#2196F3',
+    },
+    {
+      title: 'Day Countdown',
+      icon: 'access-time',
+      description: 'Countdown to a specific date',
+      screen: 'DayCountdown',
+      color: '#9C27B0',
     },
   ];
   
@@ -87,8 +97,23 @@ const CalculatorsScreen = () => {
         options={{ headerShown: false, animation: 'none' }}
       />
       <Stack.Screen 
+        name="DayCountdown" 
+        component={DayCountdownScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
         name="SavedItems" 
         component={CalculatorSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="UnitCalculatorSavedItems" 
+        component={UnitCalculatorSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="TotalCostSavedItems" 
+        component={TotalCostSavedItemsScreen} 
         options={{ headerShown: false, animation: 'none' }}
       />
     </Stack.Navigator>

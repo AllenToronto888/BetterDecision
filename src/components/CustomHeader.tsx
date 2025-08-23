@@ -24,30 +24,32 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   leftAction,
   rightAction,
   statusBarColor,
-  statusBarStyle = 'light-content',
+  statusBarStyle,
 }) => {
-  const { theme } = useTheme();
-  const headerBackgroundColor = statusBarColor || theme.colors.primary;
+  const { theme, isDarkMode } = useTheme();
+  const headerBackgroundColor = statusBarColor || (isDarkMode ? theme.colors.background : theme.colors.primary);
+  const defaultStatusBarStyle = isDarkMode ? 'light-content' : 'light-content';
+  const finalStatusBarStyle = statusBarStyle || defaultStatusBarStyle;
 
   return (
     <SafeAreaView style={{ backgroundColor: headerBackgroundColor }} edges={['top']}>
-      <StatusBar backgroundColor={headerBackgroundColor} barStyle={statusBarStyle} />
+      <StatusBar backgroundColor={headerBackgroundColor} barStyle={finalStatusBarStyle} />
       <View style={[styles.customHeader, { backgroundColor: headerBackgroundColor }]}>
         {leftAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={leftAction.onPress}>
-            <MaterialIcons name={leftAction.icon} size={36} color="#FFFFFF" />
+            <MaterialIcons name={leftAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
           </TouchableOpacity>
         ) : (
           <View style={styles.headerButton} />
         )}
         
-        <Typography variant="h4" style={styles.headerTitle}>
+        <Typography variant="h4" style={[styles.headerTitle, { color: isDarkMode ? theme.colors.text : '#FFFFFF' }]}>
           {title}
         </Typography>
         
         {rightAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={rightAction.onPress}>
-            <MaterialIcons name={rightAction.icon} size={36} color="#FFFFFF" />
+            <MaterialIcons name={rightAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
           </TouchableOpacity>
         ) : (
           <View style={styles.headerButton} />

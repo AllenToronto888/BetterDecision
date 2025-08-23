@@ -75,6 +75,41 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
     );
   };
 
+  const handleClearAll = () => {
+    if (savedItems.length === 0) {
+      const itemType = selectedTab === 'calculation' ? 'calculations' : 
+                       selectedTab === 'comparison' ? 'comparisons' : 'decisions';
+      Alert.alert('No Items', `There are no saved ${itemType} to clear.`);
+      return;
+    }
+
+    const itemType = selectedTab === 'calculation' ? 'calculations' : 
+                     selectedTab === 'comparison' ? 'comparisons' : 'decisions';
+    
+    Alert.alert(
+      `Clear All ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`,
+      `Are you sure you want to delete all ${savedItems.length} saved ${itemType}? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete all items one by one
+              for (const item of savedItems) {
+                await deleteSavedItem(item.id);
+              }
+              Alert.alert('Success', `All ${itemType} cleared successfully`);
+            } catch (error) {
+              Alert.alert('Error', `Failed to clear all ${itemType}`);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
     if (newExpanded.has(itemId)) {
@@ -276,6 +311,12 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
         <Typography variant="h3" color="text" style={styles.headerTitle}>
           Saved Items
         </Typography>
+        <TouchableOpacity
+          style={styles.clearAllButton}
+          onPress={handleClearAll}
+        >
+          <MaterialIcons name="delete-sweep" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
 
       {/* Tabs */}
@@ -314,13 +355,21 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 100,
     paddingHorizontal: 20,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  clearAllButton: {
+    padding: 8,
+    borderRadius: 4,
   },
   tabContainer: {
     flexDirection: 'row',

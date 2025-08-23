@@ -282,7 +282,7 @@ const TotalCostScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
+          onPress: () => navigation.navigate('TotalCostSavedItems' as never)
         }}
       />
 
@@ -512,6 +512,7 @@ const TotalCostScreen = () => {
               title="Compare"
               variant="secondary"
               icon="compare"
+              size="large"
               style={[styles.buttonRow, { marginTop: 16, marginBottom: 16 }]}
               onPress={calculateComparisonTotalCost}
             />

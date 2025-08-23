@@ -1,11 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 
@@ -38,9 +38,9 @@ const UnitCalculatorScreen = () => {
     },
     dataType: 'calculation',
     enabled: products.some(p => p.price.trim() !== '' && p.quantity.trim() !== ''),
-    delay: 1000, // Auto-save after 1 second of inactivity
+    delay: 5000, // Auto-save after 5 seconds of inactivity
     onSave: (name) => {
-      console.log('Auto-saved:', name);
+      console.log('🟢 AUTO-SAVE SUCCESS:', name);
       // Force status to saved, then idle after a short delay
       setTimeout(() => setAutoSaveStatus('idle'), 1500);
     },
@@ -52,23 +52,40 @@ const UnitCalculatorScreen = () => {
     onStatusChange: setAutoSaveStatus,
   });
 
-  const unitOptions = ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each'];
+  // Unit categories
+  const weightUnits = ['g', 'kg', 'oz', 'lb'];
+  const volumeUnits = ['ml', 'l'];
+  const countUnits = ['each'];
+  
+  // Dynamic unit filtering - Product A shows all units, Product B+ are filtered
+  const getAvailableUnits = (productIndex: number) => {
+    // Product A (index 0) can always choose any unit
+    if (productIndex === 0) {
+      return ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each'];
+    }
+    
+    // For Product B+, filter based on Product A's unit category
+    const firstProduct = products[0];
+    if (!firstProduct || !firstProduct.unit || firstProduct.unit.trim() === '') {
+      return ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each']; // Show all if Product A has no unit yet
+    }
+    
+    if (weightUnits.includes(firstProduct.unit)) {
+      return weightUnits;
+    } else if (volumeUnits.includes(firstProduct.unit)) {
+      return volumeUnits;
+    } else if (countUnits.includes(firstProduct.unit)) {
+      return countUnits;
+    }
+    
+    return ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each']; // Fallback
+  };
 
   useEffect(() => {
     calculateUnitPrices();
   }, [products.map(p => `${p.price}-${p.quantity}-${p.unit}`).join(',')]);
 
-  // Failsafe: Reset auto-save status if it gets stuck in pending for too long
-  useEffect(() => {
-    if (autoSaveStatus === 'pending') {
-      const timeout = setTimeout(() => {
-        console.log('Auto-save timeout - resetting to idle');
-        setAutoSaveStatus('idle');
-      }, 5000); // Reset after 5 seconds if stuck in pending
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [autoSaveStatus]);
+  // Removed problematic timeout that was interfering with auto-save
 
 
 
@@ -147,13 +164,17 @@ const UnitCalculatorScreen = () => {
   };
 
   const cycleUnit = (index: number) => {
-    const currentUnitIndex = unitOptions.indexOf(products[index].unit);
-    const nextUnitIndex = (currentUnitIndex + 1) % unitOptions.length;
-    updateProduct(index, 'unit', unitOptions[nextUnitIndex]);
+    const availableUnits = getAvailableUnits(index);
+    const currentUnitIndex = availableUnits.indexOf(products[index].unit);
+    const nextUnitIndex = (currentUnitIndex + 1) % availableUnits.length;
+    updateProduct(index, 'unit', availableUnits[nextUnitIndex]);
   };
 
   const addProduct = () => {
-    setProducts([...products, { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 }]);
+    const newProductIndex = products.length;
+    const availableUnits = getAvailableUnits(newProductIndex);
+    const defaultUnit = availableUnits[0]; // Use first available unit in the category
+    setProducts([...products, { name: '', price: '', quantity: '', unit: defaultUnit, unitPrice: 0 }]);
   };
 
   // Removed loadHistoryData function as HistoryButton is no longer used in the component
@@ -289,7 +310,7 @@ const UnitCalculatorScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
+          onPress: () => navigation.navigate('UnitCalculatorSavedItems' as never)
         }}
       />
 
@@ -360,17 +381,7 @@ const UnitCalculatorScreen = () => {
           )}
         </View>
 
-        {/* Auto-save Status */}
-        {products.some(p => p.price.trim() && p.quantity.trim()) && autoSaveStatus !== 'idle' && (
-          <View style={styles.autoSaveStatus}>
-            <Typography variant="caption" color="textSecondary" style={styles.autoSaveText}>
-              {autoSaveStatus === 'pending' && '⏳ Changes detected...'}
-              {autoSaveStatus === 'saving' && '💾 Saving...'}
-              {autoSaveStatus === 'saved' && '✅ Auto-saved!'}
-              {autoSaveStatus === 'error' && '❌ Save failed'}
-            </Typography>
-          </View>
-        )}
+
       </ScrollView>
     </View>
   );
@@ -462,7 +473,7 @@ const styles = StyleSheet.create({
 
   actionButtonsContainer: {
     flexDirection: 'row',
-    marginTop: 16,
+    marginTop: 8,
     marginBottom: 8,
     gap: 12,
   },

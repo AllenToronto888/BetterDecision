@@ -83,7 +83,7 @@ export const useAutoSave = ({
       const existingData = await AsyncStorage.getItem(storageKey);
       const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
 
-      // Check if we already have an auto-saved item for this session
+      // Find existing auto-saved item for this dataType to update it
       const autoSavedIndex = existingItems.findIndex(item => 
         item.isAutoSaved && item.type === dataType
       );

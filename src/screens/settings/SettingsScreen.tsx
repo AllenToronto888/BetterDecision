@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
+import Constants from 'expo-constants';
 import {
     Alert,
     Linking,
@@ -11,25 +11,32 @@ import {
     View,
 } from 'react-native';
 import { CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
+import { clearAllData, clearFeatureData } from '../../utils/storage';
 
 const SettingsScreen = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  const { t } = useI18n();
   
   const clearCache = () => {
     Alert.alert(
-      'Clear Cache',
-      'Are you sure you want to clear all cached data? This cannot be undone.',
+      'Clear All Data',
+      'Are you sure you want to clear ALL saved data? This includes all comparisons, calculations, and settings. This cannot be undone.',
       [
         {
           text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Clear',
+          text: 'Clear All',
           style: 'destructive',
-          onPress: () => {
-            // Clear cache logic would go here
-            Alert.alert('Success', 'Cache cleared successfully');
+          onPress: async () => {
+            try {
+              await clearAllData();
+              Alert.alert('Success', 'All data cleared successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear data. Please try again.');
+            }
           },
         },
       ]
@@ -37,34 +44,62 @@ const SettingsScreen = () => {
   };
 
   const openSavedItems = () => {
-    // Note: In a real app, you'd navigate to SavedItemsScreen here
     Alert.alert(
       'Saved Items',
-      'Access your saved calculations, comparisons, and decisions.',
+      'Choose which type of saved items to view:',
       [
-        { text: 'OK' },
-        { text: 'Open Saved Items', onPress: () => console.log('Navigate to SavedItemsScreen') }
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Calculations', onPress: () => console.log('Navigate to SavedItemsScreen with calculations') },
+        { text: 'Comparisons', onPress: () => console.log('Navigate to SavedItemsScreen with comparisons') },
+        { text: 'Decisions', onPress: () => console.log('Navigate to SavedItemsScreen with decisions') }
       ]
     );
   };
   
   const clearSavedComparisons = () => {
     Alert.alert(
-      'Clear Saved Comparisons',
-      'Are you sure you want to delete all saved comparisons? This cannot be undone.',
+      'Clear Lists',
+      'Choose which type of lists to clear:',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Clear Calculations', 
           style: 'destructive',
-          onPress: () => {
-            // Clear saved comparisons logic would go here
-            Alert.alert('Success', 'Saved comparisons deleted successfully');
-          },
+          onPress: async () => {
+            try {
+              await clearFeatureData('UNIT_COMPARISONS');
+              await clearFeatureData('TOTAL_COST_COMPARISONS');
+              Alert.alert('Success', 'All calculations cleared successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear calculations');
+            }
+          }
         },
+        { 
+          text: 'Clear Comparisons',
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await clearFeatureData('QUICK_COMPARISONS');
+              await clearFeatureData('DETAIL_COMPARISONS');
+              Alert.alert('Success', 'All comparisons cleared successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear comparisons');
+            }
+          }
+        },
+        { 
+          text: 'Clear Decisions',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearFeatureData('PROS_CONS_LISTS');
+              Alert.alert('Success', 'All decisions cleared successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear decisions');
+            }
+          }
+        }
       ]
     );
   };
@@ -88,20 +123,20 @@ const SettingsScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <CustomHeader title="Settings" />
+      <CustomHeader title={t('settings')} />
       
       <ScrollView
         style={[styles.container, { backgroundColor: theme.colors.background }]}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: 100 }]}
       >
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Appearance</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('appearance')}</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="brightness-6" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Dark Mode</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('darkMode')}</Text>
           </View>
           <Switch
             value={isDarkMode}
@@ -111,50 +146,44 @@ const SettingsScreen = () => {
           />
         </View>
         
-        <TouchableOpacity style={styles.settingRow}>
-          <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="color-lens" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Custom Theme</Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
-        </TouchableOpacity>
+
       </View>
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Data Management</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('dataManagement')}</Text>
         
         <TouchableOpacity style={styles.settingRow} onPress={openSavedItems}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="bookmark" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Saved Items</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('savedItems')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={clearCache}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="cleaning-services" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Clear Cache</Text>
+            <MaterialIcons name="delete-forever" size={24} color={theme.colors.danger} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearAllData')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.settingRow} onPress={clearSavedComparisons}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="delete" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Clear Saved Comparisons</Text>
+            <MaterialIcons name="delete-sweep" size={24} color={theme.colors.warning} style={styles.settingIcon} />
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearLists')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
       <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>App</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('app')}</Text>
         
         <TouchableOpacity style={styles.settingRow} onPress={rateApp}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="star" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Rate App</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('rateApp')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
@@ -162,7 +191,7 @@ const SettingsScreen = () => {
         <TouchableOpacity style={styles.settingRow} onPress={openPrivacyPolicy}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="privacy-tip" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Privacy Policy</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('privacyPolicy')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
@@ -170,7 +199,7 @@ const SettingsScreen = () => {
         <TouchableOpacity style={styles.settingRow} onPress={openTermsOfService}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="description" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Terms of Service</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('termsOfService')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
@@ -178,15 +207,15 @@ const SettingsScreen = () => {
         <TouchableOpacity style={styles.settingRow} onPress={contactUs}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="mail" size={24} color={theme.colors.primary} style={styles.settingIcon} />
-            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Contact Us</Text>
+            <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('contactUs')}</Text>
           </View>
           <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
       <View style={styles.versionContainer}>
-        <Text style={[styles.versionText, { color: theme.colors.tabBarInactive }]}>
-          Better Decision v1.0.0
+        <Text style={[styles.versionText, { color: theme.colors.textSecondary }]}>
+          {Constants.expoConfig?.name || 'Better Decision'} v{Constants.expoConfig?.version || '1.0.0'}
         </Text>
       </View>
       </ScrollView>

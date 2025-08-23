@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { saveDetailComparison, saveProsConsList, saveQuickComparison } from '../utils/storage';
+import { saveDetailComparison, saveProConsList, saveQuickComparison } from '../utils/storage';
 import { Button } from './Button';
 import { Typography } from './Typography';
 
@@ -78,6 +78,8 @@ export const Save: React.FC<SaveComponentProps> = ({
         throw new Error('Please enter a name for your saved item');
       }
 
+
+
       // Handle Quick Comparison data specifically
       if (dataType === 'comparison' && data.comparisonType === 'quick_comparison') {
         const quickComparisonData = {
@@ -87,6 +89,7 @@ export const Save: React.FC<SaveComponentProps> = ({
           criteria: data.criteria,
           options: data.options,
           comparisonData: data.comparisonData,
+          notes: data.notes,
         };
         
         await saveQuickComparison(quickComparisonData);
@@ -100,6 +103,7 @@ export const Save: React.FC<SaveComponentProps> = ({
           criteria: data.criteria,
           options: data.options,
           comparisonData: data.comparisonData,
+          notes: data.notes,
         };
         
         await saveDetailComparison(detailComparisonData);
@@ -114,7 +118,7 @@ export const Save: React.FC<SaveComponentProps> = ({
           cons: data.cons || [],
         };
         
-        await saveProsConsList(prosConsData);
+        await saveProConsList(prosConsData);
       }
       // Fallback to generic storage for other types
       else {
@@ -122,15 +126,18 @@ export const Save: React.FC<SaveComponentProps> = ({
         const existingData = await AsyncStorage.getItem(storageKey);
         const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
 
-        // Check for duplicate names
-        const duplicateExists = existingItems.some(item => item.name.toLowerCase() === name.trim().toLowerCase());
-        if (duplicateExists) {
-          throw new Error('An item with this name already exists. Please choose a different name.');
+        // Auto-generate unique name if duplicate exists
+        let finalName = name.trim();
+        let counter = 1;
+        
+        while (existingItems.some(item => item.name.toLowerCase() === finalName.toLowerCase())) {
+          finalName = `${name.trim()} (${counter})`;
+          counter++;
         }
 
         const newItem: SavedItem = {
           id: Date.now().toString(),
-          name: name.trim(),
+          name: finalName,
           data,
           type: dataType,
           createdAt: new Date().toISOString(),
@@ -139,6 +146,17 @@ export const Save: React.FC<SaveComponentProps> = ({
 
         const updatedItems = [newItem, ...existingItems];
         await AsyncStorage.setItem(storageKey, JSON.stringify(updatedItems));
+        
+        // Use the final generated name for success callback
+        onSaveSuccess?.(finalName);
+        setIsModalVisible(false);
+        setSaveName('');
+        
+        Alert.alert(
+          'Saved Successfully!',
+          `Your ${dataType} has been saved as "${finalName}".`
+        );
+        return; // Exit early since we handled everything here
       }
 
       onSaveSuccess?.(name.trim());
@@ -147,17 +165,7 @@ export const Save: React.FC<SaveComponentProps> = ({
       
       Alert.alert(
         'Saved Successfully!',
-        `"${name.trim()}" has been saved and can be accessed in your saved items.`,
-        [
-          { text: 'OK' },
-          { 
-            text: 'View Saved Items', 
-            onPress: () => {
-              // Note: In a real app, you'd navigate to the SavedItemsScreen here
-              console.log('Navigate to saved items');
-            }
-          }
-        ]
+        `"${name.trim()}" has been saved.`
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save';

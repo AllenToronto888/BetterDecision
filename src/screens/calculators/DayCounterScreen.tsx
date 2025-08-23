@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
@@ -9,7 +10,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
 
 const DayCounterScreen = () => {
@@ -26,6 +26,8 @@ const DayCounterScreen = () => {
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const [daysDifference, setDaysDifference] = useState(0);
+  const [actualDays, setActualDays] = useState(0);
+  const [workingDays, setWorkingDays] = useState(0);
   const [timeUnit, setTimeUnit] = useState('days');
   
   const timeUnits = ['days', 'weeks', 'months', 'years'];
@@ -33,6 +35,41 @@ const DayCounterScreen = () => {
   useEffect(() => {
     calculateDifference();
   }, [startDate, endDate, includeEndDate, timeUnit]);
+
+  const calculateWorkingDays = (startDate, endDate, includeEndDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Reset hours to avoid timezone issues
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    
+    let workingDaysCount = 0;
+    let currentDate = new Date(start);
+    
+    // Loop through each day from start to end
+    while (currentDate <= end) {
+      const dayOfWeek = currentDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+      
+      // Count if it's Monday (1) through Friday (5)
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        workingDaysCount++;
+      }
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Adjust for include end date setting
+    if (!includeEndDate) {
+      const endDayOfWeek = end.getDay();
+      if (endDayOfWeek >= 1 && endDayOfWeek <= 5) {
+        workingDaysCount--; // Remove end date if it's a weekday
+      }
+    }
+    
+    return workingDaysCount;
+  };
 
   const calculateDifference = () => {
     const start = new Date(startDate);
@@ -50,6 +87,13 @@ const DayCounterScreen = () => {
     if (includeEndDate) {
       diffDays += 1;
     }
+    
+    // Store the actual days for working time calculation
+    setActualDays(diffDays);
+    
+    // Calculate proper working days using real calendar logic
+    const actualWorkingDays = calculateWorkingDays(startDate, endDate, includeEndDate);
+    setWorkingDays(actualWorkingDays);
     
     // Convert to selected time unit
     let result = diffDays;
@@ -182,7 +226,7 @@ const DayCounterScreen = () => {
         <View style={styles.resultRow}>
           <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
             <Text style={[styles.resultValue, { color: theme.colors.text }]}>
-              {daysDifference.toFixed(timeUnit === 'days' ? 0 : 1)}
+              {timeUnit === 'days' ? Math.round(daysDifference).toString() : daysDifference.toFixed(2)}
             </Text>
           </View>
           <TouchableOpacity
@@ -195,29 +239,27 @@ const DayCounterScreen = () => {
         </View>
       </View>
       
-      {timeUnit !== 'days' && (
-        <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Working Time</Text>
-          <View style={styles.workingTimeContainer}>
-            <Text style={[styles.workingTimeText, { color: theme.colors.text }]}>
-              Working time
-            </Text>
-            <View style={styles.resultRow}>
-              <View style={[styles.resultContainer, { backgroundColor: theme.colors.background, flex: 1 }]}>
-                <Text style={[styles.resultValue, { color: theme.colors.text }]}>
-                  {Math.max(0, Math.floor(daysDifference * 5 / 7)).toString()}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
-              >
-                <Text style={styles.unitButtonText}>days</Text>
-                <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
+      <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Working Time</Text>
+        <Text style={[styles.helperText, { color: theme.colors.textSecondary }]}>
+          Excludes weekends (Mon-Fri only)
+        </Text>
+        <View style={styles.workingTimeContainer}>
+          <View style={styles.resultRow}>
+            <View style={[styles.resultContainer, { backgroundColor: theme.colors.background, flex: 1 }]}>
+              <Text style={[styles.resultValue, { color: theme.colors.text }]}>
+                {workingDays.toString()}
+              </Text>
             </View>
+            <TouchableOpacity
+              style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
+            >
+              <Text style={styles.unitButtonText}>days</Text>
+              <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
         </View>
-      )}
+      </View>
       </ScrollView>
     </View>
   );
@@ -230,6 +272,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    paddingBottom: 100,
   },
   card: {
     borderRadius: 8,
@@ -239,7 +282,7 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
@@ -252,7 +295,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dateText: {
-    fontSize: 16,
+    fontSize: 18,
   },
   switchRow: {
     flexDirection: 'row',
@@ -261,7 +304,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   switchLabel: {
-    fontSize: 16,
+    fontSize: 18,
   },
   resultRow: {
     flexDirection: 'row',
@@ -288,14 +331,16 @@ const styles = StyleSheet.create({
   unitButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: 18,
     marginRight: 4,
+  },
+  helperText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    marginBottom: 12,
   },
   workingTimeContainer: {
     marginTop: 8,
-  },
-  workingTimeText: {
-    fontSize: 14,
-    marginBottom: 8,
   },
 });
 

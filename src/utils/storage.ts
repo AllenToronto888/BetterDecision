@@ -121,6 +121,7 @@ export interface ProsConsList {
     text: string;
     weight: number;
   }>;
+  notes?: string;
 }
 
 export const saveProConsList = async (list: ProsConsList): Promise<void> => {
@@ -157,6 +158,7 @@ export interface QuickComparison {
     optionId: string;
     status: 'yes' | 'no' | 'partial';
   }>;
+  notes?: string;
 }
 
 export const saveQuickComparison = async (comparison: QuickComparison): Promise<void> => {
@@ -193,6 +195,7 @@ export interface DetailComparison {
     optionId: string;
     text: string;
   }>;
+  notes?: string;
 }
 
 export const saveDetailComparison = async (comparison: DetailComparison): Promise<void> => {
@@ -214,10 +217,6 @@ export const deleteDetailComparison = async (id: string): Promise<void> => {
 // App Theme
 export interface AppTheme {
   isDarkMode: boolean;
-  customColors?: {
-    primary: string;
-    secondary: string;
-  };
 }
 
 export const saveAppTheme = async (theme: AppTheme): Promise<void> => {

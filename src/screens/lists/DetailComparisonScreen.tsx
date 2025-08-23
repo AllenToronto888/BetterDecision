@@ -36,7 +36,6 @@ const DetailComparisonScreen = () => {
   const [criteria, setCriteria] = useState<Criterion[]>([
     { id: '1', text: 'Price' },
     { id: '2', text: 'Features' },
-    { id: '3', text: 'Warranty' },
   ]);
   const [options, setOptions] = useState<Option[]>([
     { id: '1', name: 'Product A' },
@@ -47,9 +46,9 @@ const DetailComparisonScreen = () => {
     { criterionId: '1', optionId: '2', text: '$599' },
     { criterionId: '2', optionId: '1', text: 'Basic' },
     { criterionId: '2', optionId: '2', text: 'Premium' },
-    { criterionId: '3', optionId: '1', text: '1 year' },
-    { criterionId: '3', optionId: '2', text: '2 years' },
   ]);
+  const [notes, setNotes] = useState('');
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
   
   const addCriterion = () => {
@@ -153,6 +152,8 @@ const DetailComparisonScreen = () => {
         text: '',
       }));
       setComparisonData(newCells);
+      setNotes('');
+      setNotesExpanded(false);
     }
   };
 
@@ -166,7 +167,7 @@ const DetailComparisonScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
+          onPress: () => navigation.navigate('DetailComparisonSavedItems' as never)
         }}
       />
 
@@ -191,6 +192,7 @@ const DetailComparisonScreen = () => {
                     criteria,
                     options,
                     comparisonData,
+                    notes,
                     comparisonType: 'detail_comparison',
                   }}
                   dataType="comparison"
@@ -204,6 +206,7 @@ const DetailComparisonScreen = () => {
                     criteria,
                     options,
                     comparisonData,
+                    notes,
                   }}
                   dataType="comparison"
                   title="Detail Comparison Result"
@@ -255,7 +258,7 @@ const DetailComparisonScreen = () => {
               </View>
             ))}
             
-              <View style={styles.criterionCell}>
+              <View style={styles.clearAllContainer}>
                 <TouchableOpacity
                   style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                   onPress={clearAllCriteria}
@@ -295,7 +298,7 @@ const DetailComparisonScreen = () => {
                   style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
                   onPress={addOption}
                 >
-                  <MaterialIcons name="add" size={24} color="#FFFFFF" />
+                  <MaterialIcons name="add" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
               {criteria.map((criterion) => (
@@ -327,11 +330,52 @@ const DetailComparisonScreen = () => {
                   style={[styles.addCriterionButton, { backgroundColor: theme.colors.primary }]}
                   onPress={addCriterion}
                 >
-                  <MaterialIcons name="add" size={24} color="#FFFFFF" />
+                  <MaterialIcons name="add" size={20} color="#FFFFFF" />
                   <Text style={styles.addButtonText}>Add Criterion</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+
+          {/* Notes Section */}
+          <View style={[styles.notesSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+            <TouchableOpacity
+              style={styles.notesHeader}
+              onPress={() => setNotesExpanded(!notesExpanded)}
+            >
+              <View style={styles.notesHeaderLeft}>
+                <MaterialIcons name="note" size={20} color={theme.colors.primary} />
+                <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+                {notes.trim() && !notesExpanded && (
+                  <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
+                    <Text style={styles.notesBadgeText}>•</Text>
+                  </View>
+                )}
+              </View>
+              <MaterialIcons
+                name={notesExpanded ? "expand-less" : "expand-more"}
+                size={24}
+                color={theme.colors.text}
+              />
+            </TouchableOpacity>
+            
+            {notesExpanded && (
+              <View style={styles.notesContent}>
+                <TextInput
+                  style={[styles.notesInput, { 
+                    backgroundColor: theme.colors.background, 
+                    color: theme.colors.text,
+                    borderColor: theme.colors.border 
+                  }]}
+                  value={notes}
+                  onChangeText={setNotes}
+                  placeholder="Add notes about this comparison..."
+                  placeholderTextColor={theme.colors.tabBarInactive}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -378,7 +422,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   optionHeaderCell: {
-    width: 140,
+    width: 130,
     height: 48,
     padding: 8,
     borderRadius: 4,
@@ -405,7 +449,7 @@ const styles = StyleSheet.create({
     color: 'inherit',
   },
   comparisonCell: {
-    width: 140,
+    width: 130,
     borderRadius: 4,
     marginRight: 4,
     marginBottom: 8,
@@ -426,6 +470,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 14,
   },
   deleteButton: {
     position: 'absolute',
@@ -439,6 +484,12 @@ const styles = StyleSheet.create({
   },
   swipeableContentOverride: {
     borderRadius: 4,
+  },
+  clearAllContainer: {
+    minHeight: 48,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    flex: 1,
   },
   clearAllButton: {
     flexDirection: 'row',
@@ -472,6 +523,52 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  
+  // Notes Section Styles
+  notesSection: {
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  notesHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  notesTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  notesBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  notesBadgeText: {
+    fontSize: 0,
+  },
+  notesContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  notesInput: {
+    minHeight: 80,
+    maxHeight: 120,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
+    fontSize: 16,
+    lineHeight: 20,
   },
 });
 

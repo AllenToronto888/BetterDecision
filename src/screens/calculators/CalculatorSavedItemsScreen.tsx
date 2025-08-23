@@ -61,6 +61,36 @@ const CalculatorSavedItemsScreen: React.FC = () => {
     );
   };
 
+  const handleClearAll = () => {
+    if (savedItems.length === 0) {
+      Alert.alert('No Items', 'There are no saved calculations to clear.');
+      return;
+    }
+
+    Alert.alert(
+      'Clear All Calculations',
+      `Are you sure you want to delete all ${savedItems.length} saved calculations? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete all items one by one
+              for (const item of savedItems) {
+                await deleteSavedItem(item.id);
+              }
+              Alert.alert('Success', 'All calculations cleared successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear all calculations');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
     if (newExpanded.has(itemId)) {
@@ -314,6 +344,10 @@ const CalculatorSavedItemsScreen: React.FC = () => {
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
+        }}
+        rightAction={{
+          icon: "delete-sweep",
+          onPress: handleClearAll
         }}
       />
 

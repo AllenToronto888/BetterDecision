@@ -3,9 +3,11 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
 
 // List screens
-import ComparisonSavedItemsScreen from './ComparisonSavedItemsScreen';
+import DetailComparisonSavedItemsScreen from './DetailComparisonSavedItemsScreen';
 import DetailComparisonScreen from './DetailComparisonScreen';
+import ProsConsSavedItemsScreen from './ProsConsSavedItemsScreen';
 import ProsConsScreen from './ProsConsScreen';
+import QuickComparisonSavedItemsScreen from './QuickComparisonSavedItemsScreen';
 import QuickComparisonScreen from './QuickComparisonScreen';
 
 // Placeholder removed - using real ProsConsScreen now
@@ -87,9 +89,20 @@ const ListsScreen = () => {
         component={DetailComparisonScreen} 
         options={{ headerShown: false, animation: 'none' }}
       />
+
       <Stack.Screen 
-        name="SavedItems" 
-        component={ComparisonSavedItemsScreen} 
+        name="QuickComparisonSavedItems" 
+        component={QuickComparisonSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="DetailComparisonSavedItems" 
+        component={DetailComparisonSavedItemsScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="ProsConsSavedItems" 
+        component={ProsConsSavedItemsScreen} 
         options={{ headerShown: false, animation: 'none' }}
       />
     </Stack.Navigator>

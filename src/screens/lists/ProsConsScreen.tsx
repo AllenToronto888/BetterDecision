@@ -31,6 +31,8 @@ const ProsConsScreen = () => {
   const [cons, setCons] = useState<Item[]>([
     { id: '1', text: 'The company is far from my house', weight: 3 },
   ]);
+  const [notes, setNotes] = useState('');
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
   const totalProsWeight = pros.reduce((sum, item) => sum + item.weight, 0);
@@ -92,13 +94,24 @@ const ProsConsScreen = () => {
   const clearAll = () => {
     setPros([]);
     setCons([]);
+    setNotes('');
+    setNotesExpanded(false);
   };
   
   const renderItem = (item: Item, isPro: boolean) => {
     return (
       <SwipableRow
         key={item.id}
-        onDelete={() => removeItem(isPro, item.id)}
+        leftActions={[{
+          icon: 'delete',
+          color: theme.colors.danger,
+          onPress: () => removeItem(isPro, item.id),
+        }]}
+        rightActions={[{
+          icon: 'delete',
+          color: theme.colors.danger,
+          onPress: () => removeItem(isPro, item.id),
+        }]}
       >
         <View 
           style={[
@@ -164,7 +177,7 @@ const ProsConsScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
+          onPress: () => navigation.navigate('ProsConsSavedItems' as never)
         }}
       />
 
@@ -190,9 +203,10 @@ const ProsConsScreen = () => {
                     cons,
                     totalProsWeight,
                     totalConsWeight,
-                    comparisonType: 'pros_cons',
+                    notes,
+                    type: 'pros_cons',
                   }}
-                  dataType="comparison"
+                  dataType="decision"
                   variant="icon"
                   showInput={false}
                   onSaveSuccess={(name) => console.log('Saved as:', name)}
@@ -204,6 +218,7 @@ const ProsConsScreen = () => {
                     cons,
                     totalProsWeight,
                     totalConsWeight,
+                    notes,
                   }}
                   dataType="comparison"
                   title="Pros & Cons Analysis"
@@ -279,6 +294,47 @@ const ProsConsScreen = () => {
             )}
           </View>
         </View>
+
+        {/* Notes Section */}
+        <View style={[styles.notesSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <TouchableOpacity
+            style={styles.notesHeader}
+            onPress={() => setNotesExpanded(!notesExpanded)}
+          >
+            <View style={styles.notesHeaderLeft}>
+              <MaterialIcons name="note" size={20} color={theme.colors.primary} />
+              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+              {notes.trim() && !notesExpanded && (
+                <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
+                  <Text style={styles.notesBadgeText}>•</Text>
+                </View>
+              )}
+            </View>
+            <MaterialIcons
+              name={notesExpanded ? "expand-less" : "expand-more"}
+              size={24}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+          
+          {notesExpanded && (
+            <View style={styles.notesContent}>
+              <TextInput
+                style={[styles.notesInput, { 
+                  backgroundColor: theme.colors.background, 
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border 
+                }]}
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="Add notes about this decision..."
+                placeholderTextColor={theme.colors.tabBarInactive}
+                multiline
+                textAlignVertical="top"
+              />
+            </View>
+          )}
+        </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -292,7 +348,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 80,
+    paddingBottom: 100,
   },
 
 
@@ -337,6 +393,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 14,
   },
   clearAllButton: {
     flexDirection: 'row',
@@ -352,6 +409,7 @@ const styles = StyleSheet.create({
   clearAllText: {
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 14,
   },
   itemsContainer: {
     flexDirection: 'row',
@@ -364,7 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     borderLeftWidth: 4,
-    marginBottom: -8,
+    marginBottom: 0, // Remove negative margin hack - let SwipableRow handle spacing
   },
   itemHeader: {
     flexDirection: 'row',
@@ -394,6 +452,52 @@ const styles = StyleSheet.create({
 
   itemInput: {
     minHeight: 40,
+  },
+  
+  // Notes Section Styles
+  notesSection: {
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  notesHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  notesTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  notesBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  notesBadgeText: {
+    fontSize: 0,
+  },
+  notesContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  notesInput: {
+    minHeight: 80,
+    maxHeight: 120,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
+    fontSize: 16,
+    lineHeight: 20,
   },
 });
 

@@ -34,33 +34,20 @@ const QuickComparisonScreen = () => {
   const navigation = useNavigation();
   const [title, setTitle] = useState('Quick Comparison');
   const [criteria, setCriteria] = useState<Criterion[]>([
-    { id: '1', text: 'Gutes Preis/Leistung' },
-    { id: '2', text: 'Zentral gelegen' },
-    { id: '3', text: 'Schöne Aussicht' },
-    { id: '4', text: 'Guter Service' },
-    { id: '5', text: 'Kinderfreundlich' },
+    { id: '1', text: 'Criteria 1' },
+    { id: '2', text: 'Criteria 2' },
   ]);
   const [options, setOptions] = useState<Option[]>([
     { id: '1', name: 'Option 1' },
     { id: '2', name: 'Option 2' },
-    { id: '3', name: 'Option 3' },
   ]);
+  const [notes, setNotes] = useState('');
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const [comparisonData, setComparisonData] = useState<ComparisonCell[]>([
     { criterionId: '1', optionId: '1', status: 'yes' },
     { criterionId: '1', optionId: '2', status: 'no' },
-    { criterionId: '1', optionId: '3', status: 'partial' },
     { criterionId: '2', optionId: '1', status: 'yes' },
-    { criterionId: '2', optionId: '2', status: 'yes' },
-    { criterionId: '2', optionId: '3', status: 'no' },
-    { criterionId: '3', optionId: '1', status: 'no' },
-    { criterionId: '3', optionId: '2', status: 'yes' },
-    { criterionId: '3', optionId: '3', status: 'yes' },
-    { criterionId: '4', optionId: '1', status: 'partial' },
-    { criterionId: '4', optionId: '2', status: 'yes' },
-    { criterionId: '4', optionId: '3', status: 'no' },
-    { criterionId: '5', optionId: '1', status: 'yes' },
-    { criterionId: '5', optionId: '2', status: 'no' },
-    { criterionId: '5', optionId: '3', status: 'yes' },
+    { criterionId: '2', optionId: '2', status: 'partial' },
   ]);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
   
@@ -150,6 +137,8 @@ const QuickComparisonScreen = () => {
       }));
       
       setComparisonData(newCells);
+      setNotes('');
+      setNotesExpanded(false);
     }
   };
   
@@ -215,7 +204,7 @@ const QuickComparisonScreen = () => {
         }}
         rightAction={{
           icon: "history",
-          onPress: () => navigation.navigate('SavedItems' as never)
+          onPress: () => navigation.navigate('QuickComparisonSavedItems' as never)
         }}
       />
 
@@ -240,6 +229,7 @@ const QuickComparisonScreen = () => {
                     criteria,
                     options,
                     comparisonData,
+                    notes,
                     comparisonType: 'quick_comparison',
                   }}
                   dataType="comparison"
@@ -253,6 +243,7 @@ const QuickComparisonScreen = () => {
                     criteria,
                     options,
                     cells: comparisonData,
+                    notes,
                   }}
                   dataType="comparison"
                   title="Quick Comparison Result"
@@ -307,7 +298,7 @@ const QuickComparisonScreen = () => {
               </View>
             ))}
             
-            <View style={styles.criterionCell}>
+            <View style={styles.clearAllContainer}>
               <TouchableOpacity
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAllCriteria}
@@ -351,7 +342,7 @@ const QuickComparisonScreen = () => {
                   style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
                   onPress={addOption}
                 >
-                  <MaterialIcons name="add" size={24} color="#FFFFFF" />
+                  <MaterialIcons name="add" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
               
@@ -380,11 +371,52 @@ const QuickComparisonScreen = () => {
                 style={[styles.addCriterionButton, { backgroundColor: theme.colors.primary }]}
                 onPress={addCriterion}
               >
-                <MaterialIcons name="add" size={24} color="#FFFFFF" />
+                <MaterialIcons name="add" size={20} color="#FFFFFF" />
                 <Text style={styles.addButtonText}>Add Criterion</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
+        </View>
+
+        {/* Notes Section */}
+        <View style={[styles.notesSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <TouchableOpacity
+            style={styles.notesHeader}
+            onPress={() => setNotesExpanded(!notesExpanded)}
+          >
+            <View style={styles.notesHeaderLeft}>
+              <MaterialIcons name="note" size={20} color={theme.colors.primary} />
+              <Text style={[styles.notesTitle, { color: theme.colors.text }]}>Notes</Text>
+              {notes.trim() && !notesExpanded && (
+                <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
+                  <Text style={styles.notesBadgeText}>•</Text>
+                </View>
+              )}
+            </View>
+            <MaterialIcons
+              name={notesExpanded ? "expand-less" : "expand-more"}
+              size={24}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+          
+          {notesExpanded && (
+            <View style={styles.notesContent}>
+              <TextInput
+                style={[styles.notesInput, { 
+                  backgroundColor: theme.colors.background, 
+                  color: theme.colors.text,
+                  borderColor: theme.colors.border 
+                }]}
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="Add notes about this comparison..."
+                placeholderTextColor={theme.colors.tabBarInactive}
+                multiline
+                textAlignVertical="top"
+              />
+            </View>
+          )}
         </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -488,6 +520,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 14,
+  },
+  clearAllContainer: {
+    minHeight: 48,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    flex: 1,
   },
   clearAllButton: {
     flexDirection: 'row',
@@ -509,6 +548,52 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     padding: 2,
+  },
+  
+  // Notes Section Styles
+  notesSection: {
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  notesHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  notesTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  notesBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  notesBadgeText: {
+    fontSize: 0,
+  },
+  notesContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  notesInput: {
+    minHeight: 80,
+    maxHeight: 120,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 12,
+    fontSize: 16,
+    lineHeight: 20,
   },
 });
 
