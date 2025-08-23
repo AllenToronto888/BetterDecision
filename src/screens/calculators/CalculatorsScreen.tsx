@@ -100,7 +100,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
 });
 

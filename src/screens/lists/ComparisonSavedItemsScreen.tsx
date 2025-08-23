@@ -5,18 +5,20 @@ import {
     Alert,
     FlatList,
     RefreshControl,
+    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { Button, CustomHeader, Share, Typography, useTheme } from '../../components';
-import { deleteQuickComparison, getQuickComparisons } from '../../utils/storage';
+import { deleteDetailComparison, deleteQuickComparison, getDetailComparisons, getQuickComparisons } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
   name: string;
   data: any;
   type: string;
+  comparisonType: 'quick' | 'detail';
   createdAt: string;
   updatedAt: string;
 }
@@ -31,9 +33,15 @@ const ComparisonSavedItemsScreen: React.FC = () => {
   const loadSavedItems = async () => {
     try {
       setIsLoading(true);
-      const quickComparisons = await getQuickComparisons();
-      // Convert to the expected format for the UI
-      const formattedItems = quickComparisons.map(comparison => ({
+      
+      // Load both quick and detail comparisons
+      const [quickComparisons, detailComparisons] = await Promise.all([
+        getQuickComparisons(),
+        getDetailComparisons()
+      ]);
+      
+      // Format quick comparisons
+      const formattedQuickItems = quickComparisons.map(comparison => ({
         id: comparison.id,
         name: comparison.title,
         data: {
@@ -43,10 +51,32 @@ const ComparisonSavedItemsScreen: React.FC = () => {
           comparisonData: comparison.comparisonData,
         },
         type: 'comparison',
+        comparisonType: 'quick' as const,
         createdAt: comparison.date,
         updatedAt: comparison.date,
       }));
-      setSavedItems(formattedItems);
+      
+      // Format detail comparisons
+      const formattedDetailItems = detailComparisons.map(comparison => ({
+        id: comparison.id,
+        name: comparison.title,
+        data: {
+          title: comparison.title,
+          criteria: comparison.criteria,
+          options: comparison.options,
+          comparisonData: comparison.comparisonData,
+        },
+        type: 'comparison',
+        comparisonType: 'detail' as const,
+        createdAt: comparison.date,
+        updatedAt: comparison.date,
+      }));
+      
+      // Combine and sort by date (newest first)
+      const allItems = [...formattedQuickItems, ...formattedDetailItems]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      setSavedItems(allItems);
     } catch (error) {
       console.error('Failed to load saved comparisons:', error);
     } finally {
@@ -56,7 +86,19 @@ const ComparisonSavedItemsScreen: React.FC = () => {
 
   const deleteSavedItem = async (id: string) => {
     try {
-      await deleteQuickComparison(id);
+      // Find the item to determine its type
+      const item = savedItems.find(item => item.id === id);
+      if (!item) {
+        throw new Error('Item not found');
+      }
+      
+      // Delete based on comparison type
+      if (item.comparisonType === 'quick') {
+        await deleteQuickComparison(id);
+      } else if (item.comparisonType === 'detail') {
+        await deleteDetailComparison(id);
+      }
+      
       await loadSavedItems(); // Reload the list
     } catch (error) {
       console.error('Failed to delete comparison:', error);
@@ -107,7 +149,8 @@ const ComparisonSavedItemsScreen: React.FC = () => {
     if (item.data.pros && item.data.cons) {
       return `${item.data.pros.length} pros, ${item.data.cons.length} cons`;
     } else if (item.data.options && item.data.criteria) {
-      return `${item.data.options.length} options, ${item.data.criteria.length} criteria`;
+      const comparisonTypeLabel = item.comparisonType === 'quick' ? 'Quick' : 'Detail';
+      return `${comparisonTypeLabel}: ${item.data.options.length} options, ${item.data.criteria.length} criteria`;
     }
     return 'Comparison data';
   };
@@ -150,9 +193,21 @@ const ComparisonSavedItemsScreen: React.FC = () => {
             const cell = item.data.comparisonData.find((cell: any) => 
               cell.criterionId === criterion.id && cell.optionId === option.id
             );
-            const status = cell ? cell.status : 'no';
-            const emoji = status === 'yes' ? '✅' : status === 'partial' ? '⚠️' : '❌';
-            details += `  ${emoji} ${criterion.text}\n`;
+            
+            // Check if this is a detail comparison (has text) or quick comparison (has status)
+            if (cell) {
+              if (cell.text !== undefined) {
+                // Detail comparison - show text content
+                details += `  📝 ${criterion.text}: ${cell.text || 'No details'}\n`;
+              } else if (cell.status !== undefined) {
+                // Quick comparison - show status with emoji
+                const status = cell.status;
+                const emoji = status === 'yes' ? '✅' : status === 'partial' ? '⚠️' : '❌';
+                details += `  ${emoji} ${criterion.text}\n`;
+              }
+            } else {
+              details += `  ❓ ${criterion.text}: No data\n`;
+            }
           });
         });
       }

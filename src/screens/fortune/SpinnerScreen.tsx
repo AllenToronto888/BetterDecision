@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     Alert,
     Animated,
@@ -54,7 +54,7 @@ const SpinnerScreen = () => {
   
   const addOption = () => {
     const newId = options.length > 0 
-      ? (Math.max(...options.map(item => parseInt(item.id))) + 1).toString()
+      ? (Math.max(...options.map(item => parseInt(item.id) || 0)) + 1).toString()
       : '1';
     
     const colorIndex = options.length % colors.length;
@@ -110,7 +110,7 @@ const SpinnerScreen = () => {
       
       setResult(selectedOption);
       setIsSpinning(false);
-      rotationValue.setValue(0);
+      // Keep the final rotation value instead of resetting to 0
     });
   };
   
@@ -129,11 +129,14 @@ const SpinnerScreen = () => {
             const startAngle = index * segmentAngle;
             const endAngle = (index + 1) * segmentAngle;
             
+            // For segments <= 180 degrees, we need a different approach
+            const isSmallSegment = segmentAngle <= 180;
+            
             return (
               <View
                 key={option.id}
                 style={[
-                  styles.segment,
+                  isSmallSegment ? styles.smallSegment : styles.segment,
                   {
                     backgroundColor: option.color,
                     transform: [
@@ -177,12 +180,6 @@ const SpinnerScreen = () => {
           icon: "chevron-left",
           onPress: () => navigation.goBack()
         }}
-        rightAction={{
-          icon: "history",
-          onPress: () => {
-            console.log('History pressed');
-          }
-        }}
       />
 
       <KeyboardAvoidingView
@@ -192,6 +189,8 @@ const SpinnerScreen = () => {
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={true}
+          keyboardShouldPersistTaps="handled"
         >
         <View style={styles.titleContainer}>
           <TextInput
@@ -235,7 +234,7 @@ const SpinnerScreen = () => {
                   style={styles.deleteButton}
                   onPress={() => removeOption(option.id)}
                 >
-                  <MaterialIcons name="delete" size={20} color={theme.danger} />
+                  <MaterialIcons name="delete" size={20} color={theme.colors.danger} />
                 </TouchableOpacity>
               )}
             </View>
@@ -262,6 +261,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    paddingBottom: 100,
     alignItems: 'center',
   },
   titleContainer: {
@@ -301,9 +301,21 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingLeft: 80,
   },
+  smallSegment: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    left: 150,
+    top: 150,
+    transformOrigin: 'left top',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 40,
+  },
   segmentText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: 18,
     width: 60,
     textAlign: 'center',
   },
@@ -339,11 +351,11 @@ const styles = StyleSheet.create({
     height: 0,
     borderLeftWidth: 10,
     borderRightWidth: 10,
-    borderBottomWidth: 20,
+    borderBottomWidth: 35,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#000',
-    transform: [{ translateY: -10 }],
+    transform: [{ translateY: -15 }, { rotate: '180deg' }],
   },
   resultContainer: {
     width: '100%',

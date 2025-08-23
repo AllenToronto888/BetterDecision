@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { saveProsConsList, saveQuickComparison } from '../utils/storage';
+import { saveDetailComparison, saveProsConsList, saveQuickComparison } from '../utils/storage';
 import { Button } from './Button';
 import { Typography } from './Typography';
 
@@ -90,6 +90,19 @@ export const Save: React.FC<SaveComponentProps> = ({
         };
         
         await saveQuickComparison(quickComparisonData);
+      }
+      // Handle Detail Comparison data specifically
+      else if (dataType === 'comparison' && data.comparisonType === 'detail_comparison') {
+        const detailComparisonData = {
+          id: Date.now().toString(),
+          title: name.trim(),
+          date: new Date().toISOString(),
+          criteria: data.criteria,
+          options: data.options,
+          comparisonData: data.comparisonData,
+        };
+        
+        await saveDetailComparison(detailComparisonData);
       } 
       // Handle Pros & Cons data
       else if (dataType === 'decision' && data.type === 'pros_cons') {

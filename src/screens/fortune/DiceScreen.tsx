@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     Animated,
     Easing,
@@ -23,6 +23,14 @@ interface DiceResult {
   rotation: Animated.Value;
 }
 
+interface HistoryEntry {
+  id: string;
+  timestamp: Date;
+  config: DiceConfig;
+  results: number[];
+  sum: number;
+}
+
 const DiceScreen = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
@@ -30,6 +38,7 @@ const DiceScreen = () => {
   const [results, setResults] = useState<DiceResult[]>([]);
   const [sum, setSum] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   
   const diceColors = useRef([
     '#F44336', // Red
@@ -39,7 +48,7 @@ const DiceScreen = () => {
     '#9C27B0', // Purple
   ]).current;
   
-  const sideOptions = [4, 6, 8, 10, 12, 20];
+  const sideOptions = [4, 6, 8, 12];
   
   const updateCount = (increment: boolean) => {
     const newCount = increment ? config.count + 1 : config.count - 1;
@@ -50,6 +59,10 @@ const DiceScreen = () => {
   
   const updateSides = (sides: number) => {
     setConfig({ ...config, sides });
+  };
+  
+  const clearHistory = () => {
+    setHistory([]);
   };
   
   const rollDice = () => {
@@ -84,10 +97,21 @@ const DiceScreen = () => {
     
     Animated.stagger(100, animations).start(() => {
       setIsRolling(false);
+      setSum(newSum); // Show total after animation completes
+      
+      // Add to history
+      const historyEntry: HistoryEntry = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        config: { ...config },
+        results: newResults.map(r => r.value),
+        sum: newSum,
+      };
+      setHistory(prev => [historyEntry, ...prev].slice(0, 20)); // Keep last 20 entries
     });
     
     setResults(newResults);
-    setSum(newSum);
+    setSum(0); // Hide total during animation
   };
   
   const renderDie = (result: DiceResult) => {
@@ -131,17 +155,13 @@ const DiceScreen = () => {
           icon: "chevron-left",
           onPress: () => navigation.goBack()
         }}
-        rightAction={{
-          icon: "history",
-          onPress: () => {
-            console.log('History pressed');
-          }
-        }}
       />
 
       <ScrollView
         style={[styles.container, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
       >
 
       <View style={[styles.configCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
@@ -180,7 +200,7 @@ const DiceScreen = () => {
           </View>
         </View>
         
-        <View style={styles.configRow}>
+        <View style={styles.configRowLast}>
           <Text style={[styles.configLabel, { color: theme.colors.text }]}>Sides per Die:</Text>
           <View style={styles.sidesContainer}>
             {sideOptions.map((sides) => (
@@ -201,7 +221,7 @@ const DiceScreen = () => {
                     { color: config.sides === sides ? '#FFFFFF' : theme.colors.text },
                   ]}
                 >
-                  d{sides}
+                  {sides}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -234,12 +254,45 @@ const DiceScreen = () => {
       )}
       
       <View style={[styles.historyCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.historyTitle, { color: theme.colors.text }]}>History</Text>
+        <View style={styles.historyHeader}>
+          <Text style={[styles.historyTitle, { color: theme.colors.text }]}>History</Text>
+          {history.length > 0 && (
+            <TouchableOpacity
+              style={[styles.clearButton, { borderColor: theme.colors.primary }]}
+              onPress={clearHistory}
+            >
+              <MaterialIcons name="clear" size={16} color={theme.colors.primary} />
+              <Text style={[styles.clearButtonText, { color: theme.colors.primary }]}>Clear All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         
-        {/* This would be populated with historical rolls */}
-        <Text style={[styles.emptyHistoryText, { color: theme.colors.tabBarInactive }]}>
-          No previous rolls
-        </Text>
+        {history.length === 0 ? (
+          <Text style={[styles.emptyHistoryText, { color: theme.colors.tabBarInactive }]}>
+            No previous rolls
+          </Text>
+        ) : (
+          history.map((entry) => (
+            <View key={entry.id} style={[styles.historyEntry, { borderBottomColor: theme.colors.border }]}>
+              <View style={styles.historyEntryHeader}>
+                <Text style={[styles.historyConfig, { color: theme.colors.text }]}>
+                  {entry.config.count}x {entry.config.sides}-sided
+                </Text>
+                <Text style={[styles.historyTime, { color: theme.colors.tabBarInactive }]}>
+                  {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+              <View style={styles.historyResults}>
+                <Text style={[styles.historyDice, { color: theme.colors.tabBarInactive }]}>
+                  [{entry.results.join(', ')}]
+                </Text>
+                <Text style={[styles.historySum, { color: theme.colors.text }]}>
+                  Total: {entry.sum}
+                </Text>
+              </View>
+            </View>
+          ))
+        )}
       </View>
       </ScrollView>
     </View>
@@ -253,12 +306,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    paddingBottom: 100,
   },
   configCard: {
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    marginHorizontal: 24,
     borderWidth: 1,
   },
   configTitle: {
@@ -271,6 +324,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  configRowLast: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 0,
   },
   configLabel: {
     fontSize: 16,
@@ -299,13 +358,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sideButton: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
-    marginBottom: 8,
+    marginBottom: 4,
     borderWidth: 1,
   },
   sideButtonText: {
@@ -374,14 +433,63 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
   },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   historyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 16,
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
   },
   emptyHistoryText: {
     textAlign: 'center',
     padding: 16,
+  },
+  historyEntry: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  historyEntryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  historyConfig: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  historyTime: {
+    fontSize: 12,
+  },
+  historyResults: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  historyDice: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+  },
+  historySum: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 
