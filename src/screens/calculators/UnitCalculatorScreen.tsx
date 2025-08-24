@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -44,19 +44,29 @@ const UnitCalculatorScreen = () => {
       calculationType: 'unit_price',
     },
     dataType: 'calculation',
-    enabled: products.some(p => p.price.trim() !== '' && p.quantity.trim() !== ''),
+    enabled: products.some(p => 
+      p.price.trim() || 
+      p.quantity.trim() ||
+      p.name.trim()
+    ),
     delay: 5000, // Auto-save after 5 seconds of inactivity
+    autoSavePrefix: t('autoSaved'),
     onSave: (name) => {
       console.log('🟢 AUTO-SAVE SUCCESS:', name);
-      // Force status to saved, then idle after a short delay
-      setTimeout(() => setAutoSaveStatus('idle'), 1500);
-    },
-    onError: (error) => {
-      console.error('Auto-save error:', error);
-      // Force status back to idle after error
+      setAutoSaveStatus('saved');
+      // Force status to idle after delay
       setTimeout(() => setAutoSaveStatus('idle'), 2000);
     },
-    onStatusChange: setAutoSaveStatus,
+    onError: (error) => {
+      console.error('🔴 AUTO-SAVE ERROR:', error);
+      setAutoSaveStatus('error');
+      // Force status back to idle after error
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    },
+    onStatusChange: (status) => {
+      console.log('🔄 AUTO-SAVE STATUS:', status);
+      setAutoSaveStatus(status);
+    },
   });
 
   // Unit categories with original values and translated labels
@@ -102,15 +112,11 @@ const UnitCalculatorScreen = () => {
     return ['g', 'kg', 'ml', 'l', 'oz', 'lb', 'each']; // Fallback
   };
 
-  useEffect(() => {
-    calculateUnitPrices();
-  }, [products.map(p => `${p.price}-${p.quantity}-${p.unit}`).join(',')]);
-
   // Removed problematic timeout that was interfering with auto-save
 
 
 
-  const calculateUnitPrices = () => {
+  const calculateUnitPrices = useCallback(() => {
     const updatedProducts = products.map((product) => {
       const price = parseFloat(product.price) || 0;
       const quantity = parseFloat(product.quantity) || 1;
@@ -176,7 +182,11 @@ const UnitCalculatorScreen = () => {
       // Clear the best products if not all products have valid prices
       setBestProductIndexes([]);
     }
-  };
+  }, [products, setProducts, setBestProductIndexes]);
+
+  useEffect(() => {
+    calculateUnitPrices();
+  }, [calculateUnitPrices]);
 
   const updateProduct = (index: number, field: keyof Product, value: string) => {
     const updatedProducts = [...products];
@@ -503,8 +513,12 @@ const styles = StyleSheet.create({
   },
   autoSaveStatus: {
     alignItems: 'center',
-    marginTop: 12,
-    paddingVertical: 8,
+    marginTop: 16,
+    marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   autoSaveText: {
     fontStyle: 'italic',

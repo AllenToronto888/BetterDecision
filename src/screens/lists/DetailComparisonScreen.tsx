@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Criterion {
@@ -52,6 +52,39 @@ const DetailComparisonScreen = () => {
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Auto-save functionality
+  useAutoSave({
+    data: {
+      criteria,
+      options,
+      comparisonData,
+      notes,
+      title,
+    },
+    dataType: 'detail_comparison',
+    enabled: Boolean(
+      criteria.some(criterion => criterion.text.trim()) ||
+      options.some(option => option.name.trim()) ||
+      comparisonData.some(cell => cell.text.trim()) ||
+      notes.trim()
+    ),
+    delay: 5000,
+    autoSavePrefix: t('autoSaved'),
+    onSave: (name) => {
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    },
+    onError: (error) => {
+      console.error('Auto-save error:', error);
+      setAutoSaveStatus('error');
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    },
+    onStatusChange: (status) => {
+      setAutoSaveStatus(status);
+    },
+  });
   
   // Update translations when language changes
   useEffect(() => {
@@ -225,7 +258,7 @@ const DetailComparisonScreen = () => {
                     notes,
                     comparisonType: 'detail_comparison',
                   }}
-                  dataType="comparison"
+                  dataType="detail_comparison"
                   variant="icon"
                   showInput={false}
                   onSaveSuccess={(name: string) => console.log('Saved as:', name)}
@@ -238,7 +271,7 @@ const DetailComparisonScreen = () => {
                     comparisonData,
                     notes,
                   }}
-                  dataType="comparison"
+                  dataType="detail_comparison"
                   title={t('detailComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}

@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 // Import Button directly from its file to avoid "Cannot call a class as a function" error
 
@@ -36,6 +36,51 @@ const ProsConsScreen = () => {
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Track if we've moved away from the initial default state
+  const isChangedFromInitial = Boolean(
+    // Current state different from initial state
+    pros.length !== 2 || 
+    cons.length !== 1 ||
+    notes.trim() ||
+    pros.some((pro, index) => {
+      const initialTexts = [t('sampleText'), t('sampleText')];
+      const initialWeights = [5, 9];
+      return pro.text !== initialTexts[index] || pro.weight !== initialWeights[index];
+    }) ||
+    cons.some((con, index) => {
+      const initialTexts = [t('sampleText')];
+      const initialWeights = [3];
+      return con.text !== initialTexts[index] || con.weight !== initialWeights[index];
+    })
+  );
+
+  // Auto-save functionality
+  useAutoSave({
+    data: {
+      pros,
+      cons,
+      notes,
+      title,
+    },
+    dataType: 'decision',
+    enabled: isChangedFromInitial,
+    delay: 5000,
+    autoSavePrefix: t('autoSaved'),
+    onSave: (name) => {
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    },
+    onError: (error) => {
+      console.error('Auto-save error:', error);
+      setAutoSaveStatus('error');
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    },
+    onStatusChange: (status) => {
+      setAutoSaveStatus(status);
+    },
+  });
   
   // Update translations when language changes
   useEffect(() => {

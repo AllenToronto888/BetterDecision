@@ -9,18 +9,17 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
-import { deleteProConsList, getProsConsLists } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
   name: string;
   data: any;
   type: string;
-  comparisonType: 'pros_cons';
   createdAt: string;
   updatedAt: string;
+  isAutoSaved?: boolean;
 }
 
 const ProsConsSavedItemsScreen: React.FC = () => {
@@ -28,56 +27,15 @@ const ProsConsSavedItemsScreen: React.FC = () => {
   const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [savedItems, setSavedItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadSavedItems = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Load only pros & cons lists
-      const prosConsLists = await getProsConsLists();
-      
-      // Format pros & cons lists
-      const formattedItems = prosConsLists.map(list => ({
-        id: list.id,
-        name: list.title,
-        data: {
-          title: list.title,
-          pros: list.pros,
-          cons: list.cons,
-          totalProsWeight: list.pros?.reduce((sum: number, pro: any) => sum + (pro.weight || 1), 0) || 0,
-          totalConsWeight: list.cons?.reduce((sum: number, con: any) => sum + (con.weight || 1), 0) || 0,
-          notes: list.notes,
-        },
-        type: 'decision',
-        comparisonType: 'pros_cons' as const,
-        createdAt: list.date,
-        updatedAt: list.date,
-      }));
-      
-      // Sort by date (newest first)
-      const sortedItems = formattedItems
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
-      setSavedItems(sortedItems);
-    } catch (error) {
-      console.error('Failed to load saved pros & cons lists:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    savedItems,
+    isLoading,
+    loadSavedItems,
+    deleteSavedItem,
+  } = useSavedItems('decision');
 
-  const deleteSavedItem = async (id: string) => {
-    try {
-      // Use the storage method for pros & cons
-      await deleteProConsList(id);
-      await loadSavedItems(); // Reload the list
-    } catch (error) {
-      console.error('Failed to delete pros & cons list:', error);
-      throw error;
-    }
-  };
+
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -112,7 +70,7 @@ const ProsConsSavedItemsScreen: React.FC = () => {
     items: savedItems,
     storageConfig: {
       type: 'clear',
-      storageKey: 'better_decision_pros_cons_lists'
+      storageKey: 'saved_decisions'
     },
     onDeleteSuccess: loadSavedItems,
     alertConfig: {
@@ -134,12 +92,13 @@ const ProsConsSavedItemsScreen: React.FC = () => {
     setExpandedItems(newExpanded);
   };
 
-  const formatDetailedData = (item: SavedItem): string => {
+    const formatDetailedData = (item: SavedItem): string => {
     let details = '';
     
     if (item.data.pros && item.data.cons) {
-      const totalProsWeight = item.data.totalProsWeight || 0;
-      const totalConsWeight = item.data.totalConsWeight || 0;
+      // Calculate totals from the pros/cons arrays
+      const totalProsWeight = item.data.pros.reduce((sum: number, pro: any) => sum + (pro.weight || 1), 0);
+      const totalConsWeight = item.data.cons.reduce((sum: number, con: any) => sum + (con.weight || 1), 0);
       
       details += `${t('totalProsScore')}: ${totalProsWeight}\n`;
       details += `${t('totalConsScore')}: ${totalConsWeight}\n\n`;
@@ -164,7 +123,7 @@ const ProsConsSavedItemsScreen: React.FC = () => {
       }
       
       details += `\n${t('result')}: ${totalProsWeight > totalConsWeight ? t('prosWin') : 
-                              totalConsWeight > totalProsWeight ? t('consWin') : t('tie')}`;
+        totalConsWeight > totalProsWeight ? t('consWin') : t('tie')}`;
     }
     
     return details.trim();

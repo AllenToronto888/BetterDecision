@@ -9,18 +9,17 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
-import { deleteQuickComparison, getQuickComparisons } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
   name: string;
   data: any;
   type: string;
-  comparisonType: 'quick';
   createdAt: string;
   updatedAt: string;
+  isAutoSaved?: boolean;
 }
 
 const QuickComparisonSavedItemsScreen: React.FC = () => {
@@ -28,54 +27,15 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
   const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [savedItems, setSavedItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadSavedItems = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Load only quick comparisons
-      const quickComparisons = await getQuickComparisons();
-      
-      // Format quick comparisons
-      const formattedQuickItems = quickComparisons.map(comparison => ({
-        id: comparison.id,
-        name: comparison.title,
-        data: {
-          title: comparison.title,
-          criteria: comparison.criteria,
-          options: comparison.options,
-          comparisonData: comparison.comparisonData,
-          notes: comparison.notes,
-        },
-        type: 'comparison',
-        comparisonType: 'quick' as const,
-        createdAt: comparison.date,
-        updatedAt: comparison.date,
-      }));
-      
-      // Sort by date (newest first)
-      const sortedItems = formattedQuickItems
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
-      setSavedItems(sortedItems);
-    } catch (error) {
-      console.error('Failed to load saved quick comparisons:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    savedItems,
+    isLoading,
+    loadSavedItems,
+    deleteSavedItem,
+  } = useSavedItems('quick_comparison');
 
-  const deleteSavedItem = async (id: string) => {
-    try {
-      await deleteQuickComparison(id);
-      await loadSavedItems(); // Reload the list
-    } catch (error) {
-      console.error('Failed to delete quick comparison:', error);
-      throw error;
-    }
-  };
+
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -110,7 +70,7 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
     items: savedItems,
     storageConfig: {
       type: 'clear',
-      storageKey: 'better_decision_quick_comparisons'
+      storageKey: 'saved_quick_comparisons'
     },
     onDeleteSuccess: loadSavedItems,
     alertConfig: {
@@ -140,16 +100,22 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
       const options = item.data.options;
       const comparisonData = item.data.comparisonData;
 
-      details += `${t('criteria')}: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
-      details += `${t('options')}: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
+      details += `${t('criteria')}: ${criteria.map((c: any) => {
+        const text = c.text || c;
+        return typeof text === 'string' ? text : String(text);
+      }).join(', ')}\n`;
+      details += `${t('options')}: ${options.map((o: any) => {
+        const name = o.name || o;
+        return typeof name === 'string' ? name : String(name);
+      }).join(', ')}\n\n`;
       
       // Show comparison results
       details += `${t('comparisonResults')}:\n`;
       criteria.forEach((criterion: any, criterionIndex: number) => {
-        const criterionText = criterion.text || criterion;
+        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : String(criterion.text || criterion);
         details += `\n${criterionText}:\n`;
         options.forEach((option: any, optionIndex: number) => {
-          const optionName = option.name || option;
+          const optionName = typeof (option.name || option) === 'string' ? (option.name || option) : String(option.name || option);
           const cellData = comparisonData.find((cell: any) => 
             cell.criterionId === criterion.id && cell.optionId === option.id
           );
@@ -161,7 +127,7 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
       
       // Add notes if they exist
       if (item.data.notes && item.data.notes.trim()) {
-        details += `\n\nNOTES:\n${item.data.notes.trim()}`;
+        details += `\n\n${t('notes').toUpperCase()}:\n${item.data.notes.trim()}`;
       }
     }
     

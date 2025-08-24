@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useRef, useState } from 'react';
 import {
     Alert,
@@ -6,17 +7,33 @@ import {
     Dimensions,
     Linking,
     PanResponder,
+    Platform,
     ScrollView,
     StyleSheet,
     Switch,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { CustomHeader, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
+import WebViewScreen from './WebViewScreen';
 
-const SettingsScreen = () => {
+const Stack = createNativeStackNavigator();
+
+// App Store Configuration
+const APP_STORE_CONFIG = {
+  ios: {
+    // Update this with your actual App Store ID when published
+    appId: null, // e.g., '123456789'
+    bundleId: 'com.allentoronto888.betterdecision'
+  },
+  android: {
+    packageName: 'com.allentoronto888.betterdecision'
+  }
+};
+
+const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const { t, currentLanguage, changeLanguage, supportedLanguages } = useI18n();
   
@@ -136,21 +153,92 @@ const SettingsScreen = () => {
     );
   };
   
-  const rateApp = () => {
-    // This would link to the app store
-    Alert.alert('Rate App', 'This would open the app store for rating.');
+  const rateApp = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        if (APP_STORE_CONFIG.ios.appId) {
+          // Direct link to App Store rating page
+          const appStoreUrl = `https://apps.apple.com/app/id${APP_STORE_CONFIG.ios.appId}?action=write-review`;
+          const supported = await Linking.canOpenURL(appStoreUrl);
+          
+          if (supported) {
+            await Linking.openURL(appStoreUrl);
+          } else {
+            // Fallback to app page
+            await Linking.openURL(`https://apps.apple.com/app/id${APP_STORE_CONFIG.ios.appId}`);
+          }
+        } else {
+          // App not published yet - show search message
+          Alert.alert(
+            t('rateApp'),
+            'Please search for "Better Decision" in the App Store to rate our app.',
+            [
+              { text: t('cancel'), style: 'cancel' },
+              { 
+                text: 'Open App Store', 
+                onPress: () => Linking.openURL('https://apps.apple.com/') 
+              }
+            ]
+          );
+        }
+      } else {
+        // Android Play Store
+        const packageName = APP_STORE_CONFIG.android.packageName;
+        const playStoreUrl = `market://details?id=${packageName}`;
+        const webPlayStoreUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
+        
+        try {
+          const supported = await Linking.canOpenURL(playStoreUrl);
+          if (supported) {
+            await Linking.openURL(playStoreUrl);
+          } else {
+            // Fallback to web version
+            await Linking.openURL(webPlayStoreUrl);
+          }
+        } catch (fallbackError) {
+          // If app not published yet, show search message
+          Alert.alert(
+            t('rateApp'),
+            'Please search for "Better Decision" in the Play Store to rate our app.',
+            [
+              { text: t('cancel'), style: 'cancel' },
+              { 
+                text: 'Open Play Store', 
+                onPress: () => Linking.openURL('https://play.google.com/store') 
+              }
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error opening app store:', error);
+      Alert.alert(
+        t('error'),
+        'Unable to open app store. Please search for "Better Decision" in your app store.',
+        [{ text: t('ok') }]
+      );
+    }
   };
   
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://example.com/privacy-policy');
+    navigation.navigate('WebView', {
+      url: 'https://betterdecision.sequla.net/privacy-policy',
+      title: t('privacyPolicy')
+    });
   };
   
   const openTermsOfService = () => {
-    Linking.openURL('https://example.com/terms-of-service');
+    navigation.navigate('WebView', {
+      url: 'https://betterdecision.sequla.net/terms-and-conditions',
+      title: t('termsOfService')
+    });
   };
   
   const contactUs = () => {
-    Linking.openURL('mailto:support@example.com');
+    navigation.navigate('WebView', {
+      url: 'https://betterdecision.sequla.net/contact',
+      title: t('contactUs')
+    });
   };
 
   return (
@@ -166,10 +254,10 @@ const SettingsScreen = () => {
         }}
       >
       
-      <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('appearance')}</Text>
+      <View style={[styles.section, styles.appearanceSection, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        <Text style={[styles.appearanceSectionTitle, { color: theme.colors.text }]}>{t('appearance')}</Text>
         
-        <View style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]}>
+        <View style={[styles.settingRow, styles.lastRow, styles.appearanceRow, { borderBottomColor: theme.colors.border }]}>
           <View style={styles.settingLabelContainer}>
             <MaterialIcons name="brightness-6" size={24} color="#FFA500" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('darkMode')}</Text>
@@ -396,6 +484,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
+  appearanceSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -406,6 +499,12 @@ const styles = StyleSheet.create({
   lastRow: {
     borderBottomWidth: 0,
     paddingBottom: 0,
+  },
+  appearanceRow: {
+    paddingVertical: 4,
+  },
+  appearanceSection: {
+    paddingBottom: 8,
   },
   settingLabelContainer: {
     flexDirection: 'row',
@@ -549,5 +648,23 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+// Main navigator for Settings tab
+const SettingsScreen = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="SettingsHome" 
+        component={SettingsHomeScreen} 
+        options={{ headerShown: false, animation: 'none' }}
+      />
+      <Stack.Screen 
+        name="WebView" 
+        component={WebViewScreen} 
+        options={{ headerShown: false, animation: 'slide_from_right' }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 export default SettingsScreen;

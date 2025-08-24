@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   historyDice: {
     fontSize: 12,
-    fontFamily: 'monospace',
+
   },
   historySum: {
     fontSize: 14,

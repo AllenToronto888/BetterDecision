@@ -233,6 +233,8 @@ export const translations = {
     ok: "OK",
     success: "Success",
     error: "Error",
+    autoSaved: "Auto-saved",
+    webViewError: "Failed to load the webpage. Please check your internet connection.",
     version: "Version"
   },
   es: {
@@ -467,6 +469,8 @@ export const translations = {
     ok: "OK",
     success: "Éxito",
     error: "Error",
+    autoSaved: "Auto-guardado",
+    webViewError: "No se pudo cargar la página web. Por favor, verifica tu conexión a internet.",
     version: "Versión"
   },
   fr: {
@@ -701,6 +705,8 @@ export const translations = {
     ok: "OK",
     success: "Succès",
     error: "Erreur",
+    autoSaved: "Auto-sauvegardé",
+    webViewError: "Échec du chargement de la page web. Veuillez vérifier votre connexion internet.",
     version: "Version"
   },
   'zh-Hans': {
@@ -935,6 +941,8 @@ export const translations = {
     ok: "确定",
     success: "成功",
     error: "错误",
+    autoSaved: "自动保存",
+    webViewError: "网页加载失败。请检查您的网络连接。",
     version: "版本"
   },
   'zh-Hant': {
@@ -1169,6 +1177,8 @@ export const translations = {
     ok: "確定",
     success: "成功",
     error: "錯誤",
+    autoSaved: "自動儲存",
+    webViewError: "網頁載入失敗。請檢查您的網路連線。",
     version: "版本"
   },
   ja: {
@@ -1403,6 +1413,8 @@ export const translations = {
     ok: "OK",
     success: "成功",
     error: "エラー",
+    autoSaved: "自動保存",
+    webViewError: "ウェブページの読み込みに失敗しました。インターネット接続を確認してください。",
     version: "バージョン"
   }
 };

@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Criterion {
@@ -45,6 +45,7 @@ const QuickComparisonScreen = () => {
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   const [comparisonData, setComparisonData] = useState<ComparisonCell[]>([
     { criterionId: '1', optionId: '1', status: 'yes' },
     { criterionId: '1', optionId: '2', status: 'no' },
@@ -52,6 +53,37 @@ const QuickComparisonScreen = () => {
     { criterionId: '2', optionId: '2', status: 'partial' },
   ]);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
+
+  // Auto-save functionality
+  useAutoSave({
+    data: {
+      criteria,
+      options,
+      comparisonData,
+      notes,
+      title,
+    },
+    dataType: 'quick_comparison',
+    enabled: Boolean(
+      criteria.some(criterion => criterion.text.trim()) ||
+      options.some(option => option.name.trim()) ||
+      notes.trim()
+    ),
+    delay: 5000,
+    autoSavePrefix: t('autoSaved'),
+    onSave: (name) => {
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    },
+    onError: (error) => {
+      console.error('Auto-save error:', error);
+      setAutoSaveStatus('error');
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    },
+    onStatusChange: (status) => {
+      setAutoSaveStatus(status);
+    },
+  });
   
   // Update translations when language changes
   useEffect(() => {
@@ -263,7 +295,7 @@ const QuickComparisonScreen = () => {
                     notes,
                     comparisonType: 'quick_comparison',
                   }}
-                  dataType="comparison"
+                  dataType="quick_comparison"
                   variant="icon"
                   showInput={false}
                   onSaveSuccess={(name: string) => console.log('Saved as:', name)}
@@ -276,7 +308,7 @@ const QuickComparisonScreen = () => {
                     cells: comparisonData,
                     notes,
                   }}
-                  dataType="comparison"
+                  dataType="quick_comparison"
                   title={t('quickComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}

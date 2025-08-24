@@ -230,8 +230,8 @@ const CalculatorSavedItemsScreen: React.FC = () => {
         const lowestPrice = Math.min(...productsWithValidPrices.map((p: any) => p.unitPrice));
         actualBestIndexes = item.data.products
           .map((product: any, index: number) => ({ product, index }))
-          .filter(({ product }) => product.unitPrice === lowestPrice)
-          .map(({ index }) => index);
+          .filter(({ product }: any) => product.unitPrice === lowestPrice)
+          .map(({ index }: any) => index);
       }
       
       item.data.products.forEach((product: any, index: number) => {
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   itemDetailsText: {
-    fontFamily: 'monospace',
+
     lineHeight: 20,
   },
   itemActions: {

@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -51,10 +51,6 @@ const DayCounterScreen = () => {
     setCalculatorTitle(t('dayCounter'));
   }, [t]);
 
-  useEffect(() => {
-    calculateDifference();
-  }, [startDate, endDate, includeEndDate, timeUnit]);
-
   const calculateWorkingDays = (startDate: Date, endDate: Date, includeEndDate: boolean) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -90,7 +86,7 @@ const DayCounterScreen = () => {
     return workingDaysCount;
   };
 
-  const calculateDifference = () => {
+  const calculateDifference = useCallback(() => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
@@ -129,7 +125,11 @@ const DayCounterScreen = () => {
     }
     
     setDaysDifference(result);
-  };
+  }, [startDate, endDate, includeEndDate, timeUnit]);
+
+  useEffect(() => {
+    calculateDifference();
+  }, [calculateDifference]);
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];

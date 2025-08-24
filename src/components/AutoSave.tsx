@@ -3,12 +3,13 @@ import { useEffect, useRef } from 'react';
 
 interface AutoSaveOptions {
   data: any;
-  dataType: 'calculation' | 'comparison' | 'decision';
+  dataType: 'calculation' | 'comparison' | 'decision' | 'quick_comparison' | 'detail_comparison';
   enabled?: boolean;
   delay?: number; // milliseconds to wait before saving
   onSave?: (savedName: string) => void;
   onError?: (error: string) => void;
   onStatusChange?: (status: 'idle' | 'pending' | 'saving' | 'saved' | 'error') => void;
+  autoSavePrefix?: string; // Translation for "Auto-saved"
 }
 
 interface SavedItem {
@@ -30,16 +31,18 @@ export const useAutoSave = ({
   onSave,
   onError,
   onStatusChange,
+  autoSavePrefix = 'Auto-saved',
 }: AutoSaveOptions) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   const isSavingRef = useRef<boolean>(false);
+  const sessionAutoSaveIdRef = useRef<string | null>(null);
 
   const generateAutoSaveName = (): string => {
     const now = new Date();
     const date = now.toLocaleDateString();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `Auto-saved - ${date} ${time}`;
+    return `${autoSavePrefix} - ${date} ${time}`;
   };
 
   const shouldSaveData = (currentData: any): boolean => {
@@ -48,24 +51,45 @@ export const useAutoSave = ({
     // Check if data has meaningful content
     switch (dataType) {
       case 'calculation':
+        // Handle Unit Calculator (has products array)
         if (currentData.products && Array.isArray(currentData.products)) {
           return currentData.products.some((p: any) => 
-            p.price && p.price.trim() && p.quantity && p.quantity.trim()
+            (p.price && p.price.trim()) || 
+            (p.quantity && p.quantity.trim()) || 
+            (p.name && p.name.trim())
           );
         }
+        
+        // Handle Total Cost Calculator (has basePrice, productName, etc.)
+        if (currentData.calculationType === 'total_cost') {
+          return Boolean(
+            (currentData.basePrice && currentData.basePrice.trim()) ||
+            (currentData.productName && currentData.productName.trim()) ||
+            (currentData.additionalCosts && currentData.additionalCosts.some((cost: any) => cost.value && cost.value.trim())) ||
+            (currentData.compareEnabled && (
+              (currentData.comparisonPrice && currentData.comparisonPrice.trim()) ||
+              (currentData.comparisonName && currentData.comparisonName.trim()) ||
+              (currentData.comparisonAdditionalCosts && currentData.comparisonAdditionalCosts.some((cost: any) => cost.value && cost.value.trim()))
+            ))
+          );
+        }
+        
         return false;
 
       case 'comparison':
-        if (currentData.pros && currentData.cons) {
-          return currentData.pros.length > 0 || currentData.cons.length > 0;
-        }
-        if (currentData.criteria && currentData.options) {
-          return currentData.criteria.length > 0 && currentData.options.length > 0;
-        }
-        return false;
+      case 'quick_comparison':
+      case 'detail_comparison':
+        // Let the screen's 'enabled' parameter handle validation logic
+        // since each comparison screen has different data structures and requirements
+        return true;
 
       case 'decision':
-        return !!currentData.result;
+        // For pros & cons decisions, check if there's meaningful content
+        return Boolean(
+          (currentData.pros && currentData.pros.some((p: any) => p.text && p.text.trim())) ||
+          (currentData.cons && currentData.cons.some((c: any) => c.text && c.text.trim())) ||
+          (currentData.notes && currentData.notes.trim())
+        );
 
       default:
         return true;
@@ -83,31 +107,52 @@ export const useAutoSave = ({
       const existingData = await AsyncStorage.getItem(storageKey);
       const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
 
-      // Find existing auto-saved item for this dataType to update it
-      const autoSavedIndex = existingItems.findIndex(item => 
-        item.isAutoSaved && item.type === dataType
-      );
-
-      const autoSaveName = generateAutoSaveName();
       const now = new Date().toISOString();
-
-      const savedItem: SavedItem = {
-        id: autoSavedIndex >= 0 ? existingItems[autoSavedIndex].id : Date.now().toString(),
-        name: autoSavedIndex >= 0 ? existingItems[autoSavedIndex].name : autoSaveName,
-        data: dataToSave,
-        type: dataType,
-        createdAt: autoSavedIndex >= 0 ? existingItems[autoSavedIndex].createdAt : now,
-        updatedAt: now,
-        isAutoSaved: true,
-      };
-
+      let savedItem: SavedItem;
       let updatedItems: SavedItem[];
-      if (autoSavedIndex >= 0) {
-        // Update existing auto-saved item
-        updatedItems = [...existingItems];
-        updatedItems[autoSavedIndex] = savedItem;
+
+      // Check if we have a session auto-save ID (means we're updating existing)
+      if (sessionAutoSaveIdRef.current) {
+        // Find and update existing session auto-save
+        const existingIndex = existingItems.findIndex(item => 
+          item.id === sessionAutoSaveIdRef.current
+        );
+
+        if (existingIndex >= 0) {
+          // Update existing session auto-save
+          savedItem = {
+            ...existingItems[existingIndex],
+            data: dataToSave,
+            updatedAt: now,
+          };
+          updatedItems = [...existingItems];
+          updatedItems[existingIndex] = savedItem;
+        } else {
+          // Session ID exists but item not found, create new one
+          sessionAutoSaveIdRef.current = Date.now().toString();
+          savedItem = {
+            id: sessionAutoSaveIdRef.current,
+            name: generateAutoSaveName(),
+            data: dataToSave,
+            type: dataType,
+            createdAt: now,
+            updatedAt: now,
+            isAutoSaved: true,
+          };
+          updatedItems = [savedItem, ...existingItems];
+        }
       } else {
-        // Add new auto-saved item at the beginning
+        // No session ID, create new auto-save for this session
+        sessionAutoSaveIdRef.current = Date.now().toString();
+        savedItem = {
+          id: sessionAutoSaveIdRef.current,
+          name: generateAutoSaveName(),
+          data: dataToSave,
+          type: dataType,
+          createdAt: now,
+          updatedAt: now,
+          isAutoSaved: true,
+        };
         updatedItems = [savedItem, ...existingItems];
       }
 
@@ -140,9 +185,9 @@ export const useAutoSave = ({
     const currentDataString = JSON.stringify(data);
     
     // Only save if data has changed
-    if (currentDataString === lastSavedDataRef.current) return;
-    
-    lastSavedDataRef.current = currentDataString;
+    if (currentDataString === lastSavedDataRef.current) {
+      return;
+    }
 
     // Clear existing timeout
     if (timeoutRef.current) {
@@ -154,6 +199,8 @@ export const useAutoSave = ({
 
     // Set new timeout for auto-save
     timeoutRef.current = setTimeout(() => {
+      // Update the ref here, right before saving
+      lastSavedDataRef.current = JSON.stringify(data);
       autoSave(data);
     }, delay);
 
@@ -165,12 +212,14 @@ export const useAutoSave = ({
     };
   }, [data, enabled, delay]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - reset session when user leaves screen
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      // Reset session auto-save ID when component unmounts (user leaves screen)
+      sessionAutoSaveIdRef.current = null;
     };
   }, []);
 };
@@ -178,7 +227,7 @@ export const useAutoSave = ({
 // Manual save function that can be used alongside auto-save
 export const saveManually = async (
   data: any,
-  dataType: 'calculation' | 'comparison' | 'decision',
+  dataType: 'calculation' | 'comparison' | 'decision' | 'quick_comparison' | 'detail_comparison',
   customName?: string
 ): Promise<void> => {
   try {

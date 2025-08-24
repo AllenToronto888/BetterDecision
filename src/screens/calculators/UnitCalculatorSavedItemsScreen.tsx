@@ -19,6 +19,7 @@ interface SavedItem {
   type: string;
   createdAt: string;
   updatedAt: string;
+  isAutoSaved?: boolean;
 }
 
 const UnitCalculatorSavedItemsScreen: React.FC = () => {
@@ -39,16 +40,7 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
     item.data.calculationType === 'unit_price'
   );
   
-  // Debug logging
-  console.log('🔍 DEBUG: Total savedItems:', savedItems.length);
-  console.log('🔍 DEBUG: Unit calculator items:', unitCalculatorItems.length);
-  console.log('🔍 DEBUG: All saved items:', savedItems.map(item => ({
-    id: item.id,
-    name: item.name,
-    type: item.type,
-    calculationType: item.data?.calculationType,
-    isAutoSaved: item.data?.isAutoSaved
-  })));
+
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -98,6 +90,20 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
     }
   });
 
+  // Unit translation mapping
+  const getUnitLabel = (unit: string) => {
+    const unitMap: Record<string, string> = {
+      'g': t('gram'),
+      'kg': t('kilogram'),
+      'oz': t('ounce'),
+      'lb': t('pound'),
+      'ml': t('milliliter'),
+      'l': t('liter'),
+      'each': t('each')
+    };
+    return unitMap[unit] || unit;
+  };
+
   const toggleItemExpansion = (itemId: string) => {
     const newExpanded = new Set(expandedItems);
     if (newExpanded.has(itemId)) {
@@ -115,14 +121,14 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
       item.data.products.forEach((product: any, index: number) => {
         const isBest = item.data.bestProductIndexes?.includes(index);
         details += `${isBest ? '⭐ ' : ''}${product.name || `${t('item')} ${index + 1}`}\n`;
-        details += `   ${t('price')}: $${product.price} for ${product.quantity}${product.unit}\n`;
+        details += `   ${t('price')}: $${product.price} for ${product.quantity}${getUnitLabel(product.unit)}\n`;
         details += `   ${t('unitPrice')}: $${product.unitPrice?.toFixed(4)}/`;
         
         // Show appropriate unit for display
         if (product.unit === 'kg' || product.unit === 'l') {
-          details += product.unit === 'kg' ? 'g' : 'ml';
+          details += getUnitLabel(product.unit === 'kg' ? 'g' : 'ml');
         } else {
-          details += product.unit;
+          details += getUnitLabel(product.unit);
         }
         details += '\n\n';
       });

@@ -9,18 +9,17 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useDeleteAll, useTheme } from '../../components';
+import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
-import { deleteDetailComparison, getDetailComparisons } from '../../utils/storage';
 
 interface SavedItem {
   id: string;
   name: string;
   data: any;
   type: string;
-  comparisonType: 'detail';
   createdAt: string;
   updatedAt: string;
+  isAutoSaved?: boolean;
 }
 
 const DetailComparisonSavedItemsScreen: React.FC = () => {
@@ -28,55 +27,15 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
   const { t } = useI18n();
   const navigation = useNavigation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [savedItems, setSavedItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadSavedItems = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Load only detail comparisons
-      const detailComparisons = await getDetailComparisons();
-      console.log('DEBUG: Loaded detail comparisons:', detailComparisons.length, detailComparisons);
-      
-      // Format detail comparisons
-      const formattedDetailItems = detailComparisons.map(comparison => ({
-        id: comparison.id,
-        name: comparison.title,
-        data: {
-          title: comparison.title,
-          criteria: comparison.criteria,
-          options: comparison.options,
-          comparisonData: comparison.comparisonData,
-          notes: comparison.notes,
-        },
-        type: 'comparison',
-        comparisonType: 'detail' as const,
-        createdAt: comparison.date,
-        updatedAt: comparison.date,
-      }));
-      
-      // Sort by date (newest first)
-      const sortedItems = formattedDetailItems
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      
-      setSavedItems(sortedItems);
-    } catch (error) {
-      console.error('Failed to load saved detail comparisons:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    savedItems,
+    isLoading,
+    loadSavedItems,
+    deleteSavedItem,
+  } = useSavedItems('detail_comparison');
 
-  const deleteSavedItem = async (id: string) => {
-    try {
-      await deleteDetailComparison(id);
-      await loadSavedItems(); // Reload the list
-    } catch (error) {
-      console.error('Failed to delete detail comparison:', error);
-      throw error;
-    }
-  };
+
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -111,7 +70,7 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
     items: savedItems,
     storageConfig: {
       type: 'clear',
-      storageKey: 'better_decision_detail_comparisons'
+      storageKey: 'saved_detail_comparisons'
     },
     onDeleteSuccess: loadSavedItems,
     alertConfig: {
@@ -143,20 +102,22 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
 
       details += `${t('criteria')}: ${criteria.map((c: any) => {
         const text = c.text || c;
-        return text === 'Price' || text === '价格' || text === '價格' || text === 'Prix' || text === 'Precio' || text === '価格' ? t('price') :
-               text === 'Features' || text === '功能' || text === '機能' || text === 'Caractéristiques' || text === 'Características' || text === '機能' ? t('features') :
-               text;
+        const textStr = typeof text === 'string' ? text : String(text);
+        return textStr === 'Price' || textStr === '价格' || textStr === '價格' || textStr === 'Prix' || textStr === 'Precio' || textStr === '価格' ? t('price') :
+               textStr === 'Features' || textStr === '功能' || textStr === '機能' || textStr === 'Caractéristiques' || textStr === 'Características' || textStr === '機能' ? t('features') :
+               textStr;
       }).join(', ')}\n`;
       details += `${t('options')}: ${options.map((o: any) => {
         const name = o.name || o;
-        return name.startsWith('Product') || name.startsWith('产品') || name.startsWith('產品') || name.startsWith('Produit') || name.startsWith('Producto') || name.startsWith('商品') ? 
-               name.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : name;
+        const nameStr = typeof name === 'string' ? name : String(name);
+        return nameStr.startsWith('Product') || nameStr.startsWith('产品') || nameStr.startsWith('產品') || nameStr.startsWith('Produit') || nameStr.startsWith('Producto') || nameStr.startsWith('商品') ? 
+               nameStr.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : nameStr;
       }).join(', ')}\n\n`;
       
       // Show comparison results in table format
       details += `${t('comparisonTable')}:\n`;
       criteria.forEach((criterion: any) => {
-        const criterionText = criterion.text || criterion;
+        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : String(criterion.text || criterion);
         // Translate common criterion terms
         const translatedCriterionText = criterionText === 'Price' || criterionText === '价格' || criterionText === '價格' || criterionText === 'Prix' || criterionText === 'Precio' || criterionText === '価格' ? t('price') :
               criterionText === 'Features' || criterionText === '功能' || criterionText === '機能' || criterionText === 'Caractéristiques' || criterionText === 'Características' || criterionText === '機能' ? t('features') :
@@ -164,9 +125,10 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
         details += `\n${translatedCriterionText}:\n`;
         options.forEach((option: any) => {
           const optionName = option.name || option;
+          const optionNameStr = typeof optionName === 'string' ? optionName : String(optionName);
           // Translate common product names
-          const translatedOptionName = optionName.startsWith('Product') || optionName.startsWith('产品') || optionName.startsWith('產品') || optionName.startsWith('Produit') || optionName.startsWith('Producto') || optionName.startsWith('商品') ? 
-                optionName.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : optionName;
+          const translatedOptionName = optionNameStr.startsWith('Product') || optionNameStr.startsWith('产品') || optionNameStr.startsWith('產品') || optionNameStr.startsWith('Produit') || optionNameStr.startsWith('Producto') || optionNameStr.startsWith('商品') ? 
+                optionNameStr.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : optionNameStr;
           const cellData = comparisonData.find((cell: any) => 
             (cell.criterionId === criterion.id || cell.criterionId === criterion) &&
             (cell.optionId === option.id || cell.optionId === option)

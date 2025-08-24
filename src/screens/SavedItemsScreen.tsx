@@ -45,13 +45,13 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
   useFocusEffect(
     useCallback(() => {
       loadSavedItems();
-    }, [selectedTab])
+    }, [selectedTab, loadSavedItems])
   );
 
   // Reload when tab changes
   React.useEffect(() => {
     loadSavedItems();
-  }, [selectedTab]);
+  }, [selectedTab, loadSavedItems]);
 
   const handleDeleteItem = (item: SavedItem) => {
     Alert.alert(
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   itemDetailsText: {
-    fontFamily: 'monospace',
+
     lineHeight: 20,
   },
   itemActions: {

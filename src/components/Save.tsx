@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useI18n } from '../i18n';
-import { saveDetailComparison, saveProConsList, saveQuickComparison } from '../utils/storage';
+
 import { Button } from './Button';
 import { Typography } from './Typography';
 
 interface SaveComponentProps {
   data: any;
-  dataType: 'calculation' | 'comparison' | 'decision' | 'custom';
+  dataType: 'calculation' | 'comparison' | 'decision' | 'quick_comparison' | 'detail_comparison' | 'custom';
   defaultName?: string;
   onSaveSuccess?: (savedName: string) => void;
   onSaveError?: (error: string) => void;
@@ -25,6 +25,7 @@ interface SavedItem {
   type: string;
   createdAt: string;
   updatedAt: string;
+  isAutoSaved?: boolean;
 }
 
 export const Save: React.FC<SaveComponentProps> = ({
@@ -82,92 +83,41 @@ export const Save: React.FC<SaveComponentProps> = ({
 
 
 
-      // Handle Quick Comparison data specifically
-      if (dataType === 'comparison' && data.comparisonType === 'quick_comparison') {
-        const quickComparisonData = {
-          id: Date.now().toString(),
-          title: name.trim(),
-          date: new Date().toISOString(),
-          criteria: data.criteria,
-          options: data.options,
-          comparisonData: data.comparisonData,
-          notes: data.notes,
-        };
-        
-        await saveQuickComparison(quickComparisonData);
-      }
-      // Handle Detail Comparison data specifically
-      else if (dataType === 'comparison' && data.comparisonType === 'detail_comparison') {
-        const detailComparisonData = {
-          id: Date.now().toString(),
-          title: name.trim(),
-          date: new Date().toISOString(),
-          criteria: data.criteria,
-          options: data.options,
-          comparisonData: data.comparisonData,
-          notes: data.notes,
-        };
-        
-        await saveDetailComparison(detailComparisonData);
-      } 
-      // Handle Pros & Cons data
-      else if (dataType === 'decision' && data.type === 'pros_cons') {
-        const prosConsData = {
-          id: Date.now().toString(),
-          title: name.trim(),
-          date: new Date().toISOString(),
-          pros: data.pros || [],
-          cons: data.cons || [],
-        };
-        
-        await saveProConsList(prosConsData);
-      }
-      // Fallback to generic storage for other types
-      else {
-        const storageKey = generateStorageKey(dataType);
-        const existingData = await AsyncStorage.getItem(storageKey);
-        const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
+      // Use unified storage for all types to match auto-save behavior
+      const storageKey = generateStorageKey(dataType);
+      const existingData = await AsyncStorage.getItem(storageKey);
+      const existingItems: SavedItem[] = existingData ? JSON.parse(existingData) : [];
 
-        // Auto-generate unique name if duplicate exists
-        let finalName = name.trim();
-        let counter = 1;
-        
-        while (existingItems.some(item => item.name.toLowerCase() === finalName.toLowerCase())) {
-          finalName = `${name.trim()} (${counter})`;
-          counter++;
-        }
-
-        const newItem: SavedItem = {
-          id: Date.now().toString(),
-          name: finalName,
-          data,
-          type: dataType,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const updatedItems = [newItem, ...existingItems];
-        await AsyncStorage.setItem(storageKey, JSON.stringify(updatedItems));
-        
-        // Use the final generated name for success callback
-        onSaveSuccess?.(finalName);
-        setIsModalVisible(false);
-        setSaveName('');
-        
-        Alert.alert(
-          t('savedSuccessfully'),
-          `${t('calculationSavedAs')} "${finalName}".`
-        );
-        return; // Exit early since we handled everything here
+      // Auto-generate unique name if duplicate exists
+      let finalName = name.trim();
+      let counter = 1;
+      
+      while (existingItems.some(item => item.name.toLowerCase() === finalName.toLowerCase())) {
+        finalName = `${name.trim()} (${counter})`;
+        counter++;
       }
 
-      onSaveSuccess?.(name.trim());
+      const newItem: SavedItem = {
+        id: Date.now().toString(),
+        name: finalName,
+        data,
+        type: dataType,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isAutoSaved: false,
+      };
+
+      const updatedItems = [newItem, ...existingItems];
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedItems));
+      
+      // Use the final generated name for success callback
+      onSaveSuccess?.(finalName);
       setIsModalVisible(false);
       setSaveName('');
       
       Alert.alert(
         t('savedSuccessfully'),
-        `"${name.trim()}" ${t('itemSaved')}.`
+        `${t('calculationSavedAs')} "${finalName}".`
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save';

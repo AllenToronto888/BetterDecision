@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -11,7 +11,7 @@ import {
     TextInput,
     View
 } from 'react-native';
-import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useTheme } from '../../components';
+import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface CostItem {
@@ -56,18 +56,44 @@ const TotalCostScreen = () => {
     { id: 'c2', type: 'tax', label: t('taxes'), value: '', isPercentage: true },
   ]);
   const [comparisonTotalCost, setComparisonTotalCost] = useState(0);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
 
-  useEffect(() => {
-    calculateTotalCost();
-  }, [basePrice, additionalCosts]);
+  // Auto-save functionality
+  useAutoSave({
+    data: {
+      basePrice,
+      productName,
+      additionalCosts,
+      compareEnabled,
+      comparisonPrice,
+      comparisonName,
+      comparisonAdditionalCosts,
+      calculationType: 'total_cost',
+    },
+    dataType: 'calculation',
+    enabled: Boolean(
+      basePrice.trim() || 
+      productName.trim() || 
+      additionalCosts.some(cost => cost.value.trim()) ||
+      (compareEnabled && (comparisonPrice.trim() || comparisonName.trim() || comparisonAdditionalCosts.some(cost => cost.value.trim())))
+    ),
+    delay: 5000,
+    autoSavePrefix: t('autoSaved'),
+    onSave: (name) => {
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    },
+    onError: (error) => {
+      console.error('Auto-save error:', error);
+      setAutoSaveStatus('error');
+      setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    },
+    onStatusChange: (status) => {
+      setAutoSaveStatus(status);
+    },
+  });
 
-  useEffect(() => {
-    if (compareEnabled) {
-      calculateComparisonTotalCost();
-    }
-  }, [comparisonPrice, comparisonAdditionalCosts, compareEnabled]);
-
-  const calculateTotalCost = () => {
+  const calculateTotalCost = useCallback(() => {
     const base = parseFloat(basePrice) || 0;
     let total = base;
 
@@ -81,9 +107,9 @@ const TotalCostScreen = () => {
     });
 
     setTotalCost(total);
-  };
+  }, [basePrice, additionalCosts]);
 
-  const calculateComparisonTotalCost = () => {
+  const calculateComparisonTotalCost = useCallback(() => {
     const base = parseFloat(comparisonPrice) || 0;
     let total = base;
 
@@ -97,9 +123,17 @@ const TotalCostScreen = () => {
     });
 
     setComparisonTotalCost(total);
-  };
+  }, [comparisonPrice, comparisonAdditionalCosts]);
 
+  useEffect(() => {
+    calculateTotalCost();
+  }, [calculateTotalCost]);
 
+  useEffect(() => {
+    if (compareEnabled) {
+      calculateComparisonTotalCost();
+    }
+  }, [calculateComparisonTotalCost, compareEnabled]);
 
   const updateCostItem = (id: string, field: keyof CostItem, value: any) => {
     const updatedCosts = additionalCosts.map((cost) => {
@@ -643,6 +677,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 8,
     paddingTop: 0,
+    paddingLeft: 16,
   },
   inputContainer: {
     flex: 1,
