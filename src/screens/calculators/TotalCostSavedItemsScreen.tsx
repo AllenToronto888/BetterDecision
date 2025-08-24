@@ -126,7 +126,7 @@ const TotalCostSavedItemsScreen: React.FC = () => {
       
       // Check if comparison mode was enabled
       const compareEnabled = item.data.compareEnabled;
-      if (compareEnabled && item.data.comparisonName) {
+      if (compareEnabled) {
         details += `\n\n--- ${t('itemComparison').toUpperCase()} ---\n`;
         
         // Comparison Product information
@@ -152,15 +152,15 @@ const TotalCostSavedItemsScreen: React.FC = () => {
         const comparisonTotalCost = item.data.comparisonTotalCost || 0;
         details += `\n${t('totalCost')}: $${comparisonTotalCost.toFixed(2)}`;
         
-        // Show which is better
+        // Show comparison result exactly as on live screen
         if (totalCost > 0 && comparisonTotalCost > 0) {
-          const savings = Math.abs(totalCost - comparisonTotalCost);
-          if (totalCost < comparisonTotalCost) {
-            details += `\n\n✅ ${productName} is less by $${savings.toFixed(2)}`;
-          } else if (comparisonTotalCost < totalCost) {
-            details += `\n\n✅ ${comparisonName} is less by $${savings.toFixed(2)}`;
+          const difference = Math.abs(totalCost - comparisonTotalCost);
+          if (totalCost > comparisonTotalCost) {
+            details += `\n\n${productName} ${t('isMoreBy')} $${difference.toFixed(2)}`;
+          } else if (totalCost < comparisonTotalCost) {
+            details += `\n\n${productName} ${t('isLessBy')} $${difference.toFixed(2)}`;
           } else {
-            details += `\n\n🟰 Both products cost the same`;
+            details += `\n\n${t('bothItemsCostSame')}`;
           }
         }
       }

@@ -301,7 +301,7 @@ const ProsConsScreen = () => {
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAll}
               >
-                <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
+                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
                 <Text style={[styles.clearAllText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             )}
@@ -418,6 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'transparent',
     borderWidth: 1,
+    marginTop: 8,
   },
   clearAllText: {
     fontWeight: 'bold',

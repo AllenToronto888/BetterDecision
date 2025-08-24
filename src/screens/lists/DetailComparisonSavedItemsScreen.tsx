@@ -141,22 +141,42 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
       const options = item.data.options;
       const comparisonData = item.data.comparisonData;
 
-      details += `${t('criteria')}: ${criteria.map((c: any) => c.text || c).join(', ')}\n`;
-      details += `${t('options')}: ${options.map((o: any) => o.name || o).join(', ')}\n\n`;
+      details += `${t('criteria')}: ${criteria.map((c: any) => {
+        const text = c.text || c;
+        return text === 'Price' || text === '价格' || text === '價格' || text === 'Prix' || text === 'Precio' || text === '価格' ? t('price') :
+               text === 'Features' || text === '功能' || text === '機能' || text === 'Caractéristiques' || text === 'Características' || text === '機能' ? t('features') :
+               text;
+      }).join(', ')}\n`;
+      details += `${t('options')}: ${options.map((o: any) => {
+        const name = o.name || o;
+        return name.startsWith('Product') || name.startsWith('产品') || name.startsWith('產品') || name.startsWith('Produit') || name.startsWith('Producto') || name.startsWith('商品') ? 
+               name.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : name;
+      }).join(', ')}\n\n`;
       
       // Show comparison results in table format
       details += `${t('comparisonTable')}:\n`;
       criteria.forEach((criterion: any) => {
         const criterionText = criterion.text || criterion;
-        details += `\n${criterionText}:\n`;
+        // Translate common criterion terms
+        const translatedCriterionText = criterionText === 'Price' || criterionText === '价格' || criterionText === '價格' || criterionText === 'Prix' || criterionText === 'Precio' || criterionText === '価格' ? t('price') :
+              criterionText === 'Features' || criterionText === '功能' || criterionText === '機能' || criterionText === 'Caractéristiques' || criterionText === 'Características' || criterionText === '機能' ? t('features') :
+              criterionText;
+        details += `\n${translatedCriterionText}:\n`;
         options.forEach((option: any) => {
           const optionName = option.name || option;
+          // Translate common product names
+          const translatedOptionName = optionName.startsWith('Product') || optionName.startsWith('产品') || optionName.startsWith('產品') || optionName.startsWith('Produit') || optionName.startsWith('Producto') || optionName.startsWith('商品') ? 
+                optionName.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : optionName;
           const cellData = comparisonData.find((cell: any) => 
             (cell.criterionId === criterion.id || cell.criterionId === criterion) &&
             (cell.optionId === option.id || cell.optionId === option)
           );
           const cellText = cellData?.text || 'N/A';
-          details += `  ${optionName}: ${cellText}\n`;
+          // Translate common cell values
+          const translatedCellText = cellText === 'Basic' || cellText === '基础' || cellText === '基礎' || cellText === 'Basique' || cellText === 'Básico' || cellText === 'ベーシック' ? t('basic') :
+                cellText === 'Premium' || cellText === '高级' || cellText === '高級' || cellText === 'Premium' || cellText === 'Premium' || cellText === 'プレミアム' ? t('premium') :
+                cellText;
+          details += `  ${translatedOptionName}: ${translatedCellText}\n`;
         });
       });
       

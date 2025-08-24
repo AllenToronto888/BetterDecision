@@ -538,7 +538,7 @@ const TotalCostScreen = () => {
               {totalCost === comparisonTotalCost ? (
                 <>
                   <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>
-                    Both items cost the same
+                    {t('bothItemsCostSame')}
                   </Text>
                   <Text style={[styles.resultValue, { color: theme.colors.text }]}>
                     $0.00
@@ -547,7 +547,7 @@ const TotalCostScreen = () => {
               ) : totalCost > comparisonTotalCost ? (
                 <>
                   <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>
-                    {productName || 'Item 1'} is{'\n'}more by
+                    {productName || t('item') + ' 1'} {t('isMoreBy')}
                   </Text>
                   <Text style={[styles.resultValue, { color: theme.colors.success }]}>
                     ${Math.abs(totalCost - comparisonTotalCost).toFixed(2)}
@@ -556,7 +556,7 @@ const TotalCostScreen = () => {
               ) : (
                 <>
                   <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>
-                    {productName || 'Item 1'} is{'\n'}less by
+                    {productName || t('item') + ' 1'} {t('isLessBy')}
                   </Text>
                   <Text style={[styles.resultValue, { color: theme.colors.danger }]}>
                     -${Math.abs(totalCost - comparisonTotalCost).toFixed(2)}

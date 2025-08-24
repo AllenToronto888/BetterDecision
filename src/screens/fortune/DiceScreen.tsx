@@ -11,6 +11,7 @@ import {
     View,
 } from 'react-native';
 import { CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface DiceConfig {
   count: number;
@@ -33,6 +34,7 @@ interface HistoryEntry {
 
 const DiceScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
   const [config, setConfig] = useState<DiceConfig>({ count: 2, sides: 6 });
   const [results, setResults] = useState<DiceResult[]>([]);
@@ -150,7 +152,7 @@ const DiceScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Dice"
+        title={t('dice')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -165,10 +167,10 @@ const DiceScreen = () => {
       >
 
       <View style={[styles.configCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <Text style={[styles.configTitle, { color: theme.colors.text }]}>Dice Configuration</Text>
+        <Text style={[styles.configTitle, { color: theme.colors.text }]}>{t('diceConfiguration')}</Text>
         
         <View style={styles.configRow}>
-          <Text style={[styles.configLabel, { color: theme.colors.text }]}>Number of Dice:</Text>
+          <Text style={[styles.configLabel, { color: theme.colors.text }]}>{t('numberOfDice')}:</Text>
           <View style={styles.counterContainer}>
             <TouchableOpacity
               style={[
@@ -201,7 +203,7 @@ const DiceScreen = () => {
         </View>
         
         <View style={styles.configRowLast}>
-          <Text style={[styles.configLabel, { color: theme.colors.text }]}>Sides per Die:</Text>
+          <Text style={[styles.configLabel, { color: theme.colors.text }]}>{t('sidesPerDie')}:</Text>
           <View style={styles.sidesContainer}>
             {sideOptions.map((sides) => (
               <TouchableOpacity
@@ -235,19 +237,19 @@ const DiceScreen = () => {
         disabled={isRolling}
       >
         <MaterialIcons name="casino" size={24} color="#FFFFFF" />
-        <Text style={styles.rollButtonText}>Roll Dice</Text>
+        <Text style={styles.rollButtonText}>{t('rollDice')}</Text>
       </TouchableOpacity>
       
       {results.length > 0 && (
         <View style={[styles.resultCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.resultTitle, { color: theme.colors.text }]}>Results</Text>
+          <Text style={[styles.resultTitle, { color: theme.colors.text }]}>{t('results')}</Text>
           
           <View style={styles.diceContainer}>
             {results.map(renderDie)}
           </View>
           
           <View style={styles.sumContainer}>
-            <Text style={[styles.sumLabel, { color: theme.colors.tabBarInactive }]}>Total:</Text>
+            <Text style={[styles.sumLabel, { color: theme.colors.tabBarInactive }]}>{t('total')}:</Text>
             <Text style={[styles.sumValue, { color: theme.colors.text }]}>{sum}</Text>
           </View>
         </View>
@@ -255,28 +257,28 @@ const DiceScreen = () => {
       
       <View style={[styles.historyCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.historyHeader}>
-          <Text style={[styles.historyTitle, { color: theme.colors.text }]}>History</Text>
+          <Text style={[styles.historyTitle, { color: theme.colors.text }]}>{t('history')}</Text>
           {history.length > 0 && (
             <TouchableOpacity
               style={[styles.clearButton, { borderColor: theme.colors.primary }]}
               onPress={clearHistory}
             >
-              <MaterialIcons name="clear" size={16} color={theme.colors.primary} />
-              <Text style={[styles.clearButtonText, { color: theme.colors.primary }]}>Clear All</Text>
+              <MaterialIcons name="delete-sweep" size={16} color={theme.colors.primary} />
+              <Text style={[styles.clearButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
             </TouchableOpacity>
           )}
         </View>
         
         {history.length === 0 ? (
           <Text style={[styles.emptyHistoryText, { color: theme.colors.tabBarInactive }]}>
-            No previous rolls
+            {t('noPreviousRolls')}
           </Text>
         ) : (
           history.map((entry) => (
             <View key={entry.id} style={[styles.historyEntry, { borderBottomColor: theme.colors.border }]}>
               <View style={styles.historyEntryHeader}>
                 <Text style={[styles.historyConfig, { color: theme.colors.text }]}>
-                  {entry.config.count}x {entry.config.sides}-sided
+                  {entry.config.count}x {entry.config.sides}-{t('sided')}
                 </Text>
                 <Text style={[styles.historyTime, { color: theme.colors.tabBarInactive }]}>
                   {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -287,7 +289,7 @@ const DiceScreen = () => {
                   [{entry.results.join(', ')}]
                 </Text>
                 <Text style={[styles.historySum, { color: theme.colors.text }]}>
-                  Total: {entry.sum}
+                  {t('total')}: {entry.sum}
                 </Text>
               </View>
             </View>

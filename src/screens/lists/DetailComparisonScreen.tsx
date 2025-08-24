@@ -293,7 +293,7 @@ const DetailComparisonScreen = () => {
                   style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                   onPress={clearAllCriteria}
                 >
-                  <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
+                  <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
                   <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
                 </TouchableOpacity>
               </View>

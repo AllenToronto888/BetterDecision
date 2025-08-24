@@ -1,53 +1,61 @@
-import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import * as Localization from 'expo-localization';
-import { t, SupportedLanguage } from './translations';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { SupportedLanguage, t } from './translations';
 
 // Get device language
 export const getDeviceLanguage = (): SupportedLanguage => {
   try {
-    const deviceLanguage = Localization.locale;
-    console.log('🌍 [i18n] Device language detected:', deviceLanguage);
+    // Simple: Just get the device language
+    const locales = Localization.getLocales();
+    console.log('🌍 Device locales:', locales);
     
-    // Map device locales to our supported languages
-    const languageMap: { [key: string]: SupportedLanguage } = {
-      'en': 'en',
-      'en-US': 'en',
-      'en-GB': 'en',
-      'en-CA': 'en',
-      'en-AU': 'en',
-      'es': 'es',
-      'es-ES': 'es',
-      'es-MX': 'es',
-      'es-AR': 'es',
-      'es-CO': 'es',
-      'fr': 'fr',
-      'fr-FR': 'fr',
-      'fr-CA': 'fr',
-      'fr-BE': 'fr',
-      'zh-CN': 'zh-Hans',
-      'zh-SG': 'zh-Hans',
-      'zh-Hans': 'zh-Hans',
-      'zh-Hans-CN': 'zh-Hans',
-      'zh-Hans-SG': 'zh-Hans',
-      'zh-TW': 'zh-Hant',
-      'zh-HK': 'zh-Hant',
-      'zh-MO': 'zh-Hant',
-      'zh-Hant': 'zh-Hant',
-      'zh-Hant-TW': 'zh-Hant',
-      'zh-Hant-HK': 'zh-Hant',
-      'zh-Hant-MO': 'zh-Hant',
-      'ja': 'ja',
-      'ja-JP': 'ja',
-    };
+    if (locales && locales.length > 0) {
+      const deviceLanguage = locales[0].languageTag;
+      console.log('🌍 Device language detected:', deviceLanguage);
+      return mapDeviceLanguage(deviceLanguage);
+    }
     
-    // First try exact match, then try language code only
-    const mappedLanguage = languageMap[deviceLanguage] || languageMap[deviceLanguage.split('-')[0]] || 'en';
-    console.log(`🌍 [i18n] Language mapping: ${deviceLanguage} → ${mappedLanguage}`);
-    return mappedLanguage;
+    console.log('🌍 No language detected, defaulting to English');
+    return 'en';
   } catch (error) {
-    console.log('🌍 [i18n] Could not detect device language, defaulting to English:', error);
+    console.log('🌍 Language detection error:', error);
     return 'en';
   }
+};
+
+// Helper function to map device language codes to our supported languages
+const mapDeviceLanguage = (deviceLanguage: string): SupportedLanguage => {
+  console.log('🌍 Mapping:', deviceLanguage);
+  
+  // Simple mapping - check exact match first, then language code
+  if (deviceLanguage.includes('zh-Hant') || deviceLanguage.includes('zh-TW') || deviceLanguage.includes('zh-HK')) {
+    console.log('🌍 → Traditional Chinese');
+    return 'zh-Hant';
+  }
+  
+  if (deviceLanguage.includes('zh')) {
+    console.log('🌍 → Simplified Chinese');
+    return 'zh-Hans';
+  }
+  
+  if (deviceLanguage.startsWith('es')) {
+    console.log('🌍 → Spanish');
+    return 'es';
+  }
+  
+  if (deviceLanguage.startsWith('fr')) {
+    console.log('🌍 → French');
+    return 'fr';
+  }
+  
+  if (deviceLanguage.startsWith('ja')) {
+    console.log('🌍 → Japanese');
+    return 'ja';
+  }
+  
+  // Default to English
+  console.log('🌍 → English (default)');
+  return 'en';
 };
 
 // Language Context
@@ -107,3 +115,4 @@ export const useI18n = () => {
 
 export { t };
 export type { SupportedLanguage };
+

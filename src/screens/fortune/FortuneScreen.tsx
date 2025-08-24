@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 // Fortune screens
 import DiceScreen from './DiceScreen';
@@ -11,19 +12,20 @@ const Stack = createNativeStackNavigator();
 // Home screen for Fortune tab
 const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   
   const fortuneOptions = [
     {
-      title: 'Spinner',
+      title: t('spinner'),
       icon: 'refresh',
-      description: 'Spin to decide between options',
+      description: t('spinToDecideBetweenOptions'),
       screen: 'Spinner',
       color: '#9C27B0',
     },
     {
-      title: 'Dice',
+      title: t('dice'),
       icon: 'casino',
-      description: 'Roll the dice for random numbers',
+      description: t('rollDiceForRandomNumbers'),
       screen: 'Dice',
       color: '#FF9800',
     },
@@ -31,7 +33,7 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <CustomHeader title="Fortune" />
+      <CustomHeader title={t('fortune')} />
       
       <ScrollView 
         style={[styles.container, { backgroundColor: theme.colors.background }]}

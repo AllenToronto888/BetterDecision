@@ -15,6 +15,7 @@ import {
     View,
 } from 'react-native';
 import { CustomHeader, useTheme } from '../../components';
+import { useI18n } from '../../i18n';
 
 interface SpinnerOption {
   id: string;
@@ -24,13 +25,14 @@ interface SpinnerOption {
 
 const SpinnerScreen = () => {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation();
-  const [title, setTitle] = useState('Spin to Decide');
+  const [title, setTitle] = useState(t('spinToDecide'));
   const [options, setOptions] = useState<SpinnerOption[]>([
-    { id: '1', text: 'Pizza', color: '#F44336' },
-    { id: '2', text: 'Burger', color: '#2196F3' },
-    { id: '3', text: 'Sushi', color: '#4CAF50' },
-    { id: '4', text: 'Pasta', color: '#FF9800' },
+    { id: '1', text: t('pizza'), color: '#F44336' },
+    { id: '2', text: t('burger'), color: '#2196F3' },
+    { id: '3', text: t('sushi'), color: '#4CAF50' },
+    { id: '4', text: t('chineseFood'), color: '#FF9800' },
   ]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<SpinnerOption | null>(null);
@@ -77,7 +79,7 @@ const SpinnerScreen = () => {
     if (options.length > 2) {
       setOptions(options.filter(option => option.id !== id));
     } else {
-      Alert.alert('Cannot Remove', 'You need at least 2 options for the spinner.');
+      Alert.alert(t('cannotRemove'), t('needAtLeastTwoOptions'));
     }
   };
   
@@ -85,7 +87,7 @@ const SpinnerScreen = () => {
     // Check if all options have text
     const emptyOptions = options.filter(option => !option.text.trim());
     if (emptyOptions.length > 0) {
-      Alert.alert('Empty Options', 'Please fill in all options before spinning.');
+      Alert.alert(t('fillAllOptions'), t('pleaseEnterTextForAllOptions'));
       return;
     }
     
@@ -164,7 +166,7 @@ const SpinnerScreen = () => {
             onPress={spinWheel}
             disabled={isSpinning}
           >
-            <Text style={styles.spinButtonText}>SPIN</Text>
+            <Text style={styles.spinButtonText}>{t('spin').toUpperCase()}</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.pointer, { borderBottomColor: theme.colors.text }]} />
@@ -175,7 +177,7 @@ const SpinnerScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <CustomHeader
-        title="Spinner"
+        title={t('spinner')}
         leftAction={{
           icon: "chevron-left",
           onPress: () => navigation.goBack()
@@ -197,7 +199,7 @@ const SpinnerScreen = () => {
             style={[styles.titleInput, { color: theme.colors.text }]}
             value={title}
             onChangeText={setTitle}
-            placeholder="Enter title"
+            placeholder={t('enterTitle')}
             placeholderTextColor={theme.colors.tabBarInactive}
           />
         </View>
@@ -206,13 +208,13 @@ const SpinnerScreen = () => {
         
         {result && (
           <View style={[styles.resultContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>Result:</Text>
+            <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>{t('result')}:</Text>
             <Text style={[styles.resultText, { color: theme.colors.text }]}>{result.text}</Text>
           </View>
         )}
         
         <View style={[styles.optionsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-          <Text style={[styles.optionsTitle, { color: theme.colors.text }]}>Options</Text>
+          <Text style={[styles.optionsTitle, { color: theme.colors.text }]}>{t('options')}</Text>
           
           {options.map((option) => (
             <View key={option.id} style={styles.optionRow}>
@@ -245,7 +247,7 @@ const SpinnerScreen = () => {
             onPress={addOption}
           >
             <MaterialIcons name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>Add Option</Text>
+            <Text style={styles.addButtonText}>{t('addOption')}</Text>
           </TouchableOpacity>
         </View>
         </ScrollView>

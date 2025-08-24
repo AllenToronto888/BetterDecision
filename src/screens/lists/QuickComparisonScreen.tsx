@@ -2,14 +2,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
@@ -334,7 +334,7 @@ const QuickComparisonScreen = () => {
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAllCriteria}
               >
-                <MaterialIcons name="clear" size={20} color={theme.colors.primary} />
+                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
                 <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             </View>
