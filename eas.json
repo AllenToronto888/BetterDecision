@@ -9,11 +9,18 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "node": "18.18.0"
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "environment": "production"
     }
   },
   "submit": {
