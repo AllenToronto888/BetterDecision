@@ -181,6 +181,7 @@ export const translations = {
     areYouSureDeleteAllDetailItems: "Are you sure you want to delete all",
     allDetailItemsCleared: "All detail items cleared successfully",
     failedToClearAllDetailItems: "Failed to clear all detail items",
+    clearAll: "Clear All",
     addCriterion: "Add Criterion",
     addOption: "Add Option",
     enterDetails: "Enter details",

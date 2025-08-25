@@ -35,7 +35,6 @@ const SpinnerScreen = () => {
     { id: '4', text: t('chineseFood'), color: '#FF9800' },
   ]);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [result, setResult] = useState<SpinnerOption | null>(null);
   
   const rotationValue = useRef(new Animated.Value(0)).current;
   const rotationDegree = rotationValue.interpolate({
@@ -92,27 +91,26 @@ const SpinnerScreen = () => {
     }
     
     setIsSpinning(true);
-    setResult(null);
     
-    // Generate random number of full rotations (2-5) plus a random position
-    const randomRotations = 2 + Math.random() * 3;
+    // Reset rotation value to 0 before spinning for consistent velocity
+    rotationValue.setValue(0);
+    
+    // Generate random number of full rotations (3-6) plus a random position
+    const randomRotations = 3 + Math.random() * 3;
     const randomPosition = Math.random();
     const toValue = randomRotations + randomPosition;
     
+    // Randomize duration between 3.5 to 5.5 seconds for variety
+    const randomDuration = 3500 + Math.random() * 2000;
+    
     Animated.timing(rotationValue, {
       toValue,
-      duration: 3000,
+      duration: randomDuration,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      // Calculate which option was selected based on the final position
-      const finalPosition = randomPosition;
-      const optionIndex = Math.floor(finalPosition * options.length);
-      const selectedOption = options[optionIndex];
-      
-      setResult(selectedOption);
+      // Just stop spinning - let user see where pointer lands
       setIsSpinning(false);
-      // Keep the final rotation value instead of resetting to 0
     });
   };
   
@@ -206,12 +204,7 @@ const SpinnerScreen = () => {
         
         {renderSpinnerWheel()}
         
-        {result && (
-          <View style={[styles.resultContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-            <Text style={[styles.resultLabel, { color: theme.colors.tabBarInactive }]}>{t('result')}:</Text>
-            <Text style={[styles.resultText, { color: theme.colors.text }]}>{result.text}</Text>
-          </View>
-        )}
+
         
         <View style={[styles.optionsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <Text style={[styles.optionsTitle, { color: theme.colors.text }]}>{t('options')}</Text>
@@ -358,22 +351,7 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     transform: [{ translateY: -15 }, { rotate: '180deg' }],
   },
-  resultContainer: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  resultLabel: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  resultText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
+
   optionsContainer: {
     width: '100%',
     padding: 16,

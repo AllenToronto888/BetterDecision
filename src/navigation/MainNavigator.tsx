@@ -25,9 +25,6 @@ const MainNavigator = () => {
         tabBarStyle: {
           backgroundColor: theme.colors.tabBar,
           position: 'absolute',
-          paddingTop: 8,
-          paddingBottom: 8,
-          height: 60,
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.tabBarInactive,

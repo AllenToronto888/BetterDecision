@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './i18n';
 import MainNavigator from './navigation/MainNavigator';
 
 const App = () => {
@@ -9,11 +10,13 @@ const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider>
-          <NavigationContainer>
-            <MainNavigator />
-          </NavigationContainer>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <NavigationContainer>
+              <MainNavigator />
+            </NavigationContainer>
+          </ThemeProvider>
+        </LanguageProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

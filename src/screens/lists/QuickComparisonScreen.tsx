@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   optionHeaderCell: {
-    width: 108,
+    width: 90,
     height: 48,
     padding: 8,
     borderRadius: 4,
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   comparisonCell: {
-    width: 108,
+    width: 90,
     height: 60,
     borderRadius: 4,
     marginRight: 4,

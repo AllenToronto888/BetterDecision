@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useRef, useState } from 'react';
 import {
@@ -102,9 +103,18 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         {
           text: t('clear'),
           style: 'destructive',
-          onPress: () => {
-            // Clear calculator logic would go here
-            Alert.alert(t('success'), t('calculatorDataCleared'));
+          onPress: async () => {
+            try {
+              // Clear all calculator-related storage
+              await AsyncStorage.multiRemove([
+                'saved_calculations',
+                'better_decision_unit_comparisons',
+                'better_decision_total_cost_comparisons'
+              ]);
+              Alert.alert(t('success'), t('calculatorDataCleared'));
+            } catch (error) {
+              Alert.alert(t('error'), 'Failed to clear calculator data');
+            }
           },
         },
       ]
@@ -123,9 +133,21 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         {
           text: t('clear'),
           style: 'destructive',
-          onPress: () => {
-            // Clear lists logic would go here
-            Alert.alert(t('success'), t('listsDataCleared'));
+          onPress: async () => {
+            try {
+              // Clear all lists-related storage
+              await AsyncStorage.multiRemove([
+                'saved_decisions',
+                'saved_quick_comparisons',
+                'saved_detail_comparisons',
+                'better_decision_pros_cons_lists',
+                'better_decision_quick_comparisons',
+                'better_decision_detail_comparisons'
+              ]);
+              Alert.alert(t('success'), t('listsDataCleared'));
+            } catch (error) {
+              Alert.alert(t('error'), 'Failed to clear lists data');
+            }
           },
         },
       ]
@@ -144,9 +166,14 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         {
           text: t('delete'),
           style: 'destructive',
-          onPress: () => {
-            // Clear all data logic would go here
-            Alert.alert(t('success'), t('allDataCleared'));
+          onPress: async () => {
+            try {
+              // Clear ALL app data
+              await AsyncStorage.clear();
+              Alert.alert(t('success'), t('allDataCleared'));
+            } catch (error) {
+              Alert.alert(t('error'), 'Failed to clear all data');
+            }
           },
         },
       ]
