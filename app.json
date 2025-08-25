@@ -3,7 +3,6 @@
     "name": "Better Decision",
     "slug": "better-decision",
     "version": "1.0.0",
-    "sdkVersion": "51.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
