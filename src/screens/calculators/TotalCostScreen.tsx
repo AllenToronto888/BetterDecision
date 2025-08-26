@@ -70,6 +70,7 @@ const TotalCostScreen = () => {
       comparisonName,
       comparisonAdditionalCosts,
       calculationType: 'total_cost',
+      title: calculatorTitle,
     },
     dataType: 'calculation',
     enabled: Boolean(
@@ -178,6 +179,28 @@ const TotalCostScreen = () => {
 
   const removeComparisonCostItem = (id: string) => {
     setComparisonAdditionalCosts(comparisonAdditionalCosts.filter((cost) => cost.id !== id));
+  };
+
+  const clearAllData = () => {
+    setBasePrice('');
+    setProductName('');
+    setAdditionalCosts([
+      { id: '1', type: 'shipping', label: t('shipping'), value: '', isPercentage: false },
+      { id: '2', type: 'tax', label: t('taxes'), value: '', isPercentage: true },
+    ]);
+    setTotalCost(0);
+    // Reset title back to default
+    setCalculatorTitle(t('totalCost'));
+  };
+
+  const clearComparisonData = () => {
+    setComparisonPrice('');
+    setComparisonName('');
+    setComparisonAdditionalCosts([
+      { id: 'c1', type: 'shipping', label: t('shipping'), value: '', isPercentage: false },
+      { id: 'c2', type: 'tax', label: t('taxes'), value: '', isPercentage: true },
+    ]);
+    setComparisonTotalCost(0);
   };
 
   const getIconForCostType = (type: string) => {
@@ -362,6 +385,7 @@ const TotalCostScreen = () => {
             onTitleChange={setCalculatorTitle}
             editable={true}
             maxLength={50}
+            defaultTitles={[t('totalCost')]}
             actions={
               <>
                 <Save
@@ -461,15 +485,7 @@ const TotalCostScreen = () => {
                 variant="outline"
                 icon="clear"
                 size="large"
-                onPress={() => {
-                  setBasePrice('');
-                  setProductName('');
-                  setAdditionalCosts([
-                    { id: '1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
-                    { id: '2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
-                  ]);
-                  setTotalCost(0);
-                }}
+                onPress={clearAllData}
                 style={styles.actionButton}
               />
             )}
@@ -558,15 +574,7 @@ const TotalCostScreen = () => {
                   variant="outline"
                   icon="clear"
                   size="large"
-                  onPress={() => {
-                    setComparisonPrice('');
-                    setComparisonName('');
-                    setComparisonAdditionalCosts([
-                      { id: 'c1', type: 'shipping', label: 'Shipping', value: '', isPercentage: false },
-                      { id: 'c2', type: 'tax', label: 'Taxes', value: '', isPercentage: true },
-                    ]);
-                    setComparisonTotalCost(0);
-                  }}
+                  onPress={clearComparisonData}
                   style={styles.actionButton}
                 />
               )}

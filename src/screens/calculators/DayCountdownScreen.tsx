@@ -28,16 +28,7 @@ const DayCountdownScreen = () => {
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCountdown'));
   
-  // Function to translate time units
-  const getUnitLabel = (unit: string) => {
-    const unitMap: Record<string, string> = {
-      'days': t('days'),
-      'weeks': t('weeks'),
-      'months': t('months'),
-      'years': t('years')
-    };
-    return unitMap[unit] || unit;
-  };
+
 
   // Function to get locale for DateTimePicker
   const getLocale = () => {
@@ -66,10 +57,7 @@ const DayCountdownScreen = () => {
       dateOpen: false,
     },
   ]);
-  const [timeUnit, setTimeUnit] = useState('days');
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
-  
-  const timeUnits = ['days', 'weeks', 'months', 'years'];
 
   // Update calculator title and initial data when language changes
   useEffect(() => {
@@ -129,23 +117,10 @@ const DayCountdownScreen = () => {
     // Calculate working days using proper calendar logic
     const workingDays = calculateWorkingDays(now, target);
     
-    // Convert to selected time unit
     const absDiffDays = Math.abs(diffDays);
-    let result = absDiffDays;
-    switch (timeUnit) {
-      case 'weeks':
-        result = absDiffDays / 7;
-        break;
-      case 'months':
-        result = absDiffDays / 30.44; // Average days in a month
-        break;
-      case 'years':
-        result = absDiffDays / 365.25; // Account for leap years
-        break;
-    }
     
     return {
-      daysRemaining: result,
+      daysRemaining: absDiffDays,
       workingDaysRemaining: Math.abs(workingDays),
       isPastDate: isPast
     };
@@ -155,18 +130,7 @@ const DayCountdownScreen = () => {
     return date.toISOString().split('T')[0];
   };
 
-  const nextTimeUnit = () => {
-    const currentIndex = timeUnits.indexOf(timeUnit);
-    const nextIndex = (currentIndex + 1) % timeUnits.length;
-    setTimeUnit(timeUnits[nextIndex]);
-  };
 
-  const formatTimeUnit = (value: number, unit: string) => {
-    if (unit === 'days') {
-      return Math.round(value).toString();
-    }
-    return value.toFixed(2);
-  };
 
   const addDate = () => {
     const today = new Date();
@@ -221,11 +185,11 @@ const DayCountdownScreen = () => {
           onTitleChange={setCalculatorTitle}
           editable={true}
           maxLength={50}
+          defaultTitles={[t('dayCountdown')]}
           actions={
             <Share
               data={{
                 dates,
-                timeUnit,
                 calculationType: 'day_countdown',
               }}
               dataType="calculation"
@@ -285,22 +249,24 @@ const DayCountdownScreen = () => {
                       );
                     }}
                   >
-                    <View style={styles.modalOverlay}>
-                      <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
-                        <View style={styles.modalHeader}>
-                          <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
-                          <TouchableOpacity onPress={() => {
-                            setDates(prevDates => 
-                              prevDates.map(item => 
-                                item.id === dateItem.id 
-                                  ? { ...item, dateOpen: false }
-                                  : item
-                              )
-                            );
-                          }}>
-                            <MaterialIcons name="close" size={24} color={theme.colors.text} />
-                          </TouchableOpacity>
-                        </View>
+                    <View style={Platform.OS === 'ios' ? styles.modalOverlay : {}}>
+                      <View style={Platform.OS === 'ios' ? [styles.modalContent, { backgroundColor: theme.colors.card }] : {}}>
+                        {Platform.OS === 'ios' && (
+                          <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
+                            <TouchableOpacity onPress={() => {
+                              setDates(prevDates => 
+                                prevDates.map(item => 
+                                  item.id === dateItem.id 
+                                    ? { ...item, dateOpen: false }
+                                    : item
+                                )
+                              );
+                            }}>
+                              <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                            </TouchableOpacity>
+                          </View>
+                        )}
                         <DateTimePicker
                           value={dateItem.date}
                           mode="date"
@@ -348,16 +314,12 @@ const DayCountdownScreen = () => {
                 <View style={styles.resultRow}>
                   <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
                     <Text style={[styles.resultValue, { color: countdown.isPastDate ? theme.colors.danger : theme.colors.text }]}>
-                      {formatTimeUnit(countdown.daysRemaining, timeUnit)}
+                      {Math.round(countdown.daysRemaining).toString()}
                     </Text>
                   </View>
-                  <TouchableOpacity
-                    style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
-                    onPress={nextTimeUnit}
-                  >
-                    <Text style={styles.unitButtonText}>{getUnitLabel(timeUnit)}</Text>
-                    <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
-                  </TouchableOpacity>
+                  <View style={[styles.unitLabel, { backgroundColor: theme.colors.primary }]}>
+                    <Text style={styles.unitLabelText}>{t('days')}</Text>
+                  </View>
                 </View>
               </View>
 
@@ -374,12 +336,9 @@ const DayCountdownScreen = () => {
                         {countdown.workingDaysRemaining.toString()}
                       </Text>
                     </View>
-                    <TouchableOpacity
-                      style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
-                    >
-                      <Text style={styles.unitButtonText}>{t('days')}</Text>
-                      <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
-                    </TouchableOpacity>
+                    <View style={[styles.unitLabel, { backgroundColor: theme.colors.primary }]}>
+                      <Text style={styles.unitLabelText}>{t('days')}</Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -388,7 +347,7 @@ const DayCountdownScreen = () => {
                 <View style={[styles.statusCard, { backgroundColor: theme.colors.danger + '20', borderColor: theme.colors.danger }]}>
                   <MaterialIcons name="warning" size={20} color={theme.colors.danger} />
                   <Text style={[styles.statusText, { color: theme.colors.danger, fontSize: 16 }]}>
-                    Target date has passed!
+                    {t('targetDatePassed')}
                   </Text>
                 </View>
               )}
@@ -474,18 +433,19 @@ const styles = StyleSheet.create({
   resultValue: {
     fontSize: 18,
   },
-  unitButton: {
+  unitLabel: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     height: 48,
     borderRadius: 4,
     paddingHorizontal: 12,
+    minWidth: 80,
   },
-  unitButtonText: {
+  unitLabelText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
-    marginRight: 4,
   },
   helperText: {
     fontSize: 16,

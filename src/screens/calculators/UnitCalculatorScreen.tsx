@@ -44,6 +44,7 @@ const UnitCalculatorScreen = () => {
       products,
       bestProductIndexes,
       calculationType: 'unit_price',
+      title: calculatorTitle,
     },
     dataType: 'calculation',
     enabled: products.some(p => 
@@ -248,6 +249,8 @@ const UnitCalculatorScreen = () => {
       { name: '', price: '', quantity: '', unit: 'g', unitPrice: 0 },
     ]);
     setBestProductIndexes([]);
+    // Reset title back to default
+    setCalculatorTitle(t('unitPrice'));
   };
 
   const removeProduct = (index: number) => {
@@ -411,6 +414,7 @@ const UnitCalculatorScreen = () => {
           onTitleChange={setCalculatorTitle}
           editable={true}
           maxLength={50}
+          defaultTitles={[t('unitPrice')]}
           actions={
             <>
               <Save

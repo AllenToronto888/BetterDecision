@@ -55,6 +55,63 @@ const DetailComparisonScreen = () => {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
 
+  // Update translation when language changes
+  useEffect(() => {
+    setCriteria(prevCriteria => 
+      prevCriteria.map((criterion, index) => ({
+        ...criterion,
+        text: criterion.text === 'Price' || 
+              criterion.text === 'Precio' || 
+              criterion.text === 'Prix' || 
+              criterion.text === '价格' || 
+              criterion.text === '價格' || 
+              criterion.text === '価格' || 
+              criterion.text.includes('price') ? 
+              t('price') : (
+                criterion.text === 'Features' || 
+                criterion.text === 'Características' || 
+                criterion.text === 'Fonctionnalités' || 
+                criterion.text === '功能' || 
+                criterion.text === '特徵' || 
+                criterion.text === '機能' || 
+                criterion.text.includes('features') ? 
+                t('features') : criterion.text
+              )
+      }))
+    );
+    setOptions(prevOptions => 
+      prevOptions.map((option, index) => ({
+        ...option,
+        name: option.name.includes('Product') || 
+              option.name.includes('Producto') || 
+              option.name.includes('Produit') || 
+              option.name.includes('产品') || 
+              option.name.includes('產品') || 
+              option.name.includes('商品') ? 
+              `${t('product')} ${String.fromCharCode(65 + index)}` : option.name
+      }))
+    );
+    setComparisonData(prevData => 
+      prevData.map(cell => ({
+        ...cell,
+        text: cell.text === 'Basic' || 
+              cell.text === 'Básico' || 
+              cell.text === 'De base' || 
+              cell.text === '基础' || 
+              cell.text === '基礎' || 
+              cell.text === 'ベーシック' ? 
+              t('basic') : (
+                cell.text === 'Premium' || 
+                cell.text === 'Prémium' || 
+                cell.text === '高级' || 
+                cell.text === '高級' || 
+                cell.text === 'プレミアム' ? 
+                t('premium') : cell.text
+              )
+      }))
+    );
+  }, [t]);
+
   // Auto-save functionality
   useAutoSave({
     data: {
@@ -218,6 +275,8 @@ const DetailComparisonScreen = () => {
       setComparisonData(newCells);
       setNotes('');
       setNotesExpanded(false);
+      // Reset title back to default
+      setTitle(t('detailComparison'));
     }
   };
 
@@ -237,13 +296,13 @@ const DetailComparisonScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          automaticallyAdjustKeyboardInsets={true}
           keyboardDismissMode="on-drag"
         >
           <SectionTitle
@@ -251,6 +310,7 @@ const DetailComparisonScreen = () => {
             onTitleChange={setTitle}
             editable={true}
             maxLength={100}
+            defaultTitles={[t('detailComparison')]}
             actions={
               <>
                 <Save
@@ -288,7 +348,7 @@ const DetailComparisonScreen = () => {
             {/* Fixed Criteria Column */}
             <View style={styles.criteriaColumn}>
               <View style={[styles.criterionHeaderCell, { backgroundColor: theme.colors.card }]}>
-                <Text style={[styles.headerText, { color: theme.colors.text }]}>Criteria</Text>
+                <Text style={[styles.headerText, { color: theme.colors.text }]}>{t('criteria')}</Text>
               </View>
             
             {criteria.map((criterion) => (
@@ -323,14 +383,23 @@ const DetailComparisonScreen = () => {
                         styles.criterionInput, 
                         { color: theme.colors.text }
                       ]}
-                      value={criterion.text}
+                      value={(criterion.text === t('price') || criterion.text === t('features')) ? '' : criterion.text}
+                      placeholder={(criterion.text === t('price') || criterion.text === t('features')) ? criterion.text : t('enterCriterion')}
                       onChangeText={(text) => updateCriterion(criterion.id, text)}
-                      placeholder={t('enterCriterion')}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       multiline={true}
                       textAlignVertical="top"
-                      onFocus={() => setFocusedInput(`criterion-${criterion.id}`)}
-                      onBlur={() => setFocusedInput(null)}
+                      onFocus={() => {
+                        setFocusedInput(`criterion-${criterion.id}`);
+                      }}
+                      onBlur={() => {
+                        setFocusedInput(null);
+                        // Revert to default if empty
+                        if (criterion.text.trim() === '') {
+                          const defaultText = parseInt(criterion.id) === 1 ? t('price') : t('features');
+                          updateCriterion(criterion.id, defaultText);
+                        }
+                      }}
                     />
                   </View>
                 </SwipableRow>
@@ -368,12 +437,21 @@ const DetailComparisonScreen = () => {
                         styles.optionInput, 
                         { color: theme.colors.text }
                       ]}
-                      value={option.name}
+                      value={option.name.includes(t('product')) ? '' : option.name}
+                      placeholder={option.name.includes(t('product')) ? option.name : `${t('product')} ${index + 1}`}
                       onChangeText={(text) => updateOption(option.id, text)}
-                      placeholder={`${t('product')} ${index + 1}`}
                       placeholderTextColor={theme.colors.tabBarInactive}
-                      onFocus={() => setFocusedInput(`option-${option.id}`)}
-                      onBlur={() => setFocusedInput(null)}
+                      onFocus={() => {
+                        setFocusedInput(`option-${option.id}`);
+                      }}
+                      onBlur={() => {
+                        setFocusedInput(null);
+                        // Revert to default if empty
+                        if (option.name.trim() === '') {
+                          const defaultName = `${t('product')} ${String.fromCharCode(64 + parseInt(option.id))}`;
+                          updateOption(option.id, defaultName);
+                        }
+                      }}
                       multiline={true}
                       textAlignVertical="top"
                       scrollEnabled={true}
@@ -420,13 +498,37 @@ const DetailComparisonScreen = () => {
                           styles.cellInput, 
                           { color: theme.colors.text }
                         ]}
-                        value={getCellText(criterion.id, option.id)}
+                        value={(() => {
+                          const currentText = getCellText(criterion.id, option.id);
+                          return (currentText === '$499' || currentText === '$599' || currentText === t('basic') || currentText === t('premium')) ? '' : currentText;
+                        })()}
+                        placeholder={(() => {
+                          const currentText = getCellText(criterion.id, option.id);
+                          return (currentText === '$499' || currentText === '$599' || currentText === t('basic') || currentText === t('premium')) ? currentText : t('enterDetails');
+                        })()}
                         onChangeText={(text) => updateCellText(criterion.id, option.id, text)}
-                        placeholder={t('enterDetails')}
                         placeholderTextColor={theme.colors.tabBarInactive}
                         multiline
-                        onFocus={() => setFocusedInput(`cell-${criterion.id}-${option.id}`)}
-                        onBlur={() => setFocusedInput(null)}
+                        onFocus={() => {
+                          setFocusedInput(`cell-${criterion.id}-${option.id}`);
+                        }}
+                        onBlur={() => {
+                          setFocusedInput(null);
+                          // Revert to default if empty
+                          const currentText = getCellText(criterion.id, option.id);
+                          if (currentText.trim() === '') {
+                            // Determine default based on criterion and option
+                            let defaultText = '';
+                            if (criterion.id === '1') { // Price criterion
+                              defaultText = option.id === '1' ? '$499' : '$599';
+                            } else if (criterion.id === '2') { // Features criterion  
+                              defaultText = option.id === '1' ? t('basic') : t('premium');
+                            }
+                            if (defaultText) {
+                              updateCellText(criterion.id, option.id, defaultText);
+                            }
+                          }
+                        }}
                       />
                     </View>
                   ))}

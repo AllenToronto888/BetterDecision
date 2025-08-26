@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Typography } from './Typography';
@@ -11,6 +11,7 @@ interface SectionTitleProps {
   maxLength?: number;
   actions?: ReactNode;
   containerStyle?: any;
+  defaultTitles?: string[]; // Array of default titles to auto-clear
 }
 
 const SectionTitle: React.FC<SectionTitleProps> = ({
@@ -20,10 +21,16 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
   maxLength = 50,
   actions,
   containerStyle,
+  defaultTitles = [],
 }) => {
   const { theme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [localTitle, setLocalTitle] = useState(title);
+
+  // Update localTitle when title prop changes (e.g., from Clear All)
+  useEffect(() => {
+    setLocalTitle(title);
+  }, [title]);
 
   const handleTitleSubmit = () => {
     setIsEditing(false);
@@ -48,7 +55,9 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
                 borderColor: theme.colors.primary 
               }
             ]}
-            value={localTitle}
+            value={defaultTitles.includes(localTitle) ? '' : localTitle}
+            placeholder={defaultTitles.includes(localTitle) ? localTitle : undefined}
+            placeholderTextColor={theme.colors.tabBarInactive}
             onChangeText={handleTitleChange}
             onBlur={handleTitleSubmit}
             onSubmitEditing={handleTitleSubmit}
@@ -58,7 +67,11 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
         ) : (
           <TouchableOpacity
             style={styles.titleContainer}
-            onPress={() => editable && setIsEditing(true)}
+            onPress={() => {
+              if (editable) {
+                setIsEditing(true);
+              }
+            }}
             disabled={!editable}
           >
             <Typography variant="h4" color="text" style={styles.screenTitle}>

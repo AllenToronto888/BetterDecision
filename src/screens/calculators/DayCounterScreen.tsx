@@ -21,16 +21,7 @@ const DayCounterScreen = () => {
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCounter'));
   
-  // Function to translate time units
-  const getUnitLabel = (unit: string) => {
-    const unitMap: Record<string, string> = {
-      'days': t('days'),
-      'weeks': t('weeks'),
-      'months': t('months'),
-      'years': t('years')
-    };
-    return unitMap[unit] || unit;
-  };
+
 
   // Function to get locale for DateTimePicker
   const getLocale = () => {
@@ -57,14 +48,12 @@ const DayCounterScreen = () => {
     return date;
   });
   const [includeEndDate, setIncludeEndDate] = useState(false);
-  const [startDateOpen, setStartDateOpen] = useState(false);
-  const [endDateOpen, setEndDateOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState<'start' | 'end'>('start');
   const [daysDifference, setDaysDifference] = useState(0);
   const [actualDays, setActualDays] = useState(0);
   const [workingDays, setWorkingDays] = useState(0);
-  const [timeUnit, setTimeUnit] = useState('days');
-  
-  const timeUnits = ['days', 'weeks', 'months', 'years'];
+
 
   // Update calculator title when language changes
   useEffect(() => {
@@ -73,7 +62,7 @@ const DayCounterScreen = () => {
 
   useEffect(() => {
     calculateDifference();
-  }, [startDate, endDate, includeEndDate, timeUnit]);
+  }, [startDate, endDate, includeEndDate]);
 
   const calculateWorkingDays = (startDate: Date, endDate: Date, includeEndDate: boolean) => {
     const start = new Date(startDate);
@@ -134,32 +123,14 @@ const DayCounterScreen = () => {
     const actualWorkingDays = calculateWorkingDays(startDate, endDate, includeEndDate);
     setWorkingDays(actualWorkingDays);
     
-    // Convert to selected time unit
-    let result = diffDays;
-    switch (timeUnit) {
-      case 'weeks':
-        result = diffDays / 7;
-        break;
-      case 'months':
-        result = diffDays / 30.44; // Average days in a month
-        break;
-      case 'years':
-        result = diffDays / 365.25; // Account for leap years
-        break;
-    }
-    
-    setDaysDifference(result);
+    setDaysDifference(diffDays);
   };
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
 
-  const nextTimeUnit = () => {
-    const currentIndex = timeUnits.indexOf(timeUnit);
-    const nextIndex = (currentIndex + 1) % timeUnits.length;
-    setTimeUnit(timeUnits[nextIndex]);
-  };
+
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -180,13 +151,13 @@ const DayCounterScreen = () => {
           onTitleChange={setCalculatorTitle}
           editable={true}
           maxLength={50}
+          defaultTitles={[t('dayCounter')]}
           actions={
             <Share
               data={{
                 startDate,
                 endDate,
                 daysDifference,
-                timeUnit,
                 includeEndDate,
                 calculationType: 'day_counter',
               }}
@@ -201,7 +172,10 @@ const DayCounterScreen = () => {
         <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('from')}</Text>
         <TouchableOpacity
           style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
-          onPress={() => setStartDateOpen(true)}
+          onPress={() => {
+            setEditingDate('start');
+            setDatePickerOpen(true);
+          }}
         >
           <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(startDate)}
@@ -209,59 +183,15 @@ const DayCounterScreen = () => {
           <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
-        <Modal
-          visible={startDateOpen}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setStartDateOpen(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
-                <TouchableOpacity onPress={() => setStartDateOpen(false)}>
-                  <MaterialIcons name="close" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-                locale={getLocale()}
-                onChange={(event, selectedDate) => {
-                  if (Platform.OS === 'android') {
-                    // On Android, handle the built-in cancel/confirm buttons
-                    if (event.type === 'set' && selectedDate) {
-                      setStartDate(selectedDate);
-                    }
-                    // Close modal regardless of action (set or dismissed)
-                    setStartDateOpen(false);
-                  } else {
-                    // On iOS, update immediately (spinner mode)
-                    if (selectedDate) {
-                      setStartDate(selectedDate);
-                    }
-                  }
-                }}
-              />
-              {Platform.OS === 'ios' && (
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity 
-                    style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
-                    onPress={() => setStartDateOpen(false)}
-                  >
-                    <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          </View>
-        </Modal>
+
         
         <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>{t('to')}</Text>
         <TouchableOpacity
           style={[styles.dateButton, { backgroundColor: theme.colors.background }]}
-          onPress={() => setEndDateOpen(true)}
+          onPress={() => {
+            setEditingDate('end');
+            setDatePickerOpen(true);
+          }}
         >
           <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(endDate)}
@@ -269,38 +199,49 @@ const DayCounterScreen = () => {
           <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
+        {/* Unified Date Picker Modal */}
         <Modal
-          visible={endDateOpen}
+          visible={datePickerOpen}
           transparent={true}
           animationType="slide"
-          onRequestClose={() => setEndDateOpen(false)}
+          onRequestClose={() => setDatePickerOpen(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
-                <TouchableOpacity onPress={() => setEndDateOpen(false)}>
-                  <MaterialIcons name="close" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-              </View>
+          <View style={Platform.OS === 'ios' ? styles.modalOverlay : {}}>
+            <View style={Platform.OS === 'ios' ? [styles.modalContent, { backgroundColor: theme.colors.card }] : {}}>
+              {Platform.OS === 'ios' && (
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
+                  <TouchableOpacity onPress={() => setDatePickerOpen(false)}>
+                    <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                  </TouchableOpacity>
+                </View>
+              )}
               <DateTimePicker
-                value={endDate}
+                value={editingDate === 'start' ? startDate : endDate}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
                 locale={getLocale()}
-                minimumDate={startDate}
+                minimumDate={editingDate === 'end' ? startDate : undefined}
                 onChange={(event, selectedDate) => {
                   if (Platform.OS === 'android') {
                     // On Android, handle the built-in cancel/confirm buttons
                     if (event.type === 'set' && selectedDate) {
-                      setEndDate(selectedDate);
+                      if (editingDate === 'start') {
+                        setStartDate(selectedDate);
+                      } else {
+                        setEndDate(selectedDate);
+                      }
                     }
                     // Close modal regardless of action (set or dismissed)
-                    setEndDateOpen(false);
+                    setDatePickerOpen(false);
                   } else {
                     // On iOS, update immediately (spinner mode)
                     if (selectedDate) {
-                      setEndDate(selectedDate);
+                      if (editingDate === 'start') {
+                        setStartDate(selectedDate);
+                      } else {
+                        setEndDate(selectedDate);
+                      }
                     }
                   }
                 }}
@@ -309,7 +250,7 @@ const DayCounterScreen = () => {
                 <View style={styles.modalButtons}>
                   <TouchableOpacity 
                     style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
-                    onPress={() => setEndDateOpen(false)}
+                    onPress={() => setDatePickerOpen(false)}
                   >
                     <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
                   </TouchableOpacity>
@@ -335,16 +276,12 @@ const DayCounterScreen = () => {
         <View style={styles.resultRow}>
           <View style={[styles.resultContainer, { backgroundColor: theme.colors.background }]}>
             <Text style={[styles.resultValue, { color: theme.colors.text }]}>
-              {timeUnit === 'days' ? Math.round(daysDifference).toString() : daysDifference.toFixed(2)}
+              {Math.round(daysDifference).toString()}
             </Text>
           </View>
-          <TouchableOpacity
-            style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
-            onPress={nextTimeUnit}
-          >
-            <Text style={styles.unitButtonText}>{getUnitLabel(timeUnit)}</Text>
-            <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={[styles.unitLabel, { backgroundColor: theme.colors.primary }]}>
+            <Text style={styles.unitLabelText}>{t('days')}</Text>
+          </View>
         </View>
       </View>
       
@@ -363,12 +300,9 @@ const DayCounterScreen = () => {
                 {workingDays.toString()}
               </Text>
             </View>
-            <TouchableOpacity
-              style={[styles.unitButton, { backgroundColor: theme.colors.primary }]}
-            >
-              <Text style={styles.unitButtonText}>{t('days')}</Text>
-              <MaterialIcons name="arrow-drop-down" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            <View style={[styles.unitLabel, { backgroundColor: theme.colors.primary }]}>
+              <Text style={styles.unitLabelText}>{t('days')}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -433,18 +367,19 @@ const styles = StyleSheet.create({
   resultValue: {
     fontSize: 18,
   },
-  unitButton: {
+  unitLabel: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     height: 48,
     borderRadius: 4,
     paddingHorizontal: 12,
+    minWidth: 80,
   },
-  unitButtonText: {
+  unitLabelText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
-    marginRight: 4,
   },
   helperText: {
     fontSize: 16,

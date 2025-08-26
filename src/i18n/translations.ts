@@ -130,6 +130,7 @@ export const translations = {
     dateName: "Date name",
     timeSince: "Time since",
     timeRemaining: "Time remaining",
+    targetDatePassed: "Target date has passed!",
     addDates: "Add Dates",
     
     // ============ LISTS SCREEN ============
@@ -371,6 +372,7 @@ export const translations = {
       dateName: "Nombre de fecha",
       timeSince: "Tiempo transcurrido",
       timeRemaining: "Tiempo restante",
+      targetDatePassed: "¡La fecha objetivo ha pasado!",
       addDates: "Agregar Fechas",
 
       // ============ LISTS SCREEN ============
@@ -612,6 +614,7 @@ export const translations = {
     dateName: "Nom de la date",
     timeSince: "Temps écoulé",
     timeRemaining: "Temps restant",
+    targetDatePassed: "La date cible est dépassée!",
     addDates: "Ajouter des Dates",
 
     // ============ LISTS SCREEN ============
@@ -853,6 +856,7 @@ export const translations = {
     dateName: "日期名称",
     timeSince: "已过时间",
     timeRemaining: "剩余时间",
+    targetDatePassed: "目标日期已过！",
     addDates: "添加日期",
 
     // ============ LISTS SCREEN ============
@@ -1094,6 +1098,7 @@ export const translations = {
     dateName: "日期名稱",
     timeSince: "已過時間",
     timeRemaining: "剩餘時間",
+    targetDatePassed: "目標日期已過！",
     addDates: "添加日期",
 
     // ============ LISTS SCREEN ============
@@ -1335,6 +1340,7 @@ export const translations = {
     dateName: "日付名",
     timeSince: "経過時間",
     timeRemaining: "残り時間",
+    targetDatePassed: "目標日が過ぎました！",
     addDates: "日付を追加",
 
     // ============ LISTS SCREEN ============

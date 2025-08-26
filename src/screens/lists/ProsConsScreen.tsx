@@ -155,6 +155,8 @@ const ProsConsScreen = () => {
     setCons([]);
     setNotes('');
     setNotesExpanded(false);
+    // Reset title back to default
+    setTitle(t('prosAndCons'));
   };
   
   const renderItem = (item: Item, isPro: boolean) => {
@@ -221,13 +223,21 @@ const ProsConsScreen = () => {
               styles.itemInput, 
               { color: theme.colors.text }
             ]}
-            value={item.text}
+            value={item.text === t('sampleText') ? '' : item.text}
+            placeholder={item.text === t('sampleText') ? t('sampleText') : (isPro ? t('addAPro') : t('addACon'))}
             onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
-            placeholder={isPro ? t('addAPro') : t('addACon')}
             placeholderTextColor={theme.colors.tabBarInactive}
             multiline
-            onFocus={() => setFocusedInput(`${isPro ? 'pro' : 'con'}-${item.id}`)}
-            onBlur={() => setFocusedInput(null)}
+            onFocus={() => {
+              setFocusedInput(`${isPro ? 'pro' : 'con'}-${item.id}`);
+            }}
+            onBlur={() => {
+              setFocusedInput(null);
+              // Revert to default if empty
+              if (item.text.trim() === '') {
+                updateItem(isPro, item.id, 'text', t('sampleText'));
+              }
+            }}
           />
         </View>
       </SwipableRow>
@@ -250,13 +260,13 @@ const ProsConsScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          automaticallyAdjustKeyboardInsets={true}
           keyboardDismissMode="on-drag"
         >
           <SectionTitle
@@ -264,6 +274,7 @@ const ProsConsScreen = () => {
             onTitleChange={setTitle}
             editable={true}
             maxLength={100}
+            defaultTitles={[t('prosAndCons')]}
             actions={
               <>
                 <Save
@@ -533,7 +544,7 @@ const styles = StyleSheet.create({
   
   // Notes Section Styles
   notesSection: {
-    marginTop: 36,
+    marginTop: 24,
     borderRadius: 8,
     borderWidth: 1,
     overflow: 'hidden',

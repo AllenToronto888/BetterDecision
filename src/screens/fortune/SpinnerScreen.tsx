@@ -88,6 +88,19 @@ const SpinnerScreen = () => {
       Alert.alert(t('cannotRemove'), t('needAtLeastTwoOptions'));
     }
   };
+
+  const clearAllOptions = () => {
+    if (options.length > 0) {
+      // Keep first two options but clear their text
+      const defaultOptions = [
+        { id: '1', text: '', color: '#F44336' },
+        { id: '2', text: '', color: '#2196F3' }
+      ];
+      setOptions(defaultOptions);
+      // Reset title back to default
+      setTitle(t('spinToDecide'));
+    }
+  };
   
   const spinWheel = () => {
     // Check if all options have text
@@ -176,12 +189,18 @@ const SpinnerScreen = () => {
               { color: theme.colors.text },
               focusedInput === 'title' && { borderWidth: 2, borderColor: theme.colors.primary }
             ]}
-            value={title}
+            value={title === t('spinToDecide') ? '' : title}
+            placeholder={title === t('spinToDecide') ? title : t('enterTitle')}
             onChangeText={setTitle}
-            placeholder={t('enterTitle')}
             placeholderTextColor={theme.colors.tabBarInactive}
             onFocus={() => setFocusedInput('title')}
-            onBlur={() => setFocusedInput(null)}
+            onBlur={() => {
+              setFocusedInput(null);
+              // Revert to default if empty
+              if (title.trim() === '') {
+                setTitle(t('spinToDecide'));
+              }
+            }}
           />
         </View>
         
@@ -283,24 +302,52 @@ const SpinnerScreen = () => {
                     { color: theme.colors.text, backgroundColor: theme.colors.background },
                     focusedInput === `option-${option.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
                   ]}
-                  value={option.text}
+                  value={(() => {
+                    const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
+                    return defaultTexts.includes(option.text) ? '' : option.text;
+                  })()}
+                  placeholder={(() => {
+                    const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
+                    return defaultTexts.includes(option.text) ? option.text : t('enterOption');
+                  })()}
                   onChangeText={(text) => updateOption(option.id, text)}
-                  placeholder={t('enterOption')}
                   placeholderTextColor={theme.colors.tabBarInactive}
                   onFocus={() => setFocusedInput(`option-${option.id}`)}
-                  onBlur={() => setFocusedInput(null)}
+                  onBlur={() => {
+                    setFocusedInput(null);
+                    // Revert to default if empty
+                    if (option.text.trim() === '') {
+                      const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
+                      const index = parseInt(option.id) - 1;
+                      if (index < defaultTexts.length) {
+                        updateOption(option.id, defaultTexts[index]);
+                      }
+                    }
+                  }}
                 />
               </View>
             </SwipableRow>
           ))}
           
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
-            onPress={addOption}
-          >
-            <MaterialIcons name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.addButtonText}>{t('addOption')}</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
+              onPress={addOption}
+            >
+              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Text style={styles.addButtonText}>{t('addOption')}</Text>
+            </TouchableOpacity>
+            
+            {options.length > 2 && (
+              <TouchableOpacity
+                style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
+                onPress={clearAllOptions}
+              >
+                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
+                <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -431,12 +478,36 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     minHeight: 44,
     borderRadius: 8,
-    marginTop: 8,
+    flex: 1,
   },
   addButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  clearAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  clearAllButtonText: {
+    fontWeight: 'bold',
+    marginLeft: 4,
     fontSize: 16,
   },
 });

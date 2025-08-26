@@ -203,6 +203,8 @@ const QuickComparisonScreen = () => {
       setComparisonData(newCells);
       setNotes('');
       setNotesExpanded(false);
+      // Reset title back to default
+      setTitle(t('quickComparison'));
     }
   };
   
@@ -274,13 +276,13 @@ const QuickComparisonScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          automaticallyAdjustKeyboardInsets={true}
           keyboardDismissMode="on-drag"
         >
           <SectionTitle
@@ -288,6 +290,7 @@ const QuickComparisonScreen = () => {
             onTitleChange={setTitle}
             editable={true}
             maxLength={100}
+            defaultTitles={[t('quickComparison')]}
             actions={
               <>
                 <Save
@@ -363,14 +366,22 @@ const QuickComparisonScreen = () => {
                         styles.criterionInput, 
                         { color: theme.colors.text }
                       ]}
-                      value={criterion.text}
+                      value={criterion.text.includes(t('criteria')) ? '' : criterion.text}
+                      placeholder={criterion.text.includes(t('criteria')) ? criterion.text : t('enterCriterion')}
                       onChangeText={(text) => updateCriterion(criterion.id, text)}
-                      placeholder={t('enterCriterion')}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       multiline={true}
                       textAlignVertical="top"
-                      onFocus={() => setFocusedInput(`criterion-${criterion.id}`)}
-                      onBlur={() => setFocusedInput(null)}
+                      onFocus={() => {
+                        setFocusedInput(`criterion-${criterion.id}`);
+                      }}
+                      onBlur={() => {
+                        setFocusedInput(null);
+                        // Revert to default if empty
+                        if (criterion.text.trim() === '') {
+                          updateCriterion(criterion.id, `${t('criteria')} ${parseInt(criterion.id)}`);
+                        }
+                      }}
                     />
                   </View>
                 </SwipableRow>
@@ -410,12 +421,20 @@ const QuickComparisonScreen = () => {
                         styles.optionInput, 
                         { color: theme.colors.text }
                       ]}
-                      value={option.name}
+                      value={option.name.includes(t('options')) ? '' : option.name}
+                      placeholder={option.name.includes(t('options')) ? option.name : `${t('options')} ${index + 1}`}
                       onChangeText={(text) => updateOption(option.id, text)}
-                      placeholder={`${t('options')} ${index + 1}`}
                       placeholderTextColor={theme.colors.tabBarInactive}
-                      onFocus={() => setFocusedInput(`option-${option.id}`)}
-                      onBlur={() => setFocusedInput(null)}
+                      onFocus={() => {
+                        setFocusedInput(`option-${option.id}`);
+                      }}
+                      onBlur={() => {
+                        setFocusedInput(null);
+                        // Revert to default if empty
+                        if (option.name.trim() === '') {
+                          updateOption(option.id, `${t('options')} ${parseInt(option.id)}`);
+                        }
+                      }}
                       multiline={true}
                       textAlignVertical="top"
                       scrollEnabled={true}

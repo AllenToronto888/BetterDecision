@@ -38,11 +38,18 @@ export const useAutoSave = ({
   const isSavingRef = useRef<boolean>(false);
   const sessionAutoSaveIdRef = useRef<string | null>(null);
 
-  const generateAutoSaveName = (): string => {
+  const generateAutoSaveName = (dataToSave: any): string => {
     const now = new Date();
     const date = now.toLocaleDateString();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `${autoSavePrefix} - ${date} ${time}`;
+    
+    // Extract title from data if available
+    let userTitle = '';
+    if (dataToSave?.title && typeof dataToSave.title === 'string' && dataToSave.title.trim()) {
+      userTitle = ` - ${dataToSave.title.trim()}`;
+    }
+    
+    return `${autoSavePrefix}${userTitle} - ${date} ${time}`;
   };
 
   const shouldSaveData = (currentData: any): boolean => {
@@ -132,7 +139,7 @@ export const useAutoSave = ({
           sessionAutoSaveIdRef.current = Date.now().toString();
           savedItem = {
             id: sessionAutoSaveIdRef.current,
-            name: generateAutoSaveName(),
+            name: generateAutoSaveName(dataToSave),
             data: dataToSave,
             type: dataType,
             createdAt: now,
@@ -146,7 +153,7 @@ export const useAutoSave = ({
         sessionAutoSaveIdRef.current = Date.now().toString();
         savedItem = {
           id: sessionAutoSaveIdRef.current,
-          name: generateAutoSaveName(),
+          name: generateAutoSaveName(dataToSave),
           data: dataToSave,
           type: dataType,
           createdAt: now,
