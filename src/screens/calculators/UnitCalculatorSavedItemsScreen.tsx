@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
   listContainerEmpty: {
     flexGrow: 1,

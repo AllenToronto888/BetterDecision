@@ -1,6 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import {
+    KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     TextInput,
@@ -120,25 +122,9 @@ const UnitCalculatorScreen = () => {
     const updatedProducts = products.map((product) => {
       const price = parseFloat(product.price) || 0;
       const quantity = parseFloat(product.quantity) || 1;
-      let standardizedQuantity = quantity;
       
-      // Convert to standard units (g or ml)
-      switch (product.unit) {
-        case 'kg':
-          standardizedQuantity = quantity * 1000;
-          break;
-        case 'l':
-          standardizedQuantity = quantity * 1000;
-          break;
-        case 'lb':
-          standardizedQuantity = quantity * 453.592;
-          break;
-        case 'oz':
-          standardizedQuantity = quantity * 28.3495;
-          break;
-      }
-      
-      const unitPrice = standardizedQuantity > 0 ? price / standardizedQuantity : 0;
+      // Calculate unit price in the original unit (for display)
+      const unitPrice = quantity > 0 ? price / quantity : 0;
       return { ...product, unitPrice };
     });
     
@@ -151,29 +137,75 @@ const UnitCalculatorScreen = () => {
       setProducts(updatedProducts);
     }
     
-    // Check if ALL products have valid unit prices (price > 0 and quantity > 0)
-    const allProductsHaveValidPrices = updatedProducts.every((product) => {
+    // Check if we have AT LEAST 2 products with valid unit prices (price > 0 and quantity > 0)
+    const validProducts = updatedProducts.filter((product) => {
       const price = parseFloat(product.price) || 0;
       const quantity = parseFloat(product.quantity) || 0;
       return price > 0 && quantity > 0;
     });
     
-    // Only find the best products if ALL products have valid prices
-    if (allProductsHaveValidPrices && updatedProducts.length > 1) {
-      let lowestUnitPrice = Infinity;
+    // Find the best products if we have at least 2 valid products
+    if (validProducts.length >= 2) {
+      let lowestStandardizedPrice = Infinity;
       
-      // First pass: find the lowest unit price
-      updatedProducts.forEach((product) => {
-        if (product.unitPrice > 0 && product.unitPrice < lowestUnitPrice) {
-          lowestUnitPrice = product.unitPrice;
+      // First pass: find the lowest standardized unit price for comparison (only valid products)
+      validProducts.forEach((product) => {
+        const price = parseFloat(product.price) || 0;
+        const quantity = parseFloat(product.quantity) || 1;
+        let standardizedQuantity = quantity;
+        
+        // Convert to standard units (g or ml) for fair comparison
+        switch (product.unit) {
+          case 'kg':
+            standardizedQuantity = quantity * 1000;
+            break;
+          case 'l':
+            standardizedQuantity = quantity * 1000;
+            break;
+          case 'lb':
+            standardizedQuantity = quantity * 453.592;
+            break;
+          case 'oz':
+            standardizedQuantity = quantity * 28.3495;
+            break;
+        }
+        
+        const standardizedPrice = standardizedQuantity > 0 ? price / standardizedQuantity : 0;
+        if (standardizedPrice > 0 && standardizedPrice < lowestStandardizedPrice) {
+          lowestStandardizedPrice = standardizedPrice;
         }
       });
       
-      // Second pass: find all products with the lowest unit price (handle ties)
+      // Second pass: find all products with the lowest standardized price (check all products, but only highlight valid ones)
       const bestIndexes: number[] = [];
       updatedProducts.forEach((product, index) => {
-        if (product.unitPrice > 0 && product.unitPrice === lowestUnitPrice) {
-          bestIndexes.push(index);
+        const price = parseFloat(product.price) || 0;
+        const quantity = parseFloat(product.quantity) || 1;
+        
+        // Only consider products with valid data
+        if (price > 0 && quantity > 0) {
+          let standardizedQuantity = quantity;
+          
+          // Convert to standard units (g or ml) for fair comparison
+          switch (product.unit) {
+            case 'kg':
+              standardizedQuantity = quantity * 1000;
+              break;
+            case 'l':
+              standardizedQuantity = quantity * 1000;
+              break;
+            case 'lb':
+              standardizedQuantity = quantity * 453.592;
+              break;
+            case 'oz':
+              standardizedQuantity = quantity * 28.3495;
+              break;
+          }
+          
+          const standardizedPrice = standardizedQuantity > 0 ? price / standardizedQuantity : 0;
+          if (standardizedPrice > 0 && standardizedPrice === lowestStandardizedPrice) {
+            bestIndexes.push(index);
+          }
         }
       });
       
@@ -302,18 +334,32 @@ const UnitCalculatorScreen = () => {
         </View>
         
         <View style={styles.resultContainer}>
-          <Typography variant="body2" color="textSecondary" style={styles.unitPriceLabel}>
-{t('unitPrice')}:
-          </Typography>
+          <View style={styles.unitPriceLabelRow}>
+            <Typography variant="body2" color="textSecondary" style={styles.unitPriceLabel}>
+              {t('unitPrice')}:
+            </Typography>
+            {isBest && bestProductIndexes.length === 1 && (
+              <View style={[styles.bestValueBadge, { backgroundColor: theme.colors.primary }]}>
+                <Typography variant="caption" style={styles.bestValueText}>
+                  {t('bestValue')}
+                </Typography>
+              </View>
+            )}
+            {isBest && bestProductIndexes.length > 1 && (
+              <View style={[styles.sameBadge, { backgroundColor: theme.colors.warning || '#FF9500' }]}>
+                <Typography variant="caption" style={styles.sameText}>
+                  {t('same')}
+                </Typography>
+              </View>
+            )}
+          </View>
           <Typography 
             variant="body1" 
             color={isBest ? "primary" : "text"} 
             style={styles.unitPriceValue}
             weight="semibold"
           >
-            ${product.unitPrice.toFixed(4)} / {product.unit === 'kg' || product.unit === 'l' ? 
-              (product.unit === 'kg' ? getUnitLabel('g') : getUnitLabel('ml')) : 
-              getUnitLabel(product.unit)}
+            ${product.unitPrice.toFixed(4)} / {getUnitLabel(product.unit)}
           </Typography>
         </View>
         
@@ -345,13 +391,19 @@ const UnitCalculatorScreen = () => {
         }}
       />
 
-      <ScrollView
-        style={{ flex: 1, backgroundColor: theme.colors.background }}
-        contentContainerStyle={{ 
-          paddingHorizontal: 24,
-          paddingTop: 16,
-          paddingBottom: 100
-        }}
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+          contentContainerStyle={{ 
+            paddingHorizontal: 24,
+            paddingTop: 16,
+            paddingBottom: 300
+          }}
+          keyboardDismissMode="on-drag"
       >
         {/* Editable Title Section */}
         <SectionTitle
@@ -414,6 +466,7 @@ const UnitCalculatorScreen = () => {
 
 
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -496,9 +549,34 @@ const styles = StyleSheet.create({
   unitPriceLabel: {
     fontSize: 18,
   },
+  unitPriceLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   unitPriceValue: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  bestValueBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  bestValueText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  sameBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  sameText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 
 

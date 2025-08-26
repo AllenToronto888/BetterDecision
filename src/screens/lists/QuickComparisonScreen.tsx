@@ -45,6 +45,7 @@ const QuickComparisonScreen = () => {
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   const [comparisonData, setComparisonData] = useState<ComparisonCell[]>([
     { criterionId: '1', optionId: '1', status: 'yes' },
@@ -273,11 +274,14 @@ const QuickComparisonScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          keyboardDismissMode="on-drag"
         >
           <SectionTitle
             title={title}
@@ -346,15 +350,27 @@ const QuickComparisonScreen = () => {
                   style={styles.swipeableRowOverride}
                   contentStyle={styles.swipeableContentOverride}
                 >
-                  <View style={[styles.criterionCell, { backgroundColor: theme.colors.card }]}>
+                  <View style={[
+                    styles.criterionCell, 
+                    { 
+                      backgroundColor: theme.colors.card,
+                      borderColor: focusedInput === `criterion-${criterion.id}` ? theme.colors.primary : theme.colors.border,
+                      borderWidth: focusedInput === `criterion-${criterion.id}` ? 2 : 1
+                    }
+                  ]}>
                     <TextInput
-                      style={[styles.criterionInput, { color: theme.colors.text }]}
+                      style={[
+                        styles.criterionInput, 
+                        { color: theme.colors.text }
+                      ]}
                       value={criterion.text}
                       onChangeText={(text) => updateCriterion(criterion.id, text)}
                       placeholder={t('enterCriterion')}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       multiline={true}
                       textAlignVertical="top"
+                      onFocus={() => setFocusedInput(`criterion-${criterion.id}`)}
+                      onBlur={() => setFocusedInput(null)}
                     />
                   </View>
                 </SwipableRow>
@@ -379,15 +395,30 @@ const QuickComparisonScreen = () => {
                 {options.map((option, index) => (
                   <View 
                     key={option.id} 
-                    style={[styles.optionHeaderCell, { backgroundColor: theme.colors.card }]}
+                    style={[
+                      styles.optionHeaderCell, 
+                      { 
+                        backgroundColor: theme.colors.card,
+                        borderColor: focusedInput === `option-${option.id}` ? theme.colors.primary : theme.colors.border,
+                        borderWidth: focusedInput === `option-${option.id}` ? 2 : 1
+                      }
+                    ]}
 
                   >
                     <TextInput
-                      style={[styles.optionInput, { color: theme.colors.text }]}
+                      style={[
+                        styles.optionInput, 
+                        { color: theme.colors.text }
+                      ]}
                       value={option.name}
                       onChangeText={(text) => updateOption(option.id, text)}
                       placeholder={`${t('options')} ${index + 1}`}
                       placeholderTextColor={theme.colors.tabBarInactive}
+                      onFocus={() => setFocusedInput(`option-${option.id}`)}
+                      onBlur={() => setFocusedInput(null)}
+                      multiline={true}
+                      textAlignVertical="top"
+                      scrollEnabled={true}
                     />
                     
                     {options.length > 1 && (
@@ -466,17 +497,23 @@ const QuickComparisonScreen = () => {
           {notesExpanded && (
             <View style={styles.notesContent}>
               <TextInput
-                style={[styles.notesInput, { 
-                  backgroundColor: theme.colors.background, 
-                  color: theme.colors.text,
-                  borderColor: theme.colors.border 
-                }]}
+                style={[
+                  styles.notesInput, 
+                  { 
+                    backgroundColor: theme.colors.background, 
+                    color: theme.colors.text,
+                    borderColor: focusedInput === 'notes' ? theme.colors.primary : theme.colors.border,
+                    borderWidth: focusedInput === 'notes' ? 2 : 1
+                  }
+                ]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder={t('addNotesAboutComparison')}
                 placeholderTextColor={theme.colors.tabBarInactive}
                 multiline
                 textAlignVertical="top"
+                onFocus={() => setFocusedInput('notes')}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
           )}
@@ -494,7 +531,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
   tableContainer: {
     flexDirection: 'row',
@@ -512,7 +549,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   criterionHeaderCell: {
-    height: 48,
+    height: 60,
     padding: 8,
     borderRadius: 4,
     marginBottom: 8,
@@ -537,7 +574,7 @@ const styles = StyleSheet.create({
   },
   optionHeaderCell: {
     width: 90,
-    height: 48,
+    height: 60,
     padding: 8,
     borderRadius: 4,
     marginRight: 4,
@@ -548,10 +585,13 @@ const styles = StyleSheet.create({
   },
   optionInput: {
     fontWeight: 'bold',
+    height: 44,
+    textAlignVertical: 'top',
+    paddingTop: 4,
   },
   addCell: {
     width: 40,
-    height: 48,
+    height: 60,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',

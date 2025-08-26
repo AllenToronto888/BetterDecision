@@ -1,21 +1,23 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+    Modal,
+    Platform,
     ScrollView,
     StyleSheet,
     Switch,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 const DayCounterScreen = () => {
   const { theme } = useTheme();
-  const { t } = useI18n();
+  const { t, currentLanguage } = useI18n();
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCounter'));
   
@@ -29,11 +31,29 @@ const DayCounterScreen = () => {
     };
     return unitMap[unit] || unit;
   };
+
+  // Function to get locale for DateTimePicker
+  const getLocale = () => {
+    const localeMap: Record<string, string> = {
+      'en': 'en-US',
+      'es': 'es-ES',
+      'fr': 'fr-FR',
+      'zh-Hans': 'zh-CN',
+      'zh-Hant': 'zh-TW',
+      'ja': 'ja-JP'
+    };
+    return localeMap[currentLanguage] || 'en-US';
+  };
   
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    // Create date in local timezone (set to start of day to avoid timezone issues)
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  });
   const [endDate, setEndDate] = useState(() => {
-    const date = new Date();
-    date.setDate(date.getDate() + 7);
+    const today = new Date();
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    date.setDate(date.getDate() + 30); // Default to 30 days from today
     return date;
   });
   const [includeEndDate, setIncludeEndDate] = useState(false);
@@ -50,6 +70,10 @@ const DayCounterScreen = () => {
   useEffect(() => {
     setCalculatorTitle(t('dayCounter'));
   }, [t]);
+
+  useEffect(() => {
+    calculateDifference();
+  }, [startDate, endDate, includeEndDate, timeUnit]);
 
   const calculateWorkingDays = (startDate: Date, endDate: Date, includeEndDate: boolean) => {
     const start = new Date(startDate);
@@ -86,7 +110,7 @@ const DayCounterScreen = () => {
     return workingDaysCount;
   };
 
-  const calculateDifference = useCallback(() => {
+  const calculateDifference = () => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
@@ -125,11 +149,7 @@ const DayCounterScreen = () => {
     }
     
     setDaysDifference(result);
-  }, [startDate, endDate, includeEndDate, timeUnit]);
-
-  useEffect(() => {
-    calculateDifference();
-  }, [calculateDifference]);
+  };
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -189,19 +209,54 @@ const DayCounterScreen = () => {
           <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
-        {startDateOpen && (
-          <DateTimePicker
-            value={startDate}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setStartDateOpen(false);
-              if (selectedDate) {
-                setStartDate(selectedDate);
-              }
-            }}
-          />
-        )}
+        <Modal
+          visible={startDateOpen}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setStartDateOpen(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
+                <TouchableOpacity onPress={() => setStartDateOpen(false)}>
+                  <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                locale={getLocale()}
+                onChange={(event, selectedDate) => {
+                  if (Platform.OS === 'android') {
+                    // On Android, handle the built-in cancel/confirm buttons
+                    if (event.type === 'set' && selectedDate) {
+                      setStartDate(selectedDate);
+                    }
+                    // Close modal regardless of action (set or dismissed)
+                    setStartDateOpen(false);
+                  } else {
+                    // On iOS, update immediately (spinner mode)
+                    if (selectedDate) {
+                      setStartDate(selectedDate);
+                    }
+                  }
+                }}
+              />
+              {Platform.OS === 'ios' && (
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity 
+                    style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
+                    onPress={() => setStartDateOpen(false)}
+                  >
+                    <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
         
         <Text style={[styles.cardTitle, { color: theme.colors.text, marginTop: 16 }]}>{t('to')}</Text>
         <TouchableOpacity
@@ -214,20 +269,55 @@ const DayCounterScreen = () => {
           <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
-        {endDateOpen && (
-          <DateTimePicker
-            value={endDate}
-            mode="date"
-            display="default"
-            minimumDate={startDate}
-            onChange={(event, selectedDate) => {
-              setEndDateOpen(false);
-              if (selectedDate) {
-                setEndDate(selectedDate);
-              }
-            }}
-          />
-        )}
+        <Modal
+          visible={endDateOpen}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setEndDateOpen(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
+                <TouchableOpacity onPress={() => setEndDateOpen(false)}>
+                  <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                locale={getLocale()}
+                minimumDate={startDate}
+                onChange={(event, selectedDate) => {
+                  if (Platform.OS === 'android') {
+                    // On Android, handle the built-in cancel/confirm buttons
+                    if (event.type === 'set' && selectedDate) {
+                      setEndDate(selectedDate);
+                    }
+                    // Close modal regardless of action (set or dismissed)
+                    setEndDateOpen(false);
+                  } else {
+                    // On iOS, update immediately (spinner mode)
+                    if (selectedDate) {
+                      setEndDate(selectedDate);
+                    }
+                  }
+                }}
+              />
+              {Platform.OS === 'ios' && (
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity 
+                    style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
+                    onPress={() => setEndDateOpen(false)}
+                  >
+                    <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
         
         <View style={styles.switchRow}>
           <Text style={[styles.switchLabel, { color: theme.colors.text }]}>{t('includeEndDate')}</Text>
@@ -260,7 +350,10 @@ const DayCounterScreen = () => {
       
       <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('workingTime')}</Text>
-        <Text style={[styles.helperText, { color: theme.colors.textSecondary }]}>
+        <Text 
+          style={[styles.helperText, { color: theme.colors.textSecondary }]}
+          numberOfLines={0}
+        >
           {t('excludesWeekends')}
         </Text>
         <View style={styles.workingTimeContainer}>
@@ -291,7 +384,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
   card: {
     borderRadius: 8,
@@ -357,9 +450,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'italic',
     marginBottom: 12,
+    lineHeight: 22,
+    flexWrap: 'wrap',
   },
   workingTimeContainer: {
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalButtons: {
+    marginTop: 20,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -36,6 +36,7 @@ const ProsConsScreen = () => {
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
 
   // Track if we've moved away from the initial default state
@@ -171,12 +172,15 @@ const ProsConsScreen = () => {
           onPress: () => removeItem(isPro, item.id),
         }]}
       >
-        <View 
+                <View
           style={[
-            styles.itemContainer, 
+            styles.itemContainer,
             { 
               backgroundColor: theme.colors.card, 
-              borderColor: isPro ? theme.colors.primary : theme.colors.danger 
+              borderColor: focusedInput === `${isPro ? 'pro' : 'con'}-${item.id}` 
+                ? theme.colors.primary 
+                : isPro ? theme.colors.primary : theme.colors.danger,
+              borderWidth: focusedInput === `${isPro ? 'pro' : 'con'}-${item.id}` ? 2 : 1
             }
           ]}
         >
@@ -213,12 +217,17 @@ const ProsConsScreen = () => {
           </View>
           
           <TextInput
-            style={[styles.itemInput, { color: theme.colors.text }]}
+            style={[
+              styles.itemInput, 
+              { color: theme.colors.text }
+            ]}
             value={item.text}
             onChangeText={(value) => updateItem(isPro, item.id, 'text', value)}
             placeholder={isPro ? t('addAPro') : t('addACon')}
             placeholderTextColor={theme.colors.tabBarInactive}
             multiline
+            onFocus={() => setFocusedInput(`${isPro ? 'pro' : 'con'}-${item.id}`)}
+            onBlur={() => setFocusedInput(null)}
           />
         </View>
       </SwipableRow>
@@ -241,11 +250,14 @@ const ProsConsScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          keyboardDismissMode="on-drag"
         >
           <SectionTitle
             title={title}
@@ -378,17 +390,23 @@ const ProsConsScreen = () => {
           {notesExpanded && (
             <View style={styles.notesContent}>
               <TextInput
-                style={[styles.notesInput, { 
-                  backgroundColor: theme.colors.background, 
-                  color: theme.colors.text,
-                  borderColor: theme.colors.border 
-                }]}
+                style={[
+                  styles.notesInput, 
+                  { 
+                    backgroundColor: theme.colors.background, 
+                    color: theme.colors.text,
+                    borderColor: focusedInput === 'notes' ? theme.colors.primary : theme.colors.border,
+                    borderWidth: focusedInput === 'notes' ? 2 : 1
+                  }
+                ]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder={t('addNotesAboutDecision')}
                 placeholderTextColor={theme.colors.tabBarInactive}
                 multiline
                 textAlignVertical="top"
+                onFocus={() => setFocusedInput('notes')}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
           )}
@@ -406,7 +424,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
 
 
@@ -515,7 +533,7 @@ const styles = StyleSheet.create({
   
   // Notes Section Styles
   notesSection: {
-    marginTop: 16,
+    marginTop: 36,
     borderRadius: 8,
     borderWidth: 1,
     overflow: 'hidden',

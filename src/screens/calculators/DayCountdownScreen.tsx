@@ -3,6 +3,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
+    Modal,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -22,7 +24,7 @@ interface DateItem {
 
 const DayCountdownScreen = () => {
   const { theme } = useTheme();
-  const { t } = useI18n();
+  const { t, currentLanguage } = useI18n();
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCountdown'));
   
@@ -36,20 +38,36 @@ const DayCountdownScreen = () => {
     };
     return unitMap[unit] || unit;
   };
+
+  // Function to get locale for DateTimePicker
+  const getLocale = () => {
+    const localeMap: Record<string, string> = {
+      'en': 'en-US',
+      'es': 'es-ES',
+      'fr': 'fr-FR',
+      'zh-Hans': 'zh-CN',
+      'zh-Hant': 'zh-TW',
+      'ja': 'ja-JP'
+    };
+    return localeMap[currentLanguage] || 'en-US';
+  };
   
   const [dates, setDates] = useState<DateItem[]>([
     {
       id: '1',
       name: `${t('importantDate')} 1`,
       date: (() => {
-        const date = new Date();
-        date.setDate(date.getDate() + 30); // Default to 30 days from now
+        const today = new Date();
+        // Create date in local timezone (set to start of day to avoid timezone issues)
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        date.setDate(date.getDate() + 30); // Default to 30 days from today
         return date;
       })(),
       dateOpen: false,
     },
   ]);
   const [timeUnit, setTimeUnit] = useState('days');
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   
   const timeUnits = ['days', 'weeks', 'months', 'years'];
 
@@ -151,7 +169,9 @@ const DayCountdownScreen = () => {
   };
 
   const addDate = () => {
-    const newDate = new Date();
+    const today = new Date();
+    // Create date in local timezone
+    const newDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     newDate.setDate(newDate.getDate() + 30);
     
     const newDateItem: DateItem = {
@@ -169,9 +189,11 @@ const DayCountdownScreen = () => {
   };
 
   const updateDateItem = (id: string, field: keyof DateItem, value: any) => {
-    setDates(dates.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
+    setDates(prevDates => 
+      prevDates.map(item => 
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    );
   };
 
   const removeDateItem = (id: string) => {
@@ -226,11 +248,17 @@ const DayCountdownScreen = () => {
               >
                   <View style={[styles.cardInSwipeableRow, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                   <TextInput
-                    style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+                    style={[
+                      styles.nameInput, 
+                      { backgroundColor: theme.colors.background, color: theme.colors.text },
+                      focusedInput === `dateName-${dateItem.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
+                    ]}
                     value={dateItem.name}
                     onChangeText={(value) => updateDateItem(dateItem.id, 'name', value)}
                     placeholder={t('dateName')}
                     placeholderTextColor={theme.colors.tabBarInactive}
+                    onFocus={() => setFocusedInput(`dateName-${dateItem.id}`)}
+                    onBlur={() => setFocusedInput(null)}
                   />
                   
                   <TouchableOpacity
@@ -243,36 +271,72 @@ const DayCountdownScreen = () => {
                     <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
                   </TouchableOpacity>
                   
-                  {dateItem.dateOpen && (
-                    <DateTimePicker
-                      value={dateItem.date}
-                      mode="date"
-                      display="default"
-                      onChange={(event, selectedDate) => {
-                        console.log('DateTimePicker event:', event.type, selectedDate);
-                        
-                        // Close picker immediately
-                        setDates(prevDates => 
-                          prevDates.map(item => 
-                            item.id === dateItem.id 
-                              ? { ...item, dateOpen: false }
-                              : item
-                          )
-                        );
-                        
-                        // Update date if user selected one
-                        if (selectedDate && (event.type === 'set' || event.type === undefined)) {
-                          setDates(prevDates => 
-                            prevDates.map(item => 
-                              item.id === dateItem.id 
-                                ? { ...item, date: selectedDate }
-                                : item
-                            )
-                          );
-                        }
-                      }}
-                    />
-                  )}
+                  <Modal
+                    visible={dateItem.dateOpen}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => {
+                      setDates(prevDates => 
+                        prevDates.map(item => 
+                          item.id === dateItem.id 
+                            ? { ...item, dateOpen: false }
+                            : item
+                        )
+                      );
+                    }}
+                  >
+                    <View style={styles.modalOverlay}>
+                      <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
+                        <View style={styles.modalHeader}>
+                          <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
+                          <TouchableOpacity onPress={() => {
+                            setDates(prevDates => 
+                              prevDates.map(item => 
+                                item.id === dateItem.id 
+                                  ? { ...item, dateOpen: false }
+                                  : item
+                              )
+                            );
+                          }}>
+                            <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                          </TouchableOpacity>
+                        </View>
+                        <DateTimePicker
+                          value={dateItem.date}
+                          mode="date"
+                          display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                          locale={getLocale()}
+                          onChange={(event, selectedDate) => {
+                            if (Platform.OS === 'android') {
+                              // On Android, handle the built-in cancel/confirm buttons
+                              if (event.type === 'set' && selectedDate) {
+                                updateDateItem(dateItem.id, 'date', selectedDate);
+                              }
+                              // Close modal regardless of action (set or dismissed)
+                              updateDateItem(dateItem.id, 'dateOpen', false);
+                            } else {
+                              // On iOS, update immediately (spinner mode)
+                              if (selectedDate) {
+                                updateDateItem(dateItem.id, 'date', selectedDate);
+                              }
+                            }
+                          }}
+                        />
+                        {Platform.OS === 'ios' && (
+                          <View style={styles.modalButtons}>
+                            <TouchableOpacity 
+                              style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
+                              onPress={() => {
+                                updateDateItem(dateItem.id, 'dateOpen', false);
+                              }}
+                            >
+                              <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </Modal>
                 </View>
               </SwipableRow>
 
@@ -365,7 +429,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
   card: {
     borderRadius: 8,
@@ -457,6 +521,41 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalButtons: {
+    marginTop: 20,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -14,7 +14,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, useTheme } from '../../components';
+import Svg, { G, Path, Text as SvgText, TSpan } from 'react-native-svg';
+import { CustomHeader, SwipableRow, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface SpinnerOption {
@@ -35,6 +36,7 @@ const SpinnerScreen = () => {
     { id: '4', text: t('chineseFood'), color: '#FF9800' },
   ]);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   
   const rotationValue = useRef(new Animated.Value(0)).current;
   const rotationDegree = rotationValue.interpolate({
@@ -42,18 +44,23 @@ const SpinnerScreen = () => {
     outputRange: ['0deg', '360deg'],
   });
   
-  const colors = [
-    '#F44336', // Red
-    '#2196F3', // Blue
-    '#4CAF50', // Green
-    '#FF9800', // Orange
-    '#9C27B0', // Purple
-    '#00BCD4', // Cyan
-    '#FFEB3B', // Yellow
-    '#795548', // Brown
-  ];
+
+  
+  const getDynamicFontSize = (text: string): number => {
+    const textLength = text.length;
+    
+    // Base font sizes for different text lengths
+    if (textLength <= 4) return 18;      // Short text: large font
+    if (textLength <= 8) return 16;      // Medium text: medium font
+    if (textLength <= 12) return 14;     // Long text: smaller font
+    return 12;                           // Very long text: smallest font
+  };
   
   const addOption = () => {
+    const colors = [
+      '#F44336', '#2196F3', '#4CAF50', '#FF9800', 
+      '#9C27B0', '#00BCD4', '#FFEB3B', '#795548'
+    ];
     const newId = options.length > 0 
       ? (Math.max(...options.map(item => parseInt(item.id) || 0)) + 1).toString()
       : '1';
@@ -109,68 +116,38 @@ const SpinnerScreen = () => {
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-      // Just stop spinning - let user see where pointer lands
+      // Just stop spinning - user can see result on wheel
       setIsSpinning(false);
     });
   };
-  
-  const renderSpinnerWheel = () => {
-    const segmentAngle = 360 / options.length;
+
+  // Function to create SVG path for pie segment
+  const createPieSlice = (startAngle: number, endAngle: number, radius: number, innerRadius: number = 0) => {
+    const centerX = 155;
+    const centerY = 155;
     
-    return (
-      <View style={styles.wheelContainer}>
-        <Animated.View
-          style={[
-            styles.wheel,
-            { transform: [{ rotate: rotationDegree }] },
-          ]}
-        >
-          {options.map((option, index) => {
-            const startAngle = index * segmentAngle;
-            const endAngle = (index + 1) * segmentAngle;
-            
-            // For segments <= 180 degrees, we need a different approach
-            const isSmallSegment = segmentAngle <= 180;
-            
-            return (
-              <View
-                key={option.id}
-                style={[
-                  isSmallSegment ? styles.smallSegment : styles.segment,
-                  {
-                    backgroundColor: option.color,
-                    transform: [
-                      { rotate: `${startAngle}deg` },
-                    ],
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    { transform: [{ rotate: `${segmentAngle / 2}deg` }] },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {option.text}
-                </Text>
-              </View>
-            );
-          })}
-        </Animated.View>
-        <View style={styles.wheelCenter}>
-          <TouchableOpacity
-            style={[styles.spinButton, { backgroundColor: theme.colors.primary }]}
-            onPress={spinWheel}
-            disabled={isSpinning}
-          >
-            <Text style={styles.spinButtonText}>{t('spin').toUpperCase()}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={[styles.pointer, { borderBottomColor: theme.colors.text }]} />
-      </View>
-    );
+    const x1 = centerX + radius * Math.cos(startAngle * Math.PI / 180);
+    const y1 = centerY + radius * Math.sin(startAngle * Math.PI / 180);
+    const x2 = centerX + radius * Math.cos(endAngle * Math.PI / 180);
+    const y2 = centerY + radius * Math.sin(endAngle * Math.PI / 180);
+    
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    
+    if (innerRadius === 0) {
+      // Simple pie slice
+      return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+    } else {
+      // Donut slice (not used in this case)
+      const x3 = centerX + innerRadius * Math.cos(endAngle * Math.PI / 180);
+      const y3 = centerY + innerRadius * Math.sin(endAngle * Math.PI / 180);
+      const x4 = centerX + innerRadius * Math.cos(startAngle * Math.PI / 180);
+      const y4 = centerY + innerRadius * Math.sin(startAngle * Math.PI / 180);
+      
+      return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4} Z`;
+    }
   };
+
+
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -194,45 +171,127 @@ const SpinnerScreen = () => {
         >
         <View style={styles.titleContainer}>
           <TextInput
-            style={[styles.titleInput, { color: theme.colors.text }]}
+            style={[
+              styles.titleInput, 
+              { color: theme.colors.text },
+              focusedInput === 'title' && { borderWidth: 2, borderColor: theme.colors.primary }
+            ]}
             value={title}
             onChangeText={setTitle}
             placeholder={t('enterTitle')}
             placeholderTextColor={theme.colors.tabBarInactive}
+            onFocus={() => setFocusedInput('title')}
+            onBlur={() => setFocusedInput(null)}
           />
         </View>
         
-        {renderSpinnerWheel()}
-        
-
+        <View style={styles.wheelContainer}>
+          <Animated.View
+            style={[
+              styles.wheel,
+              { transform: [{ rotate: rotationDegree }] },
+            ]}
+          >
+            <Svg width="310" height="310" viewBox="0 0 310 310">
+              <G origin="155, 155">
+                {options.map((option, index) => {
+                  const segmentAngle = 360 / options.length;
+                  const startAngle = index * segmentAngle - 90; // Start from top
+                  const endAngle = (index + 1) * segmentAngle - 90;
+                  const midAngle = (startAngle + endAngle) / 2;
+                  
+                  // Text position (about 2/3 out from center)
+                  const textRadius = 95;
+                  const textX = 155 + textRadius * Math.cos(midAngle * Math.PI / 180);
+                  const textY = 155 + textRadius * Math.sin(midAngle * Math.PI / 180);
+                  
+                  return (
+                    <G key={option.id}>
+                      <Path
+                        d={createPieSlice(startAngle, endAngle, 145)}
+                        fill={option.color}
+                        stroke="#FFFFFF"
+                        strokeWidth="3"
+                      />
+                      <SvgText
+                        x={textX}
+                        y={textY}
+                        fontSize={Math.max(getDynamicFontSize(option.text) + 2, 14)}
+                        fill="#FFFFFF"
+                        textAnchor="middle"
+                        alignmentBaseline="middle"
+                        fontWeight="bold"
+                      >
+                        {option.text.length > 4 ? (
+                          <>
+                            <TSpan x={textX} dy="-0.3em">{option.text.substring(0, Math.ceil(option.text.length / 2))}</TSpan>
+                            <TSpan x={textX} dy="1.2em">{option.text.substring(Math.ceil(option.text.length / 2))}</TSpan>
+                          </>
+                        ) : (
+                          option.text
+                        )}
+                      </SvgText>
+                    </G>
+                  );
+                })}
+              </G>
+            </Svg>
+          </Animated.View>
+          
+          {/* Center button */}
+          <View style={styles.wheelCenter}>
+            <TouchableOpacity
+              style={[styles.spinButton, { backgroundColor: theme.colors.primary }]}
+              onPress={spinWheel}
+              disabled={isSpinning}
+            >
+              <Text style={styles.spinButtonText}>
+                {isSpinning ? t('spinning') : t('spin').toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Pointer */}
+          <View style={[styles.pointer, { borderBottomColor: theme.colors.text }]} />
+          
+        </View>
         
         <View style={[styles.optionsContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <Text style={[styles.optionsTitle, { color: theme.colors.text }]}>{t('options')}</Text>
           
           {options.map((option) => (
-            <View key={option.id} style={styles.optionRow}>
-              <View 
-                style={[
-                  styles.colorIndicator, 
-                  { backgroundColor: option.color }
-                ]} 
-              />
-              <TextInput
-                style={[styles.optionInput, { color: theme.colors.text, backgroundColor: theme.colors.background }]}
-                value={option.text}
-                onChangeText={(text) => updateOption(option.id, text)}
-                placeholder="Enter option"
-                placeholderTextColor={theme.colors.tabBarInactive}
-              />
-              {options.length > 2 && (
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => removeOption(option.id)}
-                >
-                  <MaterialIcons name="delete" size={20} color={theme.colors.danger} />
-                </TouchableOpacity>
-              )}
-            </View>
+            <SwipableRow
+              key={option.id}
+              rightActions={options.length > 2 ? [{
+                icon: 'delete',
+                color: theme.colors.danger,
+                onPress: () => removeOption(option.id),
+              }] : undefined}
+              style={styles.swipeableRowOverride}
+              contentStyle={styles.swipeableContentOverride}
+            >
+              <View style={styles.optionRow}>
+                <View 
+                  style={[
+                    styles.colorIndicator, 
+                    { backgroundColor: option.color }
+                  ]} 
+                />
+                <TextInput
+                  style={[
+                    styles.optionInput, 
+                    { color: theme.colors.text, backgroundColor: theme.colors.background },
+                    focusedInput === `option-${option.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
+                  ]}
+                  value={option.text}
+                  onChangeText={(text) => updateOption(option.id, text)}
+                  placeholder={t('enterOption')}
+                  placeholderTextColor={theme.colors.tabBarInactive}
+                  onFocus={() => setFocusedInput(`option-${option.id}`)}
+                  onBlur={() => setFocusedInput(null)}
+                />
+              </View>
+            </SwipableRow>
           ))}
           
           <TouchableOpacity
@@ -256,12 +315,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
     alignItems: 'center',
   },
   titleContainer: {
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 8,
     paddingHorizontal: 24,
   },
   titleInput: {
@@ -273,52 +332,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   wheelContainer: {
-    width: 300,
-    height: 300,
+    width: 330,
+    height: 330,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 24,
-  },
-  wheel: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    overflow: 'hidden',
+    marginTop: 4,
+    marginBottom: 16,
     position: 'relative',
   },
-  segment: {
-    position: 'absolute',
-    width: 150,
-    height: 300,
-    left: 150,
-    transformOrigin: 'left center',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingLeft: 80,
-  },
-  smallSegment: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    left: 150,
-    top: 150,
-    transformOrigin: 'left top',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingTop: 40,
-  },
-  segmentText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-    width: 60,
-    textAlign: 'center',
+  wheel: {
+    width: 310,
+    height: 310,
   },
   wheelCenter: {
     position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -329,28 +359,31 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   spinButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 74,
+    height: 74,
+    borderRadius: 37,
     justifyContent: 'center',
     alignItems: 'center',
   },
   spinButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'center',
   },
   pointer: {
     position: 'absolute',
-    top: 0,
+    top: 10,
     width: 0,
     height: 0,
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 35,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderBottomWidth: 30,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    transform: [{ translateY: -15 }, { rotate: '180deg' }],
+    transform: [{ rotate: '180deg' }],
   },
+
 
   optionsContainer: {
     width: '100%',
@@ -366,7 +399,7 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    height: 44,
   },
   colorIndicator: {
     width: 24,
@@ -376,26 +409,35 @@ const styles = StyleSheet.create({
   },
   optionInput: {
     flex: 1,
-    height: 40,
+    height: 44,
     borderRadius: 4,
     paddingHorizontal: 12,
+    fontSize: 16,
   },
-  deleteButton: {
-    padding: 8,
-    marginLeft: 8,
+  swipeableRowOverride: {
+    marginBottom: 12,
+    borderRadius: 4,
+    height: 44,
+  },
+  swipeableContentOverride: {
+    borderRadius: 4,
+    minHeight: 44,
   },
   addButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 44,
+    borderRadius: 8,
     marginTop: 8,
   },
   addButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     marginLeft: 8,
+    fontSize: 16,
   },
 });
 

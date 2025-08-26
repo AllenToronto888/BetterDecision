@@ -35,6 +35,7 @@ const TotalCostScreen = () => {
   ]);
   const [compareEnabled, setCompareEnabled] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   
   // Update calculator title when language changes
   useEffect(() => {
@@ -200,11 +201,17 @@ const TotalCostScreen = () => {
             <MaterialIcons name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
           </View>
           <TextInput
-            style={[styles.costItemLabel, { color: theme.colors.text }]}
+            style={[
+              styles.costItemLabel, 
+              { color: theme.colors.text },
+              focusedInput === `costLabel-${item.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
+            ]}
             value={item.label}
             onChangeText={(value) => updateCostItem(item.id, 'label', value)}
             placeholder={t('label')}
             placeholderTextColor={theme.colors.tabBarInactive}
+            onFocus={() => setFocusedInput(`costLabel-${item.id}`)}
+            onBlur={() => setFocusedInput(null)}
           />
           {item.isPercentage && (
             <Text style={[styles.percentageHelper, { color: theme.colors.tabBarInactive }]}>
@@ -221,12 +228,18 @@ const TotalCostScreen = () => {
               <Text style={[styles.inputPrefix, { color: theme.colors.text }]}>$</Text>
             )}
             <TextInput
-              style={[styles.costInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+              style={[
+                styles.costInput, 
+                { backgroundColor: theme.colors.background, color: theme.colors.text },
+                focusedInput === `costValue-${item.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
+              ]}
               value={item.value}
               onChangeText={(value) => updateCostItem(item.id, 'value', value)}
               keyboardType="numeric"
               placeholder="0.00"
               placeholderTextColor={theme.colors.tabBarInactive}
+              onFocus={() => setFocusedInput(`costValue-${item.id}`)}
+              onBlur={() => setFocusedInput(null)}
             />
           </View>
           
@@ -393,22 +406,34 @@ const TotalCostScreen = () => {
           
           <View style={[styles.section, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <TextInput
-              style={[styles.nameInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+              style={[
+                styles.nameInput, 
+                { backgroundColor: theme.colors.background, color: theme.colors.text },
+                focusedInput === 'productName' && { borderWidth: 2, borderColor: theme.colors.primary }
+              ]}
               value={productName}
               onChangeText={setProductName}
               placeholder={t('productNameOptional')}
               placeholderTextColor={theme.colors.tabBarInactive}
+              onFocus={() => setFocusedInput('productName')}
+              onBlur={() => setFocusedInput(null)}
             />
             
             <View style={styles.basePriceContainer}>
               <Text style={[styles.currencySymbol, { color: theme.colors.text }]}>$</Text>
               <TextInput
-                style={[styles.basePriceInput, { backgroundColor: theme.colors.background, color: theme.colors.text }]}
+                style={[
+                  styles.basePriceInput, 
+                  { backgroundColor: theme.colors.background, color: theme.colors.text },
+                  focusedInput === 'basePrice' && { borderWidth: 2, borderColor: theme.colors.primary }
+                ]}
                 value={basePrice}
                 onChangeText={setBasePrice}
                 keyboardType="numeric"
                 placeholder={t('enterBasePrice')}
                 placeholderTextColor={theme.colors.tabBarInactive}
+                onFocus={() => setFocusedInput('basePrice')}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
           </View>
@@ -613,7 +638,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 300,
   },
   section: {
     borderRadius: 8,
