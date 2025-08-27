@@ -23,7 +23,7 @@ interface DateItem {
 }
 
 const DayCountdownScreen = () => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
   const { t, currentLanguage } = useI18n();
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCountdown'));
@@ -271,6 +271,7 @@ const DayCountdownScreen = () => {
                           value={dateItem.date}
                           mode="date"
                           display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+                          themeVariant={isDarkMode ? 'dark' : 'light'}
                           locale={getLocale()}
                           onChange={(event, selectedDate) => {
                             if (Platform.OS === 'android') {

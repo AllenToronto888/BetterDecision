@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, View } from 'react-native';
 import { getAppTheme, saveAppTheme } from '../utils/storage';
 
 // Define typography
@@ -146,7 +146,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
   
   if (isLoading) {
-    return null; // Or a loading indicator
+    // Return a themed loading screen instead of null to prevent flash
+    const loadingTheme = colorScheme === 'dark' ? darkTheme : lightTheme;
+    return (
+      <View style={{ 
+        flex: 1, 
+        backgroundColor: loadingTheme.colors.background 
+      }} />
+    );
   }
   
   return (

@@ -16,7 +16,7 @@ import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 const DayCounterScreen = () => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
   const { t, currentLanguage } = useI18n();
   const navigation = useNavigation();
   const [calculatorTitle, setCalculatorTitle] = useState(t('dayCounter'));
@@ -199,42 +199,30 @@ const DayCounterScreen = () => {
           <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
-        {/* Unified Date Picker Modal */}
-        <Modal
-          visible={datePickerOpen}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setDatePickerOpen(false)}
-        >
-          <View style={Platform.OS === 'ios' ? styles.modalOverlay : {}}>
-            <View style={Platform.OS === 'ios' ? [styles.modalContent, { backgroundColor: theme.colors.card }] : {}}>
-              {Platform.OS === 'ios' && (
+        {/* Date Picker - Platform specific implementation */}
+        {Platform.OS === 'ios' ? (
+          <Modal
+            visible={datePickerOpen}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setDatePickerOpen(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
                   <TouchableOpacity onPress={() => setDatePickerOpen(false)}>
                     <MaterialIcons name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
-              )}
-              <DateTimePicker
-                value={editingDate === 'start' ? startDate : endDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-                locale={getLocale()}
-                minimumDate={editingDate === 'end' ? startDate : undefined}
-                onChange={(event, selectedDate) => {
-                  if (Platform.OS === 'android') {
-                    // On Android, handle the built-in cancel/confirm buttons
-                    if (event.type === 'set' && selectedDate) {
-                      if (editingDate === 'start') {
-                        setStartDate(selectedDate);
-                      } else {
-                        setEndDate(selectedDate);
-                      }
-                    }
-                    // Close modal regardless of action (set or dismissed)
-                    setDatePickerOpen(false);
-                  } else {
+                <DateTimePicker
+                  value={editingDate === 'start' ? startDate : endDate}
+                  mode="date"
+                  display="spinner"
+                  themeVariant={isDarkMode ? 'dark' : 'light'}
+                  locale={getLocale()}
+                  minimumDate={editingDate === 'end' ? startDate : undefined}
+                  onChange={(event, selectedDate) => {
                     // On iOS, update immediately (spinner mode)
                     if (selectedDate) {
                       if (editingDate === 'start') {
@@ -243,10 +231,8 @@ const DayCounterScreen = () => {
                         setEndDate(selectedDate);
                       }
                     }
-                  }
-                }}
-              />
-              {Platform.OS === 'ios' && (
+                  }}
+                />
                 <View style={styles.modalButtons}>
                   <TouchableOpacity 
                     style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
@@ -255,10 +241,34 @@ const DayCounterScreen = () => {
                     <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>{t('done')}</Text>
                   </TouchableOpacity>
                 </View>
-              )}
+              </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        ) : (
+          // Android: DateTimePicker handles its own modal
+          datePickerOpen && (
+            <DateTimePicker
+              value={editingDate === 'start' ? startDate : endDate}
+              mode="date"
+              display="calendar"
+              themeVariant={isDarkMode ? 'dark' : 'light'}
+              locale={getLocale()}
+              minimumDate={editingDate === 'end' ? startDate : undefined}
+              onChange={(event, selectedDate) => {
+                // On Android, handle the built-in cancel/confirm buttons
+                if (event.type === 'set' && selectedDate) {
+                  if (editingDate === 'start') {
+                    setStartDate(selectedDate);
+                  } else {
+                    setEndDate(selectedDate);
+                  }
+                }
+                // Close picker regardless of action (set or dismissed)
+                setDatePickerOpen(false);
+              }}
+            />
+          )
+        )}
         
         <View style={styles.switchRow}>
           <Text style={[styles.switchLabel, { color: theme.colors.text }]}>{t('includeEndDate')}</Text>

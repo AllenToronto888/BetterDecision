@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { Typography } from './Typography';
@@ -33,7 +33,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
   return (
     <SafeAreaView style={{ backgroundColor: headerBackgroundColor }} edges={['top']}>
-      <StatusBar backgroundColor={headerBackgroundColor} barStyle={finalStatusBarStyle} />
       <View style={[styles.customHeader, { backgroundColor: headerBackgroundColor }]}>
         {leftAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={leftAction.onPress}>

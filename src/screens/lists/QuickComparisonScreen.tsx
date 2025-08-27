@@ -40,8 +40,8 @@ const QuickComparisonScreen = () => {
     { id: '2', text: `${t('criteria')} 2` },
   ]);
   const [options, setOptions] = useState<Option[]>([
-    { id: '1', name: `${t('options')} 1` },
-    { id: '2', name: `${t('options')} 2` },
+    { id: '1', name: `${t('option')} 1` },
+    { id: '2', name: `${t('option')} 2` },
   ]);
   const [notes, setNotes] = useState('');
   const [notesExpanded, setNotesExpanded] = useState(false);
@@ -63,7 +63,7 @@ const QuickComparisonScreen = () => {
     })),
     options: options.map(o => ({
       ...o,
-      name: o.name.trim() || `${t('options')} ${o.id}`
+      name: o.name.trim() || `${t('option')} ${o.id}`
     })),
     comparisonData,
     notes,
@@ -124,10 +124,10 @@ const QuickComparisonScreen = () => {
         name: option.name.startsWith('Option') || 
               option.name.startsWith('选项') || 
               option.name.startsWith('選項') || 
-              option.name.startsWith('Options') || 
+              option.name.startsWith('Option') || 
               option.name.startsWith('オプション') || 
               option.name.includes('Option') ? 
-              `${t('options')} ${index + 1}` : option.name
+              `${t('option')} ${index + 1}` : option.name
       }))
     );
   }, [t]);
@@ -155,7 +155,7 @@ const QuickComparisonScreen = () => {
       ? (Math.max(...options.map(item => parseInt(item.id))) + 1).toString()
       : '1';
     
-    const newOption = { id: newId, name: `${t('options')} ${newId}` };
+    const newOption = { id: newId, name: `${t('option')} ${newId}` };
     setOptions([...options, newOption]);
     
     // Add cells for the new option
@@ -319,7 +319,7 @@ const QuickComparisonScreen = () => {
                     })),
                     options: options.map(o => ({
                       ...o,
-                      name: o.name.trim() || `${t('options')} ${o.id}`
+                      name: o.name.trim() || `${t('option')} ${o.id}`
                     })),
                     comparisonData,
                     notes,
@@ -444,8 +444,8 @@ const QuickComparisonScreen = () => {
                         styles.optionInput, 
                         { color: theme.colors.text }
                       ]}
-                      value={option.name.includes(t('options')) ? '' : option.name}
-                      placeholder={option.name.includes(t('options')) ? option.name : `${t('options')} ${index + 1}`}
+                      value={option.name.includes(t('option')) ? '' : option.name}
+                      placeholder={option.name.includes(t('option')) ? option.name : `${t('option')} ${index + 1}`}
                       onChangeText={(text) => updateOption(option.id, text)}
                       placeholderTextColor={theme.colors.tabBarInactive}
                       onFocus={() => {
@@ -455,7 +455,7 @@ const QuickComparisonScreen = () => {
                         setFocusedInput(null);
                         // Revert to default if empty
                         if (option.name.trim() === '') {
-                          updateOption(option.id, `${t('options')} ${parseInt(option.id)}`);
+                          updateOption(option.id, `${t('option')} ${parseInt(option.id)}`);
                         }
                       }}
                       multiline={true}

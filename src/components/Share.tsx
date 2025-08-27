@@ -59,7 +59,54 @@ export const Share: React.FC<ShareComponentProps> = ({
       return message;
     } else if (calcData.startDate && calcData.endDate) {
       // Day Counter
-      return `📅 Day Counter Result:\n\nFrom: ${new Date(calcData.startDate).toLocaleDateString()}\nTo: ${new Date(calcData.endDate).toLocaleDateString()}\nDays: ${calcData.daysDifference} days`;
+      const startDate = new Date(calcData.startDate);
+      const endDate = new Date(calcData.endDate);
+      const today = new Date();
+      const isWorkingDaysIncluded = calcData.workingDays !== undefined;
+      
+      let message = `📅 Day Counter Result:\n\n`;
+      message += `From: ${startDate.toLocaleDateString()}\n`;
+      message += `To: ${endDate.toLocaleDateString()}\n\n`;
+      message += `📊 Total Days: ${calcData.daysDifference} days\n`;
+      
+      if (isWorkingDaysIncluded && calcData.workingDays !== undefined) {
+        message += `💼 Working Days: ${calcData.workingDays} days (excludes weekends)\n`;
+      }
+      
+      // Add context about timing
+      if (endDate > today) {
+        message += `\n⏰ Status: ${Math.abs(calcData.daysDifference)} days remaining`;
+      } else if (endDate < today) {
+        message += `\n⏰ Status: ${Math.abs(calcData.daysDifference)} days ago`;
+      } else {
+        message += `\n⏰ Status: Today!`;
+      }
+      
+      return message;
+    } else if (calcData.dates && Array.isArray(calcData.dates)) {
+      // Day Countdown
+      const today = new Date();
+      let message = `⏰ Day Countdown:\n\n`;
+      
+      calcData.dates.forEach((dateItem: any) => {
+        const targetDate = new Date(dateItem.date);
+        const diffTime = targetDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        message += `📋 ${dateItem.name || 'Important Date'}:\n`;
+        message += `📅 Date: ${targetDate.toLocaleDateString()}\n`;
+        
+        if (diffDays > 0) {
+          message += `⏳ Countdown: ${diffDays} days remaining\n`;
+        } else if (diffDays < 0) {
+          message += `⏰ Status: ${Math.abs(diffDays)} days ago\n`;
+        } else {
+          message += `🎉 Status: Today!\n`;
+        }
+        message += `\n`;
+      });
+      
+      return message.trim();
     }
     return JSON.stringify(calcData, null, 2);
   };
