@@ -2,14 +2,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
@@ -55,68 +55,19 @@ const DetailComparisonScreen = () => {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Update translation when language changes
-  useEffect(() => {
-    setCriteria(prevCriteria => 
-      prevCriteria.map((criterion, index) => ({
-        ...criterion,
-        text: criterion.text === 'Price' || 
-              criterion.text === 'Precio' || 
-              criterion.text === 'Prix' || 
-              criterion.text === '价格' || 
-              criterion.text === '價格' || 
-              criterion.text === '価格' || 
-              criterion.text.includes('price') ? 
-              t('price') : (
-                criterion.text === 'Features' || 
-                criterion.text === 'Características' || 
-                criterion.text === 'Fonctionnalités' || 
-                criterion.text === '功能' || 
-                criterion.text === '特徵' || 
-                criterion.text === '機能' || 
-                criterion.text.includes('features') ? 
-                t('features') : criterion.text
-              )
-      }))
-    );
-    setOptions(prevOptions => 
-      prevOptions.map((option, index) => ({
-        ...option,
-        name: option.name.includes('Product') || 
-              option.name.includes('Producto') || 
-              option.name.includes('Produit') || 
-              option.name.includes('产品') || 
-              option.name.includes('產品') || 
-              option.name.includes('商品') ? 
-              `${t('product')} ${String.fromCharCode(65 + index)}` : option.name
-      }))
-    );
-    setComparisonData(prevData => 
-      prevData.map(cell => ({
-        ...cell,
-        text: cell.text === 'Basic' || 
-              cell.text === 'Básico' || 
-              cell.text === 'De base' || 
-              cell.text === '基础' || 
-              cell.text === '基礎' || 
-              cell.text === 'ベーシック' ? 
-              t('basic') : (
-                cell.text === 'Premium' || 
-                cell.text === 'Prémium' || 
-                cell.text === '高级' || 
-                cell.text === '高級' || 
-                cell.text === 'プレミアム' ? 
-                t('premium') : cell.text
-              )
-      }))
-    );
-  }, [t]);
 
-  // Auto-save functionality
+
+  // Auto-save functionality  
   useAutoSave({
     data: {
-      criteria,
-      options,
+      criteria: criteria.map(c => ({
+        ...c,
+        text: c.text.trim() || `${t('criteria')} ${c.id}`
+      })),
+      options: options.map(o => ({
+        ...o,
+        name: o.name.trim() || `${t('options')} ${o.id}`
+      })),
       comparisonData,
       notes,
       title,
@@ -146,7 +97,15 @@ const DetailComparisonScreen = () => {
   
   // Update translations when language changes
   useEffect(() => {
-    setTitle(t('detailComparison'));
+    // Only reset title if it's currently a default/translated title
+    setTitle(prevTitle => {
+      // If previous title was a default title in any language, update it
+      const defaultTitles = [
+        'Detail Comparison', 'Comparación Detallada', 'Comparaison Détaillée', 
+        '详细比较', '詳細比較', '詳細比較'
+      ];
+      return defaultTitles.includes(prevTitle) ? t('detailComparison') : prevTitle;
+    });
     setCriteria(prevCriteria => 
       prevCriteria.map((criterion, index) => ({
         ...criterion,
@@ -316,8 +275,14 @@ const DetailComparisonScreen = () => {
                 <Save
                   data={{
                     title,
-                    criteria,
-                    options,
+                    criteria: criteria.map(c => ({
+                      ...c,
+                      text: c.text.trim() || `${t('criteria')} ${c.id}`
+                    })),
+                    options: options.map(o => ({
+                      ...o,
+                      name: o.name.trim() || `${t('options')} ${o.id}`
+                    })),
                     comparisonData,
                     notes,
                     comparisonType: 'detail_comparison',

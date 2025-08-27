@@ -55,15 +55,24 @@ const QuickComparisonScreen = () => {
   ]);
   const [rowHeights, setRowHeights] = useState<{[key: string]: number}>({});
 
+  // Auto-save data with processed criteria/options
+  const autoSaveData = {
+    criteria: criteria.map(c => ({
+      ...c,
+      text: c.text.trim() || `${t('criteria')} ${c.id}`
+    })),
+    options: options.map(o => ({
+      ...o,
+      name: o.name.trim() || `${t('options')} ${o.id}`
+    })),
+    comparisonData,
+    notes,
+    title,
+  };
+
   // Auto-save functionality
   useAutoSave({
-    data: {
-      criteria,
-      options,
-      comparisonData,
-      notes,
-      title,
-    },
+    data: autoSaveData,
     dataType: 'quick_comparison',
     enabled: Boolean(
       criteria.some(criterion => criterion.text.trim()) ||
@@ -88,7 +97,15 @@ const QuickComparisonScreen = () => {
   
   // Update translations when language changes
   useEffect(() => {
-    setTitle(t('quickComparison'));
+    // Only reset title if it's currently a default/translated title
+    setTitle(prevTitle => {
+      // If previous title was a default title in any language, update it
+      const defaultTitles = [
+        'Quick Comparison', 'Comparación Rápida', 'Comparaison Rapide', 
+        '快速比较', '快速比較', 'クイック比較'
+      ];
+      return defaultTitles.includes(prevTitle) ? t('quickComparison') : prevTitle;
+    });
     setCriteria(prevCriteria => 
       prevCriteria.map((criterion, index) => ({
         ...criterion,
@@ -296,8 +313,14 @@ const QuickComparisonScreen = () => {
                 <Save
                   data={{
                     title,
-                    criteria,
-                    options,
+                    criteria: criteria.map(c => ({
+                      ...c,
+                      text: c.text.trim() || `${t('criteria')} ${c.id}`
+                    })),
+                    options: options.map(o => ({
+                      ...o,
+                      name: o.name.trim() || `${t('options')} ${o.id}`
+                    })),
                     comparisonData,
                     notes,
                     comparisonType: 'quick_comparison',

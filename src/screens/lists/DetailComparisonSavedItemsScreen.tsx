@@ -102,14 +102,14 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
 
       details += `${t('criteria')}: ${criteria.map((c: any) => {
         const text = c.text || c;
-        const textStr = typeof text === 'string' ? text : String(text);
+        const textStr = typeof text === 'string' ? text : (text || `${t('criteria')} ${c.id}`);
         return textStr === 'Price' || textStr === '价格' || textStr === '價格' || textStr === 'Prix' || textStr === 'Precio' || textStr === '価格' ? t('price') :
                textStr === 'Features' || textStr === '功能' || textStr === '機能' || textStr === 'Caractéristiques' || textStr === 'Características' || textStr === '機能' ? t('features') :
                textStr;
       }).join(', ')}\n`;
       details += `${t('options')}: ${options.map((o: any) => {
         const name = o.name || o;
-        const nameStr = typeof name === 'string' ? name : String(name);
+        const nameStr = typeof name === 'string' ? name : (name || `${t('options')} ${o.id}`);
         return nameStr.startsWith('Product') || nameStr.startsWith('产品') || nameStr.startsWith('產品') || nameStr.startsWith('Produit') || nameStr.startsWith('Producto') || nameStr.startsWith('商品') ? 
                nameStr.replace(/^(Product|产品|產品|Produit|Producto|商品)\s*/, t('product') + ' ') : nameStr;
       }).join(', ')}\n\n`;
@@ -117,7 +117,7 @@ const DetailComparisonSavedItemsScreen: React.FC = () => {
       // Show comparison results in table format
       details += `${t('comparisonTable')}:\n`;
       criteria.forEach((criterion: any) => {
-        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : String(criterion.text || criterion);
+        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : (criterion.text || `${t('criteria')} ${criterion.id}`);
         // Translate common criterion terms
         const translatedCriterionText = criterionText === 'Price' || criterionText === '价格' || criterionText === '價格' || criterionText === 'Prix' || criterionText === 'Precio' || criterionText === '価格' ? t('price') :
               criterionText === 'Features' || criterionText === '功能' || criterionText === '機能' || criterionText === 'Caractéristiques' || criterionText === 'Características' || criterionText === '機能' ? t('features') :

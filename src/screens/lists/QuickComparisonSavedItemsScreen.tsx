@@ -102,20 +102,20 @@ const QuickComparisonSavedItemsScreen: React.FC = () => {
 
       details += `${t('criteria')}: ${criteria.map((c: any) => {
         const text = c.text || c;
-        return typeof text === 'string' ? text : String(text);
+        return typeof text === 'string' ? text : (text || `${t('criteria')} ${c.id}`);
       }).join(', ')}\n`;
       details += `${t('options')}: ${options.map((o: any) => {
         const name = o.name || o;
-        return typeof name === 'string' ? name : String(name);
+        return typeof name === 'string' ? name : (name || `${t('options')} ${o.id}`);
       }).join(', ')}\n\n`;
       
       // Show comparison results
       details += `${t('comparisonResults')}:\n`;
       criteria.forEach((criterion: any, criterionIndex: number) => {
-        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : String(criterion.text || criterion);
+        const criterionText = typeof (criterion.text || criterion) === 'string' ? (criterion.text || criterion) : (criterion.text || `${t('criteria')} ${criterion.id}`);
         details += `\n${criterionText}:\n`;
         options.forEach((option: any, optionIndex: number) => {
-          const optionName = typeof (option.name || option) === 'string' ? (option.name || option) : String(option.name || option);
+          const optionName = typeof (option.name || option) === 'string' ? (option.name || option) : (option.name || `${t('options')} ${option.id}`);
           const cellData = comparisonData.find((cell: any) => 
             cell.criterionId === criterion.id && cell.optionId === option.id
           );

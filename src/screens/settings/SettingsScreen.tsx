@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Constants from 'expo-constants';
 import React, { useRef, useState } from 'react';
 import {
     Alert,
@@ -364,7 +365,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
       
       <View style={styles.versionContainer}>
         <Text style={[styles.versionText, { color: theme.colors.tabBarInactive }]}>
-          Better Decision {t('version')} 1.0.0
+          Better Decision {t('version')} {Constants.expoConfig?.version}
         </Text>
       </View>
       </ScrollView>

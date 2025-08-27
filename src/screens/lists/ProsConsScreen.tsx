@@ -85,7 +85,15 @@ const ProsConsScreen = () => {
   
   // Update translations when language changes
   useEffect(() => {
-    setTitle(t('prosAndCons'));
+    // Only reset title if it's currently a default/translated title
+    setTitle(prevTitle => {
+      // If previous title was a default title in any language, update it
+      const defaultTitles = [
+        'Pros & Cons', 'Pros y Contras', 'Pour et Contre', 
+        '优缺点', '優缺點', 'プロ・コン'
+      ];
+      return defaultTitles.includes(prevTitle) ? t('prosAndCons') : prevTitle;
+    });
     setPros(prevPros => 
       prevPros.map(pro => ({ ...pro, text: pro.text === 'sample text' ? t('sampleText') : pro.text }))
     );
