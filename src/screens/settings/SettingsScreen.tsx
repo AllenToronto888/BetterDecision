@@ -26,8 +26,7 @@ const Stack = createNativeStackNavigator();
 // App Store Configuration
 const APP_STORE_CONFIG = {
   ios: {
-    // Update this with your actual App Store ID when published
-    appId: null, // e.g., '123456789'
+    appId: '6751603616', // Official App Store ID from Apple
     bundleId: 'com.allentoronto888.betterdecision'
   },
   android: {
