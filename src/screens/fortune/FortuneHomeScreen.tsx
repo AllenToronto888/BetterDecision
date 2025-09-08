@@ -1,18 +1,18 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, CustomHeader, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
-// Fortune screens
-import DiceScreen from './DiceScreen';
-import SpinnerScreen from './SpinnerScreen';
-
-const Stack = createNativeStackNavigator();
-
-// Home screen for Fortune tab
 const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
+  console.log('🔍 DEBUG: FortuneHomeScreen - Component initializing');
   const { theme } = useTheme();
   const { t } = useI18n();
+  console.log('🔍 DEBUG: FortuneHomeScreen - Theme and i18n loaded');
+  
+  // Add layout debugging
+  const handleLayout = (event: any) => {
+    const { height, width } = event.nativeEvent.layout;
+    console.log('🔍 DEBUG: FortuneHomeScreen - Layout measured:', { height, width });
+  };
   
   const fortuneOptions = [
     {
@@ -32,7 +32,10 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   ];
   
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <View 
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      onLayout={handleLayout}
+    >
       <CustomHeader title={t('fortune')} />
       
       <ScrollView 
@@ -54,29 +57,6 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   );
 };
 
-// Main navigator for Fortune tab
-const FortuneScreen = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen 
-        name="FortuneHome" 
-        component={FortuneHomeScreen} 
-        options={{ headerShown: false, animation: 'none' }}
-      />
-      <Stack.Screen 
-        name="Spinner" 
-        component={SpinnerScreen} 
-        options={{ headerShown: false, animation: 'none' }}
-      />
-      <Stack.Screen 
-        name="Dice" 
-        component={DiceScreen} 
-        options={{ headerShown: false, animation: 'none' }}
-      />
-    </Stack.Navigator>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -87,4 +67,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FortuneScreen;
+export default FortuneHomeScreen;

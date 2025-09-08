@@ -17,7 +17,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, useTheme } from '../../components';
+import { CustomHeader, RateUsComponent, useTheme } from '../../components';
+import { resetSessionData } from '../../hooks/useSessionTracking';
 import { useI18n } from '../../i18n';
 import WebViewScreen from './WebViewScreen';
 
@@ -41,6 +42,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
   // Floating button state
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [showRateUsModal, setShowRateUsModal] = useState(false);
   const pan = useRef(new Animated.ValueXY({ x: Dimensions.get('window').width - 84, y: 100 })).current;
   
   // Track drag state to prevent tap when dragging
@@ -477,21 +479,41 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                   </Text>
                 </TouchableOpacity>
                 
-                {/* Add more dev tools here if needed */}
+                {/* Rate Us Testing */}
                 <TouchableOpacity
                   style={styles.menuItem}
                   onPress={() => {
-                    Alert.alert('Dev Tools', 'More development tools can be added here');
+                    setIsExpanded(false);
+                    setShowRateUsModal(true);
                   }}
                 >
-                  <MaterialIcons name="settings" size={20} color={theme.colors.primary} />
-                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Dev Tools</Text>
+                  <MaterialIcons name="star" size={20} color="#FFD700" />
+                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Test Rate Us</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={async () => {
+                    setIsExpanded(false);
+                    await resetSessionData();
+                    Alert.alert('Dev Tools', 'Session data reset! Rate us will show after 20 sessions again.');
+                  }}
+                >
+                  <MaterialIcons name="refresh" size={20} color="#FF5722" />
+                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Reset Sessions</Text>
                 </TouchableOpacity>
               </View>
             )}
           </Animated.View>
         </>
       )}
+      
+      {/* Rate Us Modal for Testing */}
+      <RateUsComponent 
+        visible={showRateUsModal}
+        onClose={() => setShowRateUsModal(false)}
+        sessionCount={20}
+      />
     </View>
   );
 };

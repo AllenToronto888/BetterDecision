@@ -241,7 +241,7 @@ const SpinnerScreen = () => {
                         alignmentBaseline="middle"
                         fontWeight="bold"
                       >
-                        {option.text.length > 4 ? (
+                        {option.text.length > 8 ? (
                           <>
                             <TSpan x={textX} dy="-0.3em">{option.text.substring(0, Math.ceil(option.text.length / 2))}</TSpan>
                             <TSpan x={textX} dy="1.2em">{option.text.substring(Math.ceil(option.text.length / 2))}</TSpan>

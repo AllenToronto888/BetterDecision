@@ -32,7 +32,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   const finalStatusBarStyle = statusBarStyle || defaultStatusBarStyle;
 
   return (
-    <SafeAreaView style={{ backgroundColor: headerBackgroundColor }} edges={['top']}>
+    <SafeAreaView 
+      style={{ backgroundColor: headerBackgroundColor }} 
+      edges={['top']}
+    >
       <View style={[styles.customHeader, { backgroundColor: headerBackgroundColor }]}>
         {leftAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={leftAction.onPress}>

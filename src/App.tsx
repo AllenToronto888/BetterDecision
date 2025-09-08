@@ -1,13 +1,30 @@
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { RateUsComponent } from './components';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { useSessionTracking } from './hooks/useSessionTracking';
 import { LanguageProvider } from './i18n';
 import MainNavigator from './navigation/MainNavigator';
 
 const AppContent = () => {
   const { theme, isDarkMode } = useTheme();
+  const { shouldShowRateUs, sessionCount } = useSessionTracking();
+  const [showRateUsModal, setShowRateUsModal] = useState(false);
+  
+  // Show rate us modal when conditions are met
+  React.useEffect(() => {
+    if (shouldShowRateUs) {
+      // Small delay to let the app fully load
+      const timer = setTimeout(() => {
+        setShowRateUsModal(true);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowRateUs]);
   
   const navigationTheme = {
     ...DefaultTheme,
@@ -29,12 +46,18 @@ const AppContent = () => {
       <NavigationContainer theme={navigationTheme}>
         <MainNavigator />
       </NavigationContainer>
+      
+      {/* Rate Us Modal */}
+      <RateUsComponent 
+        visible={showRateUsModal}
+        onClose={() => setShowRateUsModal(false)}
+        sessionCount={sessionCount}
+      />
     </>
   );
 };
 
 const App = () => {
-  console.log('DEBUG: App component initializing');
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
