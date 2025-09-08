@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
     Modal,
     Platform,
@@ -277,7 +277,7 @@ const DayCounterScreen = () => {
             value={includeEndDate}
             onValueChange={setIncludeEndDate}
             trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-            thumbColor={theme.colors.background}
+            thumbColor={includeEndDate ? '#FFFFFF' : theme.colors.textSecondary}
           />
         </View>
       </View>

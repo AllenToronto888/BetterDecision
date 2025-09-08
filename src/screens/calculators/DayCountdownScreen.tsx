@@ -46,7 +46,7 @@ const DayCountdownScreen = () => {
   const [dates, setDates] = useState<DateItem[]>([
     {
       id: '1',
-      name: `${t('importantDate')} 1`,
+      name: '',
       date: (() => {
         const today = new Date();
         // Create date in local timezone (set to start of day to avoid timezone issues)
@@ -59,15 +59,9 @@ const DayCountdownScreen = () => {
   ]);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
-  // Update calculator title and initial data when language changes
+  // Update calculator title when language changes
   useEffect(() => {
     setCalculatorTitle(t('dayCountdown'));
-    setDates(prevDates => 
-      prevDates.map((date, index) => ({
-        ...date,
-        name: `${t('importantDate')} ${index + 1}`
-      }))
-    );
   }, [t]);
 
   const calculateWorkingDays = (startDate: Date, endDate: Date) => {
@@ -140,7 +134,7 @@ const DayCountdownScreen = () => {
     
     const newDateItem: DateItem = {
       id: Date.now().toString(),
-      name: `${t('importantDate')} ${dates.length + 1}`,
+      name: '',
       date: newDate,
       dateOpen: false,
     };
@@ -219,7 +213,7 @@ const DayCountdownScreen = () => {
                     ]}
                     value={dateItem.name}
                     onChangeText={(value) => updateDateItem(dateItem.id, 'name', value)}
-                    placeholder={t('dateName')}
+                    placeholder={`${t('importantDate')} ${index + 1}`}
                     placeholderTextColor={theme.colors.tabBarInactive}
                     onFocus={() => setFocusedInput(`dateName-${dateItem.id}`)}
                     onBlur={() => setFocusedInput(null)}
@@ -327,7 +321,7 @@ const DayCountdownScreen = () => {
               {/* Working Time Card */}
               <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
                 <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{t('workingTime')}</Text>
-                <Text style={[styles.helperText, { color: theme.colors.textSecondary }]}>
+                <Text style={[styles.helperText, { color: theme.colors.tabBarInactive }]}>
                   {t('excludesWeekends')}
                 </Text>
                 <View style={styles.workingTimeContainer}>
@@ -449,9 +443,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   helperText: {
-    fontSize: 16,
+    fontSize: 12,
     fontStyle: 'italic',
-    marginBottom: 12,
+    marginBottom: 8,
+    opacity: 0.8,
   },
   nameInput: {
     height: 48,

@@ -60,7 +60,7 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({ onNext, onCancel 
 
         {/* Subtitle */}
         <Text style={[styles.subtitle, { color: theme.colors.primary }]}>
-          Find the best deal,{'\n'}calculate the true cost.
+          {t('savvySpendingSubtitle')}
         </Text>
       </View>
 

@@ -1,6 +1,6 @@
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RateUsComponent } from './components';
@@ -13,6 +13,21 @@ const AppContent = () => {
   const { theme, isDarkMode } = useTheme();
   const { shouldShowRateUs, sessionCount } = useSessionTracking();
   const [showRateUsModal, setShowRateUsModal] = useState(false);
+
+  // Initialize AdMob SDK
+  useEffect(() => {
+    const initializeAdMob = async () => {
+      try {
+        const mobileAds = require('react-native-google-mobile-ads').default;
+        await mobileAds().initialize();
+        console.log('AdMob SDK initialized successfully');
+      } catch (error) {
+        console.log('AdMob SDK not available or failed to initialize:', error);
+      }
+    };
+    
+    initializeAdMob();
+  }, []);
   
   // Show rate us modal when conditions are met
   React.useEffect(() => {

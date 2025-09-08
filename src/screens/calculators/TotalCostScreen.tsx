@@ -274,7 +274,7 @@ const TotalCostScreen = () => {
               value={item.isPercentage}
               onValueChange={(value) => updateCostItem(item.id, 'isPercentage', value)}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={theme.colors.background}
+              thumbColor={item.isPercentage ? '#FFFFFF' : theme.colors.textSecondary}
             />
           </View>
         </View>
@@ -339,7 +339,7 @@ const TotalCostScreen = () => {
               value={item.isPercentage}
               onValueChange={(value) => updateComparisonCostItem(item.id, 'isPercentage', value)}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={theme.colors.background}
+              thumbColor={item.isPercentage ? '#FFFFFF' : theme.colors.textSecondary}
             />
           </View>
         </View>
@@ -516,7 +516,7 @@ const TotalCostScreen = () => {
                 }
               }}
               trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={theme.colors.background}
+              thumbColor={compareEnabled ? '#FFFFFF' : theme.colors.textSecondary}
             />
           </View>
         </View>

@@ -283,7 +283,7 @@ const UnitCalculatorScreen = () => {
               { backgroundColor: theme.colors.background, color: theme.colors.text },
               focusedInput === `name-${index}` && { borderWidth: 2, borderColor: theme.colors.primary }
             ]}
-            placeholder={t('productName')}
+            placeholder={`${t('item')} ${index + 1}`}
             placeholderTextColor={theme.colors.tabBarInactive}
             value={product.name}
             onChangeText={(value) => updateProduct(index, 'name', value)}

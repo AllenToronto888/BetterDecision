@@ -80,12 +80,12 @@ export const darkTheme = {
     background: '#121212',
     text: '#FFFFFF',
     textSecondary: '#AAAAAA',
-    primary: '#90CAF9',
+    primary: '#1976D2', // Darker blue for better contrast with white text
     secondary: '#FFCC80',
     success: '#81C784',
     danger: '#E57373',
     warning: '#FFCC80',
-    info: '#90CAF9',
+    info: '#1976D2', // Matching primary for consistency
     card: '#1E1E1E',
     border: '#333333',
     tabBar: '#1E1E1E',

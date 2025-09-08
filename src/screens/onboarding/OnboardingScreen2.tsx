@@ -61,7 +61,7 @@ const OnboardingScreen2: React.FC<OnboardingScreen2Props> = ({ onNext, onBack, o
 
         {/* Subtitle */}
         <Text style={[styles.subtitle, { color: theme.colors.primary }]}>
-          Line up your choices{'\n'}and see what wins.
+          {t('clearYourHeadSubtitle')}
         </Text>
       </View>
 

@@ -758,7 +758,8 @@ const styles = StyleSheet.create({
   },
   adContainer: {
     alignItems: 'center',
-    marginVertical: 8, // 8px + AdMobBanner's built-in 8px = 16px total
+    marginTop: 16, // Exact 16px spacing from notes section
+    marginBottom: 8,
     paddingHorizontal: 16,
   },
 });

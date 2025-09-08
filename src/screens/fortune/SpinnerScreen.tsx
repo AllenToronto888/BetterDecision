@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
     Alert,
     Animated,
@@ -70,16 +70,13 @@ const SpinnerScreen = () => {
     setOptions([...options, newOption]);
   };
   
-  const updateOption = (id: string, text: string) => {
-    const updatedOptions = options.map(option => {
-      if (option.id === id) {
-        return { ...option, text };
-      }
-      return option;
-    });
-    
-    setOptions(updatedOptions);
-  };
+  const updateOption = useCallback((id: string, text: string) => {
+    setOptions(prevOptions => 
+      prevOptions.map(option => 
+        option.id === id ? { ...option, text } : option
+      )
+    );
+  }, []);
   
   const removeOption = (id: string) => {
     if (options.length > 2) {
@@ -160,7 +157,27 @@ const SpinnerScreen = () => {
     }
   };
 
-
+  // Memoize default texts to avoid recalculation on every render
+  const defaultTexts = useMemo(() => [t('pizza'), t('burger'), t('sushi'), t('chineseFood')], [t]);
+  
+  const getOptionValue = useCallback((option: SpinnerOption) => {
+    return defaultTexts.includes(option.text) ? '' : option.text;
+  }, [defaultTexts]);
+  
+  const getOptionPlaceholder = useCallback((option: SpinnerOption) => {
+    return defaultTexts.includes(option.text) ? option.text : t('enterOption');
+  }, [defaultTexts, t]);
+  
+  const handleOptionBlur = useCallback((option: SpinnerOption) => {
+    setFocusedInput(null);
+    // Revert to default if empty
+    if (option.text.trim() === '') {
+      const index = parseInt(option.id) - 1;
+      if (index < defaultTexts.length) {
+        updateOption(option.id, defaultTexts[index]);
+      }
+    }
+  }, [defaultTexts, updateOption]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -174,13 +191,16 @@ const SpinnerScreen = () => {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           style={[styles.container, { backgroundColor: theme.colors.background }]}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={true}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          keyboardDismissMode="on-drag"
         >
         <View style={styles.titleContainer}>
           <TextInput
@@ -302,28 +322,12 @@ const SpinnerScreen = () => {
                     { color: theme.colors.text, backgroundColor: theme.colors.background },
                     focusedInput === `option-${option.id}` && { borderWidth: 2, borderColor: theme.colors.primary }
                   ]}
-                  value={(() => {
-                    const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
-                    return defaultTexts.includes(option.text) ? '' : option.text;
-                  })()}
-                  placeholder={(() => {
-                    const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
-                    return defaultTexts.includes(option.text) ? option.text : t('enterOption');
-                  })()}
+                  value={getOptionValue(option)}
+                  placeholder={getOptionPlaceholder(option)}
                   onChangeText={(text) => updateOption(option.id, text)}
                   placeholderTextColor={theme.colors.tabBarInactive}
                   onFocus={() => setFocusedInput(`option-${option.id}`)}
-                  onBlur={() => {
-                    setFocusedInput(null);
-                    // Revert to default if empty
-                    if (option.text.trim() === '') {
-                      const defaultTexts = [t('pizza'), t('burger'), t('sushi'), t('chineseFood')];
-                      const index = parseInt(option.id) - 1;
-                      if (index < defaultTexts.length) {
-                        updateOption(option.id, defaultTexts[index]);
-                      }
-                    }
-                  }}
+                  onBlur={() => handleOptionBlur(option)}
                 />
               </View>
             </SwipableRow>

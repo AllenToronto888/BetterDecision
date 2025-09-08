@@ -33,8 +33,8 @@ const AdMobBanner: React.FC<AdMobBannerProps> = ({
   style,
   size = hasAdMob ? BannerAdSize?.FULL_BANNER : 'FULL_BANNER',
   showPersonalizedAds = false,
-  iosUnitId = "ca-app-pub-9076576179831024/XXXXXXXXXX", // Replace with real iOS Banner Unit ID
-  androidUnitId = "ca-app-pub-9076576179831024/XXXXXXXXXX", // Replace with real Android Banner Unit ID
+  iosUnitId = "ca-app-pub-9076576179831024/3257889898", // iOS Banner Unit ID
+  androidUnitId = "ca-app-pub-9076576179831024/9927240025", // Android Banner Unit ID
 }) => {
   // Use test ads in development, real ads in production
   const getAdUnitId = () => {

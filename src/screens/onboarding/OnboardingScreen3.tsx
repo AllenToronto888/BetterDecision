@@ -53,7 +53,7 @@ const OnboardingScreen3: React.FC<OnboardingScreen3Props> = ({ onGetStarted, onB
 
         {/* Subtitle */}
         <Text style={[styles.subtitle, { color: theme.colors.primary }]}>
-          Leave it to luck:{'\n'}spin the wheel, roll the dice.
+          {t('stillCantDecideSubtitle')}
         </Text>
       </View>
 

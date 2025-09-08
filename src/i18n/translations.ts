@@ -69,6 +69,7 @@ export const translations = {
     selectDate: "Select Date",
     unitPriceComparison: "Unit Price Comparison",
     productName: "Product name",
+    item: "Item",
     price: "Price",
     features: "Features",
     basic: "Basic",
@@ -250,14 +251,11 @@ export const translations = {
 
     // ============ ONBOARDING SCREENS ============
     savvySpending: "Savvy Spending",
-    savvySpendingSubtitle: "Find the best deal, calculate the true cost.",
+    savvySpendingSubtitle: "Find the best deal,\ncalculate the true cost.",
     clearYourHead: "Clear Your Head",
-    clearYourHeadSubtitle: "Line up your choices and see what wins.",
+    clearYourHeadSubtitle: "Line up your choices\nand see what wins.",
     stillCantDecide: "Still Can't Decide?",
-    stillCantDecideSubtitle: "Leave it to luck: spin the wheel, roll the dice.",
-    next: "Next",
-    back: "Back",
-    getStarted: "Get Started",
+    stillCantDecideSubtitle: "Leave it to luck,\nspin the wheel, roll the dice.",
     restartOnboarding: "Restart Onboarding",
     restartOnboardingMessage: "This will reset the onboarding tutorial. You'll see it again on next app launch.",
     restart: "Restart",
@@ -346,6 +344,7 @@ export const translations = {
     selectDate: "Seleccionar Fecha",
     unitPriceComparison: "Comparación de Precio Unitario",
     productName: "Nombre del producto",
+    item: "Artículo",
     price: "Precio",
     features: "Características",
     basic: "Básico",
@@ -527,14 +526,11 @@ export const translations = {
 
     // ============ ONBOARDING SCREENS ============
     savvySpending: "Gasto Inteligente",
-    savvySpendingSubtitle: "Encuentra la mejor oferta, calcula el costo real.",
+    savvySpendingSubtitle: "Encuentra la mejor oferta,\ncalcula el costo real.",
     clearYourHead: "Aclara tu Mente",
-    clearYourHeadSubtitle: "Organiza tus opciones y ve cuál gana.",
+    clearYourHeadSubtitle: "Organiza tus opciones\ny ve cuál gana.",
     stillCantDecide: "¿Aún no puedes decidir?",
-    stillCantDecideSubtitle: "Déjalo a la suerte: gira la ruleta, lanza los dados.",
-    next: "Siguiente",
-    back: "Atrás",
-    getStarted: "Comenzar",
+    stillCantDecideSubtitle: "Déjalo a la suerte,\ngira la ruleta, lanza los dados.",
 
     // ============ COMMON/SHARED ============
     cancel: "Cancelar",
@@ -619,6 +615,7 @@ export const translations = {
     selectDate: "Sélectionner la Date",
     unitPriceComparison: "Comparaison Prix Unitaire",
     productName: "Nom du produit",
+    item: "Article",
     price: "Prix",
     features: "Fonctions",
     basic: "Basique",
@@ -800,14 +797,11 @@ export const translations = {
 
     // ============ ONBOARDING SCREENS ============
     savvySpending: "Dépenses Intelligentes",
-    savvySpendingSubtitle: "Trouvez la meilleure offre, calculez le vrai coût.",
+    savvySpendingSubtitle: "Trouvez la meilleure offre,\ncalculez le vrai coût.",
     clearYourHead: "Éclaircissez vos Idées",
-    clearYourHeadSubtitle: "Alignez vos choix et voyez qui gagne.",
+    clearYourHeadSubtitle: "Alignez vos choix\net voyez qui gagne.",
     stillCantDecide: "Toujours Indécis?",
-    stillCantDecideSubtitle: "Laissez faire la chance: tournez la roue, lancez les dés.",
-    next: "Suivant",
-    back: "Retour",
-    getStarted: "Commencer",
+    stillCantDecideSubtitle: "Laissez faire la chance,\ntournez la roue, lancez les dés.",
 
     // ============ COMMON/SHARED ============
     cancel: "Annuler",
@@ -892,6 +886,7 @@ export const translations = {
     selectDate: "选择日期",
     unitPriceComparison: "单价比较",
     productName: "产品名称",
+    item: "项目",
     price: "价格",
     features: "功能",
     basic: "基础",
@@ -1071,6 +1066,18 @@ export const translations = {
     noPreviousRolls: "没有之前的投掷记录",
     sided: "面",
 
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "精明消费",
+    savvySpendingSubtitle: "找到最优惠的价格,\n计算真实成本。",
+    clearYourHead: "理清思路",
+    clearYourHeadSubtitle: "排列你的选择,\n看看哪个获胜。",
+    stillCantDecide: "仍然无法决定？",
+    stillCantDecideSubtitle: "交给运气吧,\n转动转盘，掷骰子。",
+    restartOnboarding: "重启引导",
+    restartOnboardingMessage: "这将重置引导教程。下次启动应用时你将再次看到它。",
+    restart: "重启",
+    onboardingResetSuccess: "引导已重置。重启应用以再次查看教程。",
+
     // ============ COMMON/SHARED ============
     cancel: "取消",
     confirm: "确认",
@@ -1154,6 +1161,7 @@ export const translations = {
     selectDate: "選擇日期",
     unitPriceComparison: "單價比較",
     productName: "產品名稱",
+    item: "項目",
     price: "價格",
     features: "功能",
     basic: "基礎",
@@ -1333,6 +1341,18 @@ export const translations = {
     noPreviousRolls: "沒有之前的投擲",
     sided: "面",
 
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "精明消費",
+    savvySpendingSubtitle: "找到最優惠的價格,\n計算真實成本。",
+    clearYourHead: "理清思路",
+    clearYourHeadSubtitle: "排列你的選擇,\n看看哪個獲勝。",
+    stillCantDecide: "仍然無法決定？",
+    stillCantDecideSubtitle: "交給運氣吧,\n轉動轉盤，擲骰子。",
+    restartOnboarding: "重啟引導",
+    restartOnboardingMessage: "這將重置引導教程。下次啟動應用時你將再次看到它。",
+    restart: "重啟",
+    onboardingResetSuccess: "引導已重置。重啟應用以再次查看教程。",
+
     // ============ COMMON/SHARED ============
     cancel: "取消",
     confirm: "確認",
@@ -1416,6 +1436,7 @@ export const translations = {
     selectDate: "日付を選択",
     unitPriceComparison: "単価比較",
     productName: "商品名",
+    item: "アイテム",
     price: "価格",
     features: "機能",
     basic: "ベーシック",
@@ -1594,6 +1615,18 @@ export const translations = {
     history: "履歴",
     noPreviousRolls: "前回の投球なし",
     sided: "面",
+
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "賢い支出",
+    savvySpendingSubtitle: "最良の取引を見つけ、\n真のコストを計算しましょう。",
+    clearYourHead: "頭をスッキリと",
+    clearYourHeadSubtitle: "選択肢を並べて\nどれが勝つかを見てみましょう。",
+    stillCantDecide: "まだ決められませんか？",
+    stillCantDecideSubtitle: "運に任せましょう、\nホイールを回し、サイコロを振りましょう。",
+    restartOnboarding: "オンボーディングを再開",
+    restartOnboardingMessage: "これによりオンボーディングチュートリアルがリセットされます。次回のアプリ起動時に再び表示されます。",
+    restart: "再開",
+    onboardingResetSuccess: "オンボーディングがリセットされました。チュートリアルを再び見るにはアプリを再起動してください。",
 
     // ============ COMMON/SHARED ============
     cancel: "キャンセル",
