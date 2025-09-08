@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 // Import Button directly from its file to avoid "Cannot call a class as a function" error
 
@@ -430,6 +430,10 @@ const ProsConsScreen = () => {
             </View>
           )}
         </View>
+
+        {/* AdMob Banner Ad */}
+        <AdMobBanner style={styles.adContainer} />
+
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -594,6 +598,11 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     lineHeight: 20,
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginVertical: 8, // 8px + AdMobBanner's built-in 8px = 16px total
+    paddingHorizontal: 16,
   },
 });
 

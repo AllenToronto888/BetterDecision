@@ -91,7 +91,6 @@ const MainNavigator = () => {
         headerTintColor: '#fff',
         tabBarStyle: {
           backgroundColor: theme.colors.tabBar,
-          position: 'absolute',
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.tabBarInactive,

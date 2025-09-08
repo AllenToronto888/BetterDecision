@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Criterion {
@@ -325,7 +325,7 @@ const QuickComparisonScreen = () => {
                     notes,
                     comparisonType: 'quick_comparison',
                   }}
-                  dataType="quick_comparison"
+                  dataType="comparison"
                   variant="icon"
                   showInput={false}
                   onSaveSuccess={(name: string) => console.log('Saved as:', name)}
@@ -338,7 +338,7 @@ const QuickComparisonScreen = () => {
                     cells: comparisonData,
                     notes,
                   }}
-                  dataType="quick_comparison"
+                  dataType="comparison"
                   title={t('quickComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
@@ -560,6 +560,10 @@ const QuickComparisonScreen = () => {
             </View>
           )}
         </View>
+
+        {/* AdMob Banner Ad */}
+        <AdMobBanner style={styles.adContainer} />
+
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -739,6 +743,11 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     lineHeight: 20,
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginVertical: 8, // 8px + AdMobBanner's built-in 8px = 16px total
+    paddingHorizontal: 16,
   },
 });
 

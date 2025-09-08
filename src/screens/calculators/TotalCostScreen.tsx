@@ -11,7 +11,7 @@ import {
     TextInput,
     View
 } from 'react-native';
-import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface CostItem {
@@ -633,6 +633,9 @@ const TotalCostScreen = () => {
             </View>
           </>
         )}
+
+        {/* AdMob Banner Ad */}
+        <AdMobBanner style={styles.adContainer} />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -797,6 +800,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     paddingVertical: 16,
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginVertical: 8, // Reduced from 16 to 8 to account for AdMobBanner's built-in 8px
+    paddingHorizontal: 16,
   },
 });
 

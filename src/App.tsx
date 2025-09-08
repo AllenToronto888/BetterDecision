@@ -7,7 +7,7 @@ import { RateUsComponent } from './components';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useSessionTracking } from './hooks/useSessionTracking';
 import { LanguageProvider } from './i18n';
-import MainNavigator from './navigation/MainNavigator';
+import RootNavigator from './navigation/RootNavigator';
 
 const AppContent = () => {
   const { theme, isDarkMode } = useTheme();
@@ -44,7 +44,7 @@ const AppContent = () => {
     <>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
       <NavigationContainer theme={navigationTheme}>
-        <MainNavigator />
+        <RootNavigator />
       </NavigationContainer>
       
       {/* Rate Us Modal */}

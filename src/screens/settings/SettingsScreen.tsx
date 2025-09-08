@@ -7,9 +7,7 @@ import {
     Alert,
     Animated,
     Dimensions,
-    Linking,
     PanResponder,
-    Platform,
     ScrollView,
     StyleSheet,
     Switch,
@@ -24,17 +22,6 @@ import WebViewScreen from './WebViewScreen';
 
 const Stack = createNativeStackNavigator();
 
-// App Store Configuration
-const APP_STORE_CONFIG = {
-  ios: {
-    appId: '6751603616', // Official App Store ID from Apple
-    bundleId: 'com.allentoronto888.betterdecision'
-  },
-  android: {
-    packageName: 'com.allentoronto888.betterdecision'
-  }
-};
-
 const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const { t, currentLanguage, changeLanguage, supportedLanguages } = useI18n();
@@ -43,6 +30,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [showRateUsModal, setShowRateUsModal] = useState(false);
+  const [showSettingsRateModal, setShowSettingsRateModal] = useState(false);
   const pan = useRef(new Animated.ValueXY({ x: Dimensions.get('window').width - 84, y: 100 })).current;
   
   // Track drag state to prevent tap when dragging
@@ -182,71 +170,13 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
     );
   };
   
-  const rateApp = async () => {
-    try {
-      if (Platform.OS === 'ios') {
-        if (APP_STORE_CONFIG.ios.appId) {
-          // Direct link to App Store rating page
-          const appStoreUrl = `https://apps.apple.com/app/id${APP_STORE_CONFIG.ios.appId}?action=write-review`;
-          const supported = await Linking.canOpenURL(appStoreUrl);
-          
-          if (supported) {
-            await Linking.openURL(appStoreUrl);
-          } else {
-            // Fallback to app page
-            await Linking.openURL(`https://apps.apple.com/app/id${APP_STORE_CONFIG.ios.appId}`);
-          }
-        } else {
-          // App not published yet - show search message
-          Alert.alert(
-            t('rateApp'),
-            'Please search for "Better Decision" in the App Store to rate our app.',
-            [
-              { text: t('cancel'), style: 'cancel' },
-              { 
-                text: 'Open App Store', 
-                onPress: () => Linking.openURL('https://apps.apple.com/') 
-              }
-            ]
-          );
-        }
-      } else {
-        // Android Play Store
-        const packageName = APP_STORE_CONFIG.android.packageName;
-        const playStoreUrl = `market://details?id=${packageName}`;
-        const webPlayStoreUrl = `https://play.google.com/store/apps/details?id=${packageName}`;
-        
-        try {
-          const supported = await Linking.canOpenURL(playStoreUrl);
-          if (supported) {
-            await Linking.openURL(playStoreUrl);
-          } else {
-            // Fallback to web version
-            await Linking.openURL(webPlayStoreUrl);
-          }
-        } catch (fallbackError) {
-          // If app not published yet, show search message
-          Alert.alert(
-            t('rateApp'),
-            'Please search for "Better Decision" in the Play Store to rate our app.',
-            [
-              { text: t('cancel'), style: 'cancel' },
-              { 
-                text: 'Open Play Store', 
-                onPress: () => Linking.openURL('https://play.google.com/store') 
-              }
-            ]
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error opening app store:', error);
-      Alert.alert(
-        t('error'),
-        'Unable to open app store. Please search for "Better Decision" in your app store.',
-        [{ text: t('ok') }]
-      );
-    }
+  const rateApp = () => {
+    setShowSettingsRateModal(true);
+  };
+
+  const goToOnboarding = () => {
+    // Simple entry point - just navigate to first onboarding screen
+    navigation.navigate('OnboardingScreen1');
   };
   
   const openPrivacyPolicy = () => {
@@ -502,6 +432,17 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                   <MaterialIcons name="refresh" size={20} color="#FF5722" />
                   <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Reset Sessions</Text>
                 </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setIsExpanded(false);
+                    goToOnboarding();
+                  }}
+                >
+                  <MaterialIcons name="school" size={20} color="#4CAF50" />
+                  <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Show Onboarding</Text>
+                </TouchableOpacity>
               </View>
             )}
           </Animated.View>
@@ -513,6 +454,12 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         visible={showRateUsModal}
         onClose={() => setShowRateUsModal(false)}
         sessionCount={20}
+      />
+      
+      {/* Rate Us Modal for Settings */}
+      <RateUsComponent 
+        visible={showSettingsRateModal}
+        onClose={() => setShowSettingsRateModal(false)}
       />
     </View>
   );

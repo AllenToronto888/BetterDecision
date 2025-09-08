@@ -127,7 +127,7 @@ const RateUsComponent: React.FC<RateUsComponentProps> = ({ visible, onClose, ses
   };
 
   const handleEmailFeedback = async () => {
-    const email = 'support@betterdecision.app'; // Replace with your support email
+    const email = 'info@sequla.ca'; // Support email for feedback
     const subject = encodeURIComponent('Better Decision - App Feedback');
     const body = encodeURIComponent(`
 Hi Better Decision Team,

@@ -248,6 +248,21 @@ export const translations = {
     noPreviousRolls: "No previous rolls",
     sided: "sided",
 
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "Savvy Spending",
+    savvySpendingSubtitle: "Find the best deal, calculate the true cost.",
+    clearYourHead: "Clear Your Head",
+    clearYourHeadSubtitle: "Line up your choices and see what wins.",
+    stillCantDecide: "Still Can't Decide?",
+    stillCantDecideSubtitle: "Leave it to luck: spin the wheel, roll the dice.",
+    next: "Next",
+    back: "Back",
+    getStarted: "Get Started",
+    restartOnboarding: "Restart Onboarding",
+    restartOnboardingMessage: "This will reset the onboarding tutorial. You'll see it again on next app launch.",
+    restart: "Restart",
+    onboardingResetSuccess: "Onboarding has been reset. Restart the app to see the tutorial again.",
+
     // ============ COMMON/SHARED ============
     cancel: "Cancel",
     confirm: "Confirm",
@@ -510,6 +525,17 @@ export const translations = {
     noPreviousRolls: "Sin tiradas anteriores",
     sided: "caras",
 
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "Gasto Inteligente",
+    savvySpendingSubtitle: "Encuentra la mejor oferta, calcula el costo real.",
+    clearYourHead: "Aclara tu Mente",
+    clearYourHeadSubtitle: "Organiza tus opciones y ve cuál gana.",
+    stillCantDecide: "¿Aún no puedes decidir?",
+    stillCantDecideSubtitle: "Déjalo a la suerte: gira la ruleta, lanza los dados.",
+    next: "Siguiente",
+    back: "Atrás",
+    getStarted: "Comenzar",
+
     // ============ COMMON/SHARED ============
     cancel: "Cancelar",
     confirm: "Confirmar",
@@ -771,6 +797,17 @@ export const translations = {
     history: "Historique",
     noPreviousRolls: "Aucun lancer précédent",
     sided: "faces",
+
+    // ============ ONBOARDING SCREENS ============
+    savvySpending: "Dépenses Intelligentes",
+    savvySpendingSubtitle: "Trouvez la meilleure offre, calculez le vrai coût.",
+    clearYourHead: "Éclaircissez vos Idées",
+    clearYourHeadSubtitle: "Alignez vos choix et voyez qui gagne.",
+    stillCantDecide: "Toujours Indécis?",
+    stillCantDecideSubtitle: "Laissez faire la chance: tournez la roue, lancez les dés.",
+    next: "Suivant",
+    back: "Retour",
+    getStarted: "Commencer",
 
     // ============ COMMON/SHARED ============
     cancel: "Annuler",

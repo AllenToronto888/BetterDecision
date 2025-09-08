@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Product {
@@ -468,6 +468,8 @@ const UnitCalculatorScreen = () => {
           )}
         </View>
 
+        {/* AdMob Banner Ad */}
+        <AdMobBanner style={styles.adContainer} />
 
       </ScrollView>
       </KeyboardAvoidingView>
@@ -604,6 +606,11 @@ const styles = StyleSheet.create({
   },
   autoSaveText: {
     fontStyle: 'italic',
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginVertical: 8, // 8px + AdMobBanner's built-in 8px = 16px total
+    paddingHorizontal: 16,
   },
 });
 

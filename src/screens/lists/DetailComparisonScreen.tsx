@@ -2,16 +2,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Criterion {
@@ -287,7 +287,7 @@ const DetailComparisonScreen = () => {
                     notes,
                     comparisonType: 'detail_comparison',
                   }}
-                  dataType="detail_comparison"
+                  dataType="comparison"
                   variant="icon"
                   showInput={false}
                   onSaveSuccess={(name: string) => console.log('Saved as:', name)}
@@ -300,7 +300,7 @@ const DetailComparisonScreen = () => {
                     comparisonData,
                     notes,
                   }}
-                  dataType="detail_comparison"
+                  dataType="comparison"
                   title={t('detailComparisonResult')}
                   variant="icon"
                   onShareSuccess={() => console.log('Shared successfully')}
@@ -556,6 +556,10 @@ const DetailComparisonScreen = () => {
               </View>
             )}
           </View>
+
+          {/* AdMob Banner Ad */}
+          <AdMobBanner style={styles.adContainer} />
+
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -751,6 +755,11 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     lineHeight: 20,
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginVertical: 8, // 8px + AdMobBanner's built-in 8px = 16px total
+    paddingHorizontal: 16,
   },
 });
 

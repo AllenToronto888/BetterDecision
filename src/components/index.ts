@@ -1,4 +1,5 @@
 // Export all reusable components
+export { default as AdMobBanner } from './AdMobBanner';
 export { saveManually, useAutoSave } from './AutoSave';
 export { Button } from './Button';
 export { Card } from './Card';
