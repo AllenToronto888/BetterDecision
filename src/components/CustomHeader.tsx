@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { Typography } from './Typography';
 
@@ -27,14 +27,17 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   statusBarStyle,
 }) => {
   const { theme, isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
   const headerBackgroundColor = statusBarColor || (isDarkMode ? theme.colors.background : theme.colors.primary);
   const defaultStatusBarStyle = isDarkMode ? 'light-content' : 'light-content';
   const finalStatusBarStyle = statusBarStyle || defaultStatusBarStyle;
 
   return (
-    <SafeAreaView 
-      style={{ backgroundColor: headerBackgroundColor }} 
-      edges={['top']}
+    <View 
+      style={{ 
+        backgroundColor: headerBackgroundColor,
+        paddingTop: insets.top
+      }}
     >
       <View style={[styles.customHeader, { backgroundColor: headerBackgroundColor }]}>
         {leftAction ? (
@@ -57,7 +60,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
           <View style={styles.headerButton} />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

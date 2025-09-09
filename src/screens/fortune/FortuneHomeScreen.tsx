@@ -3,16 +3,8 @@ import { Card, CustomHeader, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
-  console.log('🔍 DEBUG: FortuneHomeScreen - Component initializing');
   const { theme } = useTheme();
   const { t } = useI18n();
-  console.log('🔍 DEBUG: FortuneHomeScreen - Theme and i18n loaded');
-  
-  // Add layout debugging
-  const handleLayout = (event: any) => {
-    const { height, width } = event.nativeEvent.layout;
-    console.log('🔍 DEBUG: FortuneHomeScreen - Layout measured:', { height, width });
-  };
   
   const fortuneOptions = [
     {
@@ -34,7 +26,6 @@ const FortuneHomeScreen = ({ navigation }: { navigation: any }) => {
   return (
     <View 
       style={{ flex: 1, backgroundColor: theme.colors.background }}
-      onLayout={handleLayout}
     >
       <CustomHeader title={t('fortune')} />
       

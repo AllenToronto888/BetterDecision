@@ -14,19 +14,26 @@ const AppContent = () => {
   const { shouldShowRateUs, sessionCount } = useSessionTracking();
   const [showRateUsModal, setShowRateUsModal] = useState(false);
 
-  // Initialize AdMob SDK only in development/production builds, not Expo Go
+  // Initialize AdMob SDK only in standalone builds, not Expo Go
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
-        // Check if AdMob is available (not in Expo Go)
-        const admob = require('react-native-google-mobile-ads');
-        if (admob && admob.default) {
-          await admob.default().initialize();
-          console.log('AdMob SDK initialized successfully');
+        // Check if we're running in Expo Go using Constants
+        const Constants = require('expo-constants').default;
+        const isExpoGo = Constants.appOwnership === 'expo';
+        
+        if (isExpoGo) {
+          console.log('AdMob not available, showing placeholder');
+          return;
         }
+
+        // Only require and initialize AdMob in standalone builds
+        const mobileAds = require('react-native-google-mobile-ads').default;
+        await mobileAds().initialize();
+        console.log('AdMob SDK initialized successfully');
       } catch (error) {
-        // Silently handle - AdMob not available in Expo Go
-        console.log('AdMob not available (likely Expo Go environment)');
+        // Silently handle AdMob initialization errors
+        console.log('AdMob initialization failed:', error.message);
       }
     };
     

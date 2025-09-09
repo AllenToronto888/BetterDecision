@@ -78,7 +78,6 @@ const FortuneStack = () => {
 
 // Main Tab Navigator (Root) - Tab bar always visible
 const MainNavigator = () => {
-  console.log('🔍 DEBUG: MainNavigator - Root Tab Navigator initializing');
   const { theme } = useTheme();
   const { t } = useI18n();
   

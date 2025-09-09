@@ -3,10 +3,8 @@ import { Card, CustomHeader, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 const CalculatorsHomeScreen = ({ navigation }: { navigation: any }) => {
-  console.log('🔍 DEBUG: CalculatorsHomeScreen - Component initializing');
   const { theme } = useTheme();
   const { t } = useI18n();
-  console.log('🔍 DEBUG: CalculatorsHomeScreen - Theme and i18n loaded');
   
   const calculatorOptions = [
     {
