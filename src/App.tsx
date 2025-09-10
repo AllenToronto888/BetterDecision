@@ -1,7 +1,11 @@
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
+// Remove direct import to avoid iOS < 14 crashes
+// import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RateUsComponent } from './components';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -19,7 +23,6 @@ const AppContent = () => {
     const initializeAdMob = async () => {
       try {
         // Check if we're running in Expo Go using Constants
-        const Constants = require('expo-constants').default;
         const isExpoGo = Constants.appOwnership === 'expo';
         
         if (isExpoGo) {
@@ -28,7 +31,8 @@ const AppContent = () => {
         }
 
         // Request App Tracking Transparency permission (iOS 14.5+)
-        const { requestTrackingPermissionsAsync } = require('expo-tracking-transparency');
+        // Dynamic import to avoid crashes on older iOS versions
+        const { requestTrackingPermissionsAsync } = await import('expo-tracking-transparency');
         const trackingStatus = await requestTrackingPermissionsAsync();
         
         if (trackingStatus.granted) {
@@ -38,12 +42,11 @@ const AppContent = () => {
         }
 
         // Initialize AdMob SDK regardless of tracking permission
-        const mobileAds = require('react-native-google-mobile-ads').default;
         await mobileAds().initialize();
         console.log('AdMob SDK initialized successfully');
       } catch (error) {
         // Silently handle AdMob initialization errors
-        console.log('AdMob initialization failed:', error.message);
+        console.log('AdMob initialization failed:', error instanceof Error ? error.message : String(error));
       }
     };
     
