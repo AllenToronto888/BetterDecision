@@ -18,7 +18,7 @@ const AppContent = () => {
   const { shouldShowRateUs, sessionCount } = useSessionTracking();
   const [showRateUsModal, setShowRateUsModal] = useState(false);
 
-  // Initialize AdMob SDK with App Tracking Transparency
+  // Initialize AdMob SDK without ATT (generic ads only)
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
@@ -30,20 +30,9 @@ const AppContent = () => {
           return;
         }
 
-        // Request App Tracking Transparency permission (iOS 14.5+)
-        // Dynamic import to avoid crashes on older iOS versions
-        const { requestTrackingPermissionsAsync } = await import('expo-tracking-transparency');
-        const trackingStatus = await requestTrackingPermissionsAsync();
-        
-        if (trackingStatus.granted) {
-          console.log('Tracking permission granted');
-        } else {
-          console.log('Tracking permission denied');
-        }
-
-        // Initialize AdMob SDK regardless of tracking permission
+        // Initialize AdMob SDK with generic ads (no tracking)
         await mobileAds().initialize();
-        console.log('AdMob SDK initialized successfully');
+        console.log('AdMob SDK initialized successfully with generic ads');
       } catch (error) {
         // Silently handle AdMob initialization errors
         console.log('AdMob initialization failed:', error instanceof Error ? error.message : String(error));

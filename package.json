@@ -17,6 +17,7 @@
     "@react-navigation/native-stack": "^6.9.17",
     "expo": "53.0.22",
     "expo-constants": "^17.1.7",
+    "expo-dev-client": "~5.2.4",
     "expo-localization": "^16.1.6",
     "expo-modules-core": "~2.5.0",
     "expo-status-bar": "~2.2.3",
@@ -32,9 +33,7 @@
     "react-native-svg": "15.11.2",
     "react-native-vector-icons": "^10.0.3",
     "react-native-webview": "13.13.5",
-    "underscore": "^1.13.7",
-    "expo-dev-client": "~5.2.4",
-    "expo-tracking-transparency": "~5.2.4"
+    "underscore": "^1.13.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
