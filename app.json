@@ -17,6 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
+      "buildNumber": "2",
       "jsEngine": "jsc",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -29,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.allentoronto888.betterdecision",
-      "versionCode": 1,
+      "versionCode": 2,
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
