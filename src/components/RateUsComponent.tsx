@@ -11,7 +11,7 @@ import {
     View,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { markRateUsDismissed, markRateUsNeverShowAgain, markRateUsShown } from '../hooks/useSessionTracking';
+import { markRateUsDismissed, markRateUsShown } from '../hooks/useSessionTracking';
 import { useI18n } from '../i18n';
 import { Button } from './Button';
 
@@ -191,9 +191,6 @@ Thank you!
     >
       <View style={styles.overlay}>
         <View style={[styles.container, { backgroundColor: theme.colors.card }]}>
-          {/* Close button removed */}
-
-
           {/* Personalized title with session count */}
           <Text style={[styles.title, { color: theme.colors.text }]}>
             {t('youHaveBeenUsing')}
@@ -214,6 +211,18 @@ Thank you!
 
           {/* Bottom buttons */}
           <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={async () => {
+                await markRateUsDismissed();
+                onClose();
+              }}
+            >
+              <Text style={[styles.cancelText, { color: theme.colors.tabBarInactive }]}>
+                {t('cancel')}
+              </Text>
+            </TouchableOpacity>
+            
             <Button
               title={t('maybeLater')}
               variant="primary"
@@ -224,18 +233,6 @@ Thank you!
                 onClose();
               }}
             />
-            
-            <TouchableOpacity
-              style={[styles.dontShowAgainButton]}
-              onPress={async () => {
-                await markRateUsNeverShowAgain();
-                onClose();
-              }}
-            >
-              <Text style={[styles.dontShowAgainText, { color: theme.colors.tabBarInactive }]}>
-                {t('dontShowAgain')}
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -295,25 +292,24 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     width: '100%',
+    alignItems: 'center',
     gap: 12,
+  },
+  cancelButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+  },
+  cancelText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   maybeLaterButton: {
     flex: 1,
-  },
-  dontShowAgainButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'flex-end',
-  },
-  dontShowAgainText: {
-    fontSize: 14,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
-    textAlign: 'right',
   },
 });
 

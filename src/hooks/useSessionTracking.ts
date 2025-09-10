@@ -8,8 +8,8 @@ const STORAGE_KEYS = {
   RATE_US_DISMISSED: '@app_rate_us_dismissed',
 };
 
-const SESSIONS_BEFORE_RATE_POPUP = 20; // Show after 20 sessions (very fair)
-const MIN_DAYS_BETWEEN_POPUPS = 21; // Don't show again for 21 days if dismissed
+const SESSIONS_BEFORE_RATE_POPUP = 10; // Show after 10 sessions (earlier engagement)
+const MIN_DAYS_BETWEEN_POPUPS = 10; // Don't show again for 10 days if dismissed
 
 interface SessionData {
   sessionCount: number;
@@ -121,14 +121,6 @@ export const markRateUsDismissed = async () => {
   }
 };
 
-export const markRateUsNeverShowAgain = async () => {
-  try {
-    await AsyncStorage.setItem(STORAGE_KEYS.RATE_US_SHOWN, 'never_show_again');
-    console.log('📊 Rate us marked as never show again');
-  } catch (error) {
-    console.error('Error marking rate us as never show again:', error);
-  }
-};
 
 // Debug function to reset session data (for testing)
 export const resetSessionData = async () => {
