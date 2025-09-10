@@ -14,7 +14,7 @@ const AppContent = () => {
   const { shouldShowRateUs, sessionCount } = useSessionTracking();
   const [showRateUsModal, setShowRateUsModal] = useState(false);
 
-  // Initialize AdMob SDK only in standalone builds, not Expo Go
+  // Initialize AdMob SDK with App Tracking Transparency
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
@@ -27,7 +27,17 @@ const AppContent = () => {
           return;
         }
 
-        // Only require and initialize AdMob in standalone builds
+        // Request App Tracking Transparency permission (iOS 14.5+)
+        const { requestTrackingPermissionsAsync } = require('expo-tracking-transparency');
+        const trackingStatus = await requestTrackingPermissionsAsync();
+        
+        if (trackingStatus.granted) {
+          console.log('Tracking permission granted');
+        } else {
+          console.log('Tracking permission denied');
+        }
+
+        // Initialize AdMob SDK regardless of tracking permission
         const mobileAds = require('react-native-google-mobile-ads').default;
         await mobileAds().initialize();
         console.log('AdMob SDK initialized successfully');

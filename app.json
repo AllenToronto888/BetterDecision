@@ -18,7 +18,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "This app uses advertising ID to show you personalized ads and improve ad relevance."
       }
     },
     "android": {
@@ -45,7 +46,8 @@
           "androidAppId": "ca-app-pub-9076576179831024~8872344504",
           "iosAppId": "ca-app-pub-9076576179831024~9635542085"
         }
-      ]
+      ],
+      "expo-tracking-transparency"
     ]
   },
   "react-native-google-mobile-ads": {
