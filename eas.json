@@ -22,7 +22,11 @@
     },
     "production": {
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "autoIncrement": true
+      },
+      "android": {
+        "autoIncrement": true
       }
     }
   },

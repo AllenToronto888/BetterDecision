@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -17,8 +18,8 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
-      "buildNumber": "3",
-      "jsEngine": "jsc",
+      "buildNumber": "6",
+      "newArchEnabled": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -30,6 +31,7 @@
       },
       "package": "com.allentoronto888.betterdecision",
       "versionCode": 3,
+      "newArchEnabled": true,
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
@@ -47,11 +49,13 @@
           "androidAppId": "ca-app-pub-9076576179831024~8872344504",
           "iosAppId": "ca-app-pub-9076576179831024~9635542085"
         }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
       ]
     ]
-  },
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-9076576179831024~8872344504",
-    "ios_app_id": "ca-app-pub-9076576179831024~9635542085"
   }
 }

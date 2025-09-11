@@ -2,13 +2,6 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// TODO: Re-enable Hermes in future for better performance (2-3x faster startup, 30% less memory)
-// Currently disabled to avoid build issues - can be enabled later when needed
-// To enable: remove this transformer override and set "jsEngine": "hermes" in app.json
-config.transformer = {
-  ...config.transformer,
-  // Completely disable Hermes for now
-  hermesCommand: '',
-};
-
+// Enable Hermes and New Architecture support for React Native 0.79.5 + Expo SDK 53
+// This is the modern recommended configuration for performance and compatibility
 module.exports = config;

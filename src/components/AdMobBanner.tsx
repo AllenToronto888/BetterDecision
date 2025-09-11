@@ -1,12 +1,12 @@
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
+import * as admob from 'react-native-google-mobile-ads';
 
 // Conditionally import AdMob components
 let BannerAd: any, BannerAdSize: any, TestIds: any;
 let hasAdMob = false;
 
 try {
-  const admob = require('react-native-google-mobile-ads');
   BannerAd = admob.BannerAd;
   BannerAdSize = admob.BannerAdSize;
   TestIds = admob.TestIds;
@@ -20,7 +20,7 @@ interface AdMobBannerProps {
   /** Custom style for the container */
   style?: any;
   /** Banner size - defaults to FULL_BANNER */
-  size?: BannerAdSize;
+  size?: admob.BannerAdSize;
   /** Whether to show personalized ads */
   showPersonalizedAds?: boolean;
   /** iOS Banner Ad Unit ID */
