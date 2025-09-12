@@ -19,10 +19,12 @@ import { Button } from './Button';
 const APP_STORE_CONFIG = {
   ios: {
     appId: '6751603616', // Official App Store ID from Apple
-    bundleId: 'com.allentoronto888.betterdecision'
+    bundleId: 'com.allentoronto888.betterdecision',
+    storeUrl: 'https://apps.apple.com/app/id6751603616'
   },
   android: {
-    packageName: 'com.allentoronto888.betterdecision'
+    packageName: 'com.allentoronto888.betterdecision',
+    playStoreUrl: 'https://play.google.com/store/apps/details?id=com.allentoronto888.betterdecision'
   }
 };
 
@@ -82,22 +84,26 @@ const RateUsComponent: React.FC<RateUsComponentProps> = ({ visible, onClose, ses
         }
       } else if (Platform.OS === 'android') {
         // Android - Google Play Store
-        const playStoreUrl = `https://play.google.com/store/apps/details?id=${APP_STORE_CONFIG.android.packageName}`;
-        const supported = await Linking.canOpenURL(playStoreUrl);
+        const playStoreUrl = APP_STORE_CONFIG.android.playStoreUrl;
         
-        if (supported) {
-          await Linking.openURL(playStoreUrl);
-        } else {
+        try {
+          const canOpenPlayStore = await Linking.canOpenURL(playStoreUrl);
+          if (canOpenPlayStore) {
+            await Linking.openURL(playStoreUrl);
+          } else {
+            // Fallback to general Play Store
+            await Linking.openURL('https://play.google.com/store');
+            Alert.alert(
+              t('rateApp'),
+              t('searchAppInPlayStore'),
+              [{ text: t('ok') }]
+            );
+          }
+        } catch (error) {
           Alert.alert(
             t('rateApp'),
             t('searchAppInPlayStore'),
-            [
-              { text: t('cancel'), style: 'cancel' },
-              { 
-                text: t('openPlayStore'), 
-                onPress: () => Linking.openURL('https://play.google.com/store') 
-              }
-            ]
+            [{ text: t('ok') }]
           );
         }
       }
