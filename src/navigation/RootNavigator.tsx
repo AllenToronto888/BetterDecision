@@ -99,7 +99,7 @@ const RootNavigator = () => {
               <OnboardingScreen2
                 onNext={() => navigation.navigate('OnboardingScreen3')}
                 onBack={() => navigation.goBack()}
-                onCancel={() => navigation.goBack()}
+                onCancel={() => navigation.navigate('Main')}
               />
             )}
           </Stack.Screen>
