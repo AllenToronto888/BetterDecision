@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Button, CustomHeader, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
+import { Button, CustomHeader, Icon, SectionTitle, Share, SwipableRow, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface DateItem {
@@ -226,7 +225,7 @@ const DayCountdownScreen = () => {
                     <Text style={[styles.dateText, { color: theme.colors.text }]}>
                       {formatDate(dateItem.date)}
                     </Text>
-                    <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
+                    <Icon name="calendar-today" size={20} color={theme.colors.primary} />
                   </TouchableOpacity>
                   
                   <Modal
@@ -257,7 +256,7 @@ const DayCountdownScreen = () => {
                                 )
                               );
                             }}>
-                              <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                              <Icon name="close" size={24} color={theme.colors.text} />
                             </TouchableOpacity>
                           </View>
                         )}
@@ -340,7 +339,7 @@ const DayCountdownScreen = () => {
 
               {countdown.isPastDate && (
                 <View style={[styles.statusCard, { backgroundColor: theme.colors.danger + '20', borderColor: theme.colors.danger }]}>
-                  <MaterialIcons name="warning" size={20} color={theme.colors.danger} />
+                  <Icon name="warning" size={20} color={theme.colors.danger} />
                   <Text style={[styles.statusText, { color: theme.colors.danger, fontSize: 16 }]}>
                     {t('targetDatePassed')}
                   </Text>

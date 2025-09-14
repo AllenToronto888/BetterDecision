@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -9,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Button, CustomHeader, Share, Typography, useSavedItems, useTheme } from '../../components';
+import { Button, CustomHeader, Icon, Share, Typography, useSavedItems, useTheme } from '../../components';
 
 interface SavedItem {
   id: string;
@@ -279,7 +278,7 @@ const CalculatorSavedItemsScreen: React.FC = () => {
             </Typography>
           </View>
           
-          <MaterialIcons
+          <Icon
             name={isExpanded ? 'expand-less' : 'expand-more'}
             size={24}
             color={theme.colors.textSecondary}
@@ -322,7 +321,7 @@ const CalculatorSavedItemsScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <MaterialIcons
+      <Icon
         name="calculate"
         size={64}
         color={theme.colors.tabBarInactive}

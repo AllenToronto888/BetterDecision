@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -15,7 +14,7 @@ import {
     View,
 } from 'react-native';
 import Svg, { G, Path, Text as SvgText, TSpan } from 'react-native-svg';
-import { CustomHeader, SwipableRow, useTheme } from '../../components';
+import { CustomHeader, Icon, SwipableRow, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface SpinnerOption {
@@ -338,7 +337,7 @@ const SpinnerScreen = () => {
               style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
               onPress={addOption}
             >
-              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Icon name="add" size={20} color="#FFFFFF" />
               <Text style={styles.addButtonText}>{t('addOption')}</Text>
             </TouchableOpacity>
             
@@ -347,7 +346,7 @@ const SpinnerScreen = () => {
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAllOptions}
               >
-                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
+                <Icon name="delete-sweep" size={20} color={theme.colors.primary} />
                 <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             )}

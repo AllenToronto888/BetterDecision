@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -14,6 +13,7 @@ import { useTheme } from '../context/ThemeContext';
 import { markRateUsDismissed, markRateUsShown } from '../hooks/useSessionTracking';
 import { useI18n } from '../i18n';
 import { Button } from './Button';
+import { Icon } from './Icon';
 
 // App Store Configuration (same as settings)
 const APP_STORE_CONFIG = {
@@ -177,7 +177,7 @@ Thank you!
             onPress={() => handleStarPress(star)}
             style={styles.starButton}
           >
-            <MaterialIcons
+            <Icon
               name="star"
               size={40}
               color={star <= selectedRating ? '#FFD700' : theme.colors.tabBarInactive}

@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRef, useState } from 'react';
 import {
@@ -10,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, useTheme } from '../../components';
+import { CustomHeader, Icon, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface DiceConfig {
@@ -183,7 +182,7 @@ const DiceScreen = () => {
               onPress={() => updateCount(false)}
               disabled={config.count <= 1}
             >
-              <MaterialIcons name="remove" size={20} color="#FFFFFF" />
+              <Icon name="remove" size={20} color="#FFFFFF" />
             </TouchableOpacity>
             <Text style={[styles.counterText, { color: theme.colors.text }]}>{config.count}</Text>
             <TouchableOpacity
@@ -197,7 +196,7 @@ const DiceScreen = () => {
               onPress={() => updateCount(true)}
               disabled={config.count >= 6}
             >
-              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Icon name="add" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -236,7 +235,7 @@ const DiceScreen = () => {
         onPress={rollDice}
         disabled={isRolling}
       >
-        <MaterialIcons name="casino" size={24} color="#FFFFFF" />
+        <Icon name="casino" size={24} color="#FFFFFF" />
         <Text style={styles.rollButtonText}>{t('rollDice')}</Text>
       </TouchableOpacity>
       
@@ -263,7 +262,7 @@ const DiceScreen = () => {
               style={[styles.clearButton, { borderColor: theme.colors.primary }]}
               onPress={clearHistory}
             >
-              <MaterialIcons name="delete-sweep" size={16} color={theme.colors.primary} />
+              <Icon name="delete-sweep" size={16} color={theme.colors.primary} />
               <Text style={[styles.clearButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
             </TouchableOpacity>
           )}

@@ -5,6 +5,7 @@ export { Button } from './Button';
 export { Card } from './Card';
 export { default as CustomHeader } from './CustomHeader';
 export { useDeleteAll } from './DeleteAllButton';
+export { Icon } from './Icon';
 export { default as KeyboardAwareContainer } from './KeyboardAwareContainer';
 export { default as RateUsComponent } from './RateUsComponent';
 

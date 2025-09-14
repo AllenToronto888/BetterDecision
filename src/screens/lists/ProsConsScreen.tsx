@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
@@ -11,7 +10,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { AdMobBanner, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, CustomHeader, Icon, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 // Import Button directly from its file to avoid "Cannot call a class as a function" error
 
@@ -207,7 +206,7 @@ const ProsConsScreen = () => {
                 onPress={() => changeWeight(isPro, item.id, false)}
                 disabled={item.weight <= 0}
               >
-                <MaterialIcons name="remove" size={20} color="#FFFFFF" />
+                <Icon name="remove" size={20} color="#FFFFFF" />
               </TouchableOpacity>
               <Text style={[styles.weightText, { color: theme.colors.text }]}>{item.weight}</Text>
               <TouchableOpacity
@@ -221,7 +220,7 @@ const ProsConsScreen = () => {
                 onPress={() => changeWeight(isPro, item.id, true)}
                 disabled={item.weight >= 10}
               >
-                <MaterialIcons name="add" size={20} color="#FFFFFF" />
+                <Icon name="add" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -357,7 +356,7 @@ const ProsConsScreen = () => {
               style={[styles.columnButton, { backgroundColor: theme.colors.primary }]}
               onPress={() => addItem(true)}
             >
-              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Icon name="add" size={20} color="#FFFFFF" />
               <Text style={styles.buttonText}>{t('addPros')}</Text>
             </TouchableOpacity>
           </View>
@@ -368,7 +367,7 @@ const ProsConsScreen = () => {
               style={[styles.columnButton, { backgroundColor: theme.colors.danger }]}
               onPress={() => addItem(false)}
             >
-              <MaterialIcons name="add" size={20} color="#FFFFFF" />
+              <Icon name="add" size={20} color="#FFFFFF" />
               <Text style={styles.buttonText}>{t('addCons')}</Text>
             </TouchableOpacity>
             
@@ -377,7 +376,7 @@ const ProsConsScreen = () => {
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAll}
               >
-                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
+                <Icon name="delete-sweep" size={20} color={theme.colors.primary} />
                 <Text style={[styles.clearAllText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             )}
@@ -391,7 +390,7 @@ const ProsConsScreen = () => {
             onPress={() => setNotesExpanded(!notesExpanded)}
           >
             <View style={styles.notesHeaderLeft}>
-              <MaterialIcons name="note" size={20} color={theme.colors.primary} />
+              <Icon name="note" size={20} color={theme.colors.primary} />
               <Text style={[styles.notesTitle, { color: theme.colors.text }]}>{t('notes')}</Text>
               {notes.trim() && !notesExpanded && (
                 <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
@@ -399,7 +398,7 @@ const ProsConsScreen = () => {
                 </View>
               )}
             </View>
-            <MaterialIcons
+            <Icon
               name={notesExpanded ? "expand-less" : "expand-more"}
               size={24}
               color={theme.colors.text}

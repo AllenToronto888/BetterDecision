@@ -1,18 +1,18 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import { Icon } from './Icon';
 import { Typography } from './Typography';
 
 interface CustomHeaderProps {
   title: string;
   leftAction?: {
-    icon: keyof typeof MaterialIcons.glyphMap;
+    icon: string;
     onPress: () => void;
   };
   rightAction?: {
-    icon: keyof typeof MaterialIcons.glyphMap;
+    icon: string;
     onPress: () => void;
   };
   statusBarColor?: string;
@@ -42,7 +42,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       <View style={[styles.customHeader, { backgroundColor: headerBackgroundColor }]}>
         {leftAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={leftAction.onPress}>
-            <MaterialIcons name={leftAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
+            <Icon name={leftAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
           </TouchableOpacity>
         ) : (
           <View style={styles.headerButton} />
@@ -54,7 +54,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         
         {rightAction ? (
           <TouchableOpacity style={styles.headerButton} onPress={rightAction.onPress}>
-            <MaterialIcons name={rightAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
+            <Icon name={rightAction.icon} size={36} color={isDarkMode ? theme.colors.text : '#FFFFFF'} />
           </TouchableOpacity>
         ) : (
           <View style={styles.headerButton} />

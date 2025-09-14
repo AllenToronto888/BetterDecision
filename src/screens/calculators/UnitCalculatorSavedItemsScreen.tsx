@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -9,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { CustomHeader, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
+import { CustomHeader, Icon, Typography, useDeleteAll, useSavedItems, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface SavedItem {
@@ -159,7 +158,7 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
               {item.name}
             </Typography>
           </View>
-          <MaterialIcons
+          <Icon
             name={isExpanded ? "expand-less" : "expand-more"}
             size={24}
             color={theme.colors.text}
@@ -182,14 +181,14 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
                   console.log('Shared:', item.name);
                 }}
               >
-                <MaterialIcons name="share" size={20} color={theme.colors.primary} />
+                <Icon name="share" size={20} color={theme.colors.primary} />
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.actionIcon}
                 onPress={() => handleDeleteItem(item)}
               >
-                <MaterialIcons name="delete" size={20} color={theme.colors.danger} />
+                <Icon name="delete" size={20} color={theme.colors.danger} />
               </TouchableOpacity>
             </View>
           </View>
@@ -200,7 +199,7 @@ const UnitCalculatorSavedItemsScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <MaterialIcons
+      <Icon
         name="shopping-cart"
         size={64}
         color={theme.colors.tabBarInactive}

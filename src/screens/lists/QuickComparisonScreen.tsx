@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
@@ -11,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { AdMobBanner, CustomHeader, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, CustomHeader, Icon, Save, SectionTitle, Share, SwipableRow, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface Criterion {
@@ -269,11 +268,11 @@ const QuickComparisonScreen = () => {
   const getCellIcon = (status: 'yes' | 'no' | 'partial') => {
     switch (status) {
       case 'yes':
-        return <MaterialIcons name="check-circle" size={24} color="#4CAF50" />;
+        return <Icon name="check-circle" size={24} color="#4CAF50" />;
       case 'no':
-        return <MaterialIcons name="cancel" size={24} color="#F44336" />;
+        return <Icon name="cancel" size={24} color="#F44336" />;
       case 'partial':
-        return <MaterialIcons name="remove-circle" size={24} color="#FFC107" />;
+        return <Icon name="remove-circle" size={24} color="#FFC107" />;
     }
   };
 
@@ -416,7 +415,7 @@ const QuickComparisonScreen = () => {
                 style={[styles.clearAllButton, { borderColor: theme.colors.primary }]}
                 onPress={clearAllCriteria}
               >
-                <MaterialIcons name="delete-sweep" size={20} color={theme.colors.primary} />
+                <Icon name="delete-sweep" size={20} color={theme.colors.primary} />
                 <Text style={[styles.clearAllButtonText, { color: theme.colors.primary }]}>{t('clearAll')}</Text>
               </TouchableOpacity>
             </View>
@@ -468,7 +467,7 @@ const QuickComparisonScreen = () => {
                         style={styles.deleteButton}
                         onPress={() => removeOption(option.id)}
                       >
-                        <MaterialIcons name="close" size={16} color={theme.colors.danger} />
+                        <Icon name="close" size={16} color={theme.colors.danger} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -478,7 +477,7 @@ const QuickComparisonScreen = () => {
                   style={[styles.addCell, { backgroundColor: theme.colors.primary }]}
                   onPress={addOption}
                 >
-                  <MaterialIcons name="add" size={20} color="#FFFFFF" />
+                  <Icon name="add" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
               
@@ -507,7 +506,7 @@ const QuickComparisonScreen = () => {
                 style={[styles.addCriterionButton, { backgroundColor: theme.colors.primary }]}
                 onPress={addCriterion}
               >
-                <MaterialIcons name="add" size={20} color="#FFFFFF" />
+                <Icon name="add" size={20} color="#FFFFFF" />
                 <Text style={styles.addButtonText}>{t('addCriterion')}</Text>
               </TouchableOpacity>
             </View>
@@ -521,7 +520,7 @@ const QuickComparisonScreen = () => {
             onPress={() => setNotesExpanded(!notesExpanded)}
           >
             <View style={styles.notesHeaderLeft}>
-              <MaterialIcons name="note" size={20} color={theme.colors.primary} />
+              <Icon name="note" size={20} color={theme.colors.primary} />
               <Text style={[styles.notesTitle, { color: theme.colors.text }]}>{t('notes')}</Text>
               {notes.trim() && !notesExpanded && (
                 <View style={[styles.notesBadge, { backgroundColor: theme.colors.primary }]}>
@@ -529,7 +528,7 @@ const QuickComparisonScreen = () => {
                 </View>
               )}
             </View>
-            <MaterialIcons
+            <Icon
               name={notesExpanded ? "expand-less" : "expand-more"}
               size={24}
               color={theme.colors.text}

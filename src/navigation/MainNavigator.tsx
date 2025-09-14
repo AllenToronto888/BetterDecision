@@ -1,6 +1,6 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Icon } from '../components';
 import { useTheme } from '../context/ThemeContext';
 import { useI18n } from '../i18n';
 
@@ -102,7 +102,7 @@ const MainNavigator = () => {
           headerShown: false,
           tabBarLabel: t('calculators'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="calculate" color={color} size={size} />
+            <Icon name="calculate" color={color} size={size} />
           ),
         }}
       />
@@ -113,7 +113,7 @@ const MainNavigator = () => {
           headerShown: false,
           tabBarLabel: t('lists'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="list" color={color} size={size} />
+            <Icon name="list" color={color} size={size} />
           ),
         }}
       />
@@ -124,7 +124,7 @@ const MainNavigator = () => {
           headerShown: false,
           tabBarLabel: t('fortune'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="casino" color={color} size={size} />
+            <Icon name="casino" color={color} size={size} />
           ),
         }}
       />
@@ -135,7 +135,7 @@ const MainNavigator = () => {
           headerShown: false,
           tabBarLabel: t('settings'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="settings" color={color} size={size} />
+            <Icon name="settings" color={color} size={size} />
           ),
         }}
       />

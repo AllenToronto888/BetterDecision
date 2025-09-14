@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import {
     Dimensions,
@@ -8,6 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { Icon } from '../../components';
 import { useTheme } from '../../context/ThemeContext';
 import { useI18n } from '../../i18n';
 
@@ -39,7 +39,7 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({ onNext, onCancel 
         style={styles.cancelButton}
         onPress={onCancel}
       >
-        <MaterialIcons name="close" size={36} color={theme.colors.tabBarInactive} />
+        <Icon name="close" size={36} color={theme.colors.tabBarInactive} />
       </TouchableOpacity>
 
       {/* Content */}
@@ -78,7 +78,7 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({ onNext, onCancel 
             style={styles.nextButton}
             onPress={onNext}
           >
-            <MaterialIcons name="chevron-right" size={36} color={theme.colors.tabBarInactive} />
+            <Icon name="chevron-right" size={36} color={theme.colors.tabBarInactive} />
           </TouchableOpacity>
         </View>
       </View>

@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React, { ReactNode, useRef, useState } from 'react';
 import {
     Animated,
@@ -13,6 +12,7 @@ import {
     State,
 } from 'react-native-gesture-handler';
 import { useTheme } from '../context/ThemeContext';
+import { Icon } from './Icon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25; // 25% of screen width
@@ -154,7 +154,7 @@ export const SwipableRow: React.FC<SwipableRowProps> = ({
         }}
         activeOpacity={0.7}
       >
-        <MaterialIcons name={action.icon as any} size={24} color="#FFFFFF" />
+        <Icon name={action.icon as any} size={24} color="#FFFFFF" />
       </TouchableOpacity>
     ));
   };

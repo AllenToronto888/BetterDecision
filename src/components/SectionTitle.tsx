@@ -1,7 +1,7 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { Icon } from './Icon';
 import { Typography } from './Typography';
 
 interface SectionTitleProps {
@@ -78,7 +78,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
               {localTitle}
             </Typography>
             {editable && (
-              <MaterialIcons 
+              <Icon 
                 name="edit" 
                 size={20} 
                 color={theme.colors.textSecondary} 

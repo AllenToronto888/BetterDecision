@@ -1,7 +1,7 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { Icon } from './Icon';
 
 interface ButtonProps {
   title: string;
@@ -125,7 +125,7 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         <>
           {icon && iconPosition === 'left' && (
-            <MaterialIcons 
+            <Icon 
               name={icon as any} 
               size={iconSize} 
               color={getIconColor()} 
@@ -134,7 +134,7 @@ export const Button: React.FC<ButtonProps> = ({
           )}
           <Text style={finalTextStyle}>{title}</Text>
           {icon && iconPosition === 'right' && (
-            <MaterialIcons 
+            <Icon 
               name={icon as any} 
               size={iconSize} 
               color={getIconColor()} 

@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -11,7 +10,7 @@ import {
     TextInput,
     View
 } from 'react-native';
-import { AdMobBanner, Button, CustomHeader, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
+import { AdMobBanner, Button, CustomHeader, Icon, Save, SectionTitle, Share, SwipableRow, Typography, useAutoSave, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 interface CostItem {
@@ -221,7 +220,7 @@ const TotalCostScreen = () => {
       <View style={[styles.costItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.costItemHeader}>
           <View style={styles.costItemIcon}>
-            <MaterialIcons name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
+            <Icon name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
           </View>
           <TextInput
             style={[
@@ -298,7 +297,7 @@ const TotalCostScreen = () => {
       <View style={[styles.costItem, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
         <View style={styles.costItemHeader}>
           <View style={styles.costItemIcon}>
-            <MaterialIcons name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
+            <Icon name={getIconForCostType(item.type)} size={24} color={theme.colors.primary} />
           </View>
           <TextInput
             style={[styles.costItemLabel, { color: theme.colors.text }]}

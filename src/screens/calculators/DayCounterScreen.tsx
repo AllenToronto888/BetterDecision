@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, SectionTitle, Share, useTheme } from '../../components';
+import { CustomHeader, Icon, SectionTitle, Share, useTheme } from '../../components';
 import { useI18n } from '../../i18n';
 
 const DayCounterScreen = () => {
@@ -181,7 +180,7 @@ const DayCounterScreen = () => {
           <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(startDate)}
           </Text>
-          <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
+          <Icon name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
 
@@ -197,7 +196,7 @@ const DayCounterScreen = () => {
           <Text style={[styles.dateText, { color: theme.colors.text }]}>
             {formatDate(endDate)}
           </Text>
-          <MaterialIcons name="calendar-today" size={20} color={theme.colors.primary} />
+          <Icon name="calendar-today" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         
         {/* Date Picker - Platform specific implementation */}
@@ -213,7 +212,7 @@ const DayCounterScreen = () => {
                 <View style={styles.modalHeader}>
                   <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{t('selectDate')}</Text>
                   <TouchableOpacity onPress={() => setDatePickerOpen(false)}>
-                    <MaterialIcons name="close" size={24} color={theme.colors.text} />
+                    <Icon name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
                 <DateTimePicker

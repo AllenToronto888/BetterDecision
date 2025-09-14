@@ -15,6 +15,9 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "fonts": [
+      "node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
@@ -30,7 +33,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.allentoronto888.betterdecision",
-      "versionCode": 16,
+      "versionCode": 18,
       "newArchEnabled": true,
       "softwareKeyboardLayoutMode": "pan"
     },

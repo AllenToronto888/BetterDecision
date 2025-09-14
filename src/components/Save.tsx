@@ -1,9 +1,9 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useI18n } from '../i18n';
+import { Icon } from './Icon';
 
 import { Button } from './Button';
 import { Typography } from './Typography';
@@ -205,7 +205,7 @@ export const Save: React.FC<SaveComponentProps> = ({
           onPress={handleQuickSave}
           disabled={isSaving}
         >
-          <MaterialIcons 
+          <Icon 
             name="save" 
             size={28} 
             color={isSaving ? theme.colors.tabBarInactive : theme.colors.primary} 

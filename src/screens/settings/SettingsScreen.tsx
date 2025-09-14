@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Constants from 'expo-constants';
@@ -15,7 +14,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { CustomHeader, RateUsComponent, useTheme } from '../../components';
+import { CustomHeader, Icon, RateUsComponent, useTheme } from '../../components';
 import { resetSessionData } from '../../hooks/useSessionTracking';
 import { useI18n } from '../../i18n';
 import WebViewScreen from './WebViewScreen';
@@ -218,7 +217,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         
         <View style={[styles.settingRow, styles.lastRow, styles.appearanceRow, { borderBottomColor: theme.colors.border }]}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="brightness-6" size={24} color="#FFA500" style={styles.settingIcon} />
+            <Icon name="brightness-6" size={24} color="#FFA500" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('darkMode')}</Text>
           </View>
           <Switch
@@ -235,26 +234,26 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         
         <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={clearCalculator}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="calculate" size={24} color="#4CAF50" style={styles.settingIcon} />
+            <Icon name="calculate" size={24} color="#4CAF50" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearCalculatorsData')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={clearLists}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="list" size={24} color="#2196F3" style={styles.settingIcon} />
+            <Icon name="list" size={24} color="#2196F3" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearListsData')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]} onPress={clearAllData}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="delete-sweep" size={24} color="#F44336" style={styles.settingIcon} />
+            <Icon name="delete-sweep" size={24} color="#F44336" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('clearAllData')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
@@ -263,34 +262,34 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
         
         <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={rateApp}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="star" size={24} color="#FFD700" style={styles.settingIcon} />
+            <Icon name="star" size={24} color="#FFD700" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('rateApp')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={openPrivacyPolicy}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="privacy-tip" size={24} color="#9C27B0" style={styles.settingIcon} />
+            <Icon name="privacy-tip" size={24} color="#9C27B0" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('privacyPolicy')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.settingRow, { borderBottomColor: theme.colors.border }]} onPress={openTermsOfService}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="description" size={24} color="#607D8B" style={styles.settingIcon} />
+            <Icon name="description" size={24} color="#607D8B" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('termsOfService')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.settingRow, styles.lastRow, { borderBottomColor: theme.colors.border }]} onPress={contactUs}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="mail" size={24} color="#FF5722" style={styles.settingIcon} />
+            <Icon name="mail" size={24} color="#FF5722" style={styles.settingIcon} />
             <Text style={[styles.settingLabel, { color: theme.colors.text }]}>{t('contactUs')}</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
+          <Icon name="chevron-right" size={24} color={theme.colors.tabBarInactive} />
         </TouchableOpacity>
       </View>
       
@@ -327,7 +326,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                       setIsExpanded(false);
                     }}
                   >
-                    <MaterialIcons 
+                    <Icon 
                       name="language" 
                       size={20} 
                       color={currentLanguage === lang ? theme.colors.primary : theme.colors.tabBarInactive} 
@@ -344,7 +343,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                        lang === 'ja' ? '日本語' : lang}
                     </Text>
                     {currentLanguage === lang && (
-                      <MaterialIcons name="check" size={20} color={theme.colors.primary} />
+                      <Icon name="check" size={20} color={theme.colors.primary} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -356,7 +355,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                     setShowLanguageDropdown(false);
                   }}
                 >
-                  <MaterialIcons name="close" size={20} color={theme.colors.tabBarInactive} />
+                  <Icon name="close" size={20} color={theme.colors.tabBarInactive} />
                   <Text style={[styles.cancelButtonText, { color: theme.colors.tabBarInactive }]}>
                     {t('cancel')}
                   </Text>
@@ -386,11 +385,11 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
               }}
               activeOpacity={0.7}
             >
-              <MaterialIcons 
-                name={isExpanded ? "close" : "build"} 
-                size={24} 
-                color={theme.colors.primary} 
-              />
+                <Icon 
+                  name={isExpanded ? "close" : "build"} 
+                  size={24} 
+                  color={theme.colors.primary} 
+                />
             </TouchableOpacity>
 
             {/* Expanded Menu */}
@@ -402,7 +401,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                     setShowLanguageDropdown(true);
                   }}
                 >
-                  <MaterialIcons name="language" size={20} color={theme.colors.primary} />
+                  <Icon name="language" size={20} color={theme.colors.primary} />
                   <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Language</Text>
                   <Text style={[styles.currentLangText, { color: theme.colors.tabBarInactive }]}>
                     {currentLanguage.split('-')[0].toUpperCase()}
@@ -417,7 +416,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                     setShowRateUsModal(true);
                   }}
                 >
-                  <MaterialIcons name="star" size={20} color="#FFD700" />
+                  <Icon name="star" size={20} color="#FFD700" />
                   <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Test Rate Us</Text>
                 </TouchableOpacity>
                 
@@ -429,7 +428,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                     Alert.alert('Dev Tools', 'Session data reset! Rate us will show after 20 sessions again.');
                   }}
                 >
-                  <MaterialIcons name="refresh" size={20} color="#FF5722" />
+                  <Icon name="refresh" size={20} color="#FF5722" />
                   <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Reset Sessions</Text>
                 </TouchableOpacity>
                 
@@ -440,7 +439,7 @@ const SettingsHomeScreen = ({ navigation }: { navigation: any }) => {
                     goToOnboarding();
                   }}
                 >
-                  <MaterialIcons name="school" size={20} color="#4CAF50" />
+                  <Icon name="school" size={20} color="#4CAF50" />
                   <Text style={[styles.menuItemText, { color: theme.colors.text }]}>Show Onboarding</Text>
                 </TouchableOpacity>
               </View>

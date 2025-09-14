@@ -1,7 +1,7 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { Icon } from './Icon';
 
 interface CardProps {
   title: string;
@@ -51,7 +51,7 @@ export const Card: React.FC<CardProps> = ({
     <>
       {icon && (
         <View style={[styles.iconContainer, { backgroundColor: iconColor || theme.colors.primary }]}>
-          <MaterialIcons name={icon as any} size={32} color="#FFFFFF" />
+          <Icon name={icon as any} size={32} color="#FFFFFF" />
         </View>
       )}
       <View style={styles.cardContent}>
@@ -63,7 +63,7 @@ export const Card: React.FC<CardProps> = ({
         )}
       </View>
       {onPress && (
-        <MaterialIcons name="chevron-right" size={24} color={theme.colors.textSecondary} />
+        <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />
       )}
     </>
   );

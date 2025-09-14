@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -10,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Button, Share, Typography, useSavedItems, useTheme } from '../components';
+import { Button, Icon, Share, Typography, useSavedItems, useTheme } from '../components';
 
 interface SavedItem {
   id: string;
@@ -202,7 +201,7 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
       ]}
       onPress={() => setSelectedTab(type as any)}
     >
-      <MaterialIcons
+      <Icon
         name={icon as any}
         size={20}
         color={selectedTab === type ? '#FFFFFF' : theme.colors.primary}
@@ -247,7 +246,7 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
             </Typography>
           </View>
           
-          <MaterialIcons
+          <Icon
             name={isExpanded ? 'expand-less' : 'expand-more'}
             size={24}
             color={theme.colors.textSecondary}
@@ -290,7 +289,7 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <MaterialIcons
+      <Icon
         name={selectedTab === 'calculation' ? 'calculate' : selectedTab === 'comparison' ? 'compare' : 'casino'}
         size={64}
         color={theme.colors.tabBarInactive}
@@ -315,7 +314,7 @@ const SavedItemsScreen: React.FC<SavedItemsScreenProps> = ({ route }) => {
           style={styles.clearAllButton}
           onPress={handleClearAll}
         >
-          <MaterialIcons name="delete-sweep" size={24} color="#FFFFFF" />
+          <Icon name="delete-sweep" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 

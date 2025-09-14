@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import {
     Dimensions,
@@ -8,6 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { Icon } from '../../components';
 import { useTheme } from '../../context/ThemeContext';
 import { useI18n } from '../../i18n';
 
@@ -66,7 +66,7 @@ const OnboardingScreen3: React.FC<OnboardingScreen3Props> = ({ onGetStarted, onB
               style={styles.backButton}
               onPress={onBack}
             >
-              <MaterialIcons name="chevron-left" size={36} color={theme.colors.tabBarInactive} />
+              <Icon name="chevron-left" size={36} color={theme.colors.tabBarInactive} />
             </TouchableOpacity>
           </View>
 
@@ -78,7 +78,7 @@ const OnboardingScreen3: React.FC<OnboardingScreen3Props> = ({ onGetStarted, onB
             style={styles.getStartedButton}
             onPress={onGetStarted}
           >
-            <MaterialIcons name="chevron-right" size={36} color={theme.colors.tabBarInactive} />
+            <Icon name="chevron-right" size={36} color={theme.colors.tabBarInactive} />
           </TouchableOpacity>
         </View>
       </View>

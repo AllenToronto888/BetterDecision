@@ -1,8 +1,8 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Alert, Share as RNShare, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Button } from './Button';
+import { Icon } from './Icon';
 
 interface ShareComponentProps {
   data: any;
@@ -254,7 +254,7 @@ export const Share: React.FC<ShareComponentProps> = ({
         onPress={handleShare}
         disabled={isSharing}
       >
-        <MaterialIcons 
+        <Icon 
           name="share" 
           size={28} 
           color={isSharing ? theme.colors.tabBarInactive : theme.colors.primary} 
