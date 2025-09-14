@@ -3,14 +3,14 @@ import { Text, View } from 'react-native';
 
 // Try to import MaterialIcons, fallback to text if not available
 let MaterialIcons: any;
+// FORCE EMOJI FALLBACKS FOR CONSISTENT EXPERIENCE
+let hasIcons = false;
+
 try {
   MaterialIcons = require('@expo/vector-icons').MaterialIcons;
 } catch (error) {
   console.log('MaterialIcons not available, using text fallbacks');
 }
-
-// Normal operation - try to use MaterialIcons first
-let hasIcons = true;
 
 interface IconProps {
   name: string;
@@ -98,22 +98,8 @@ const iconFallbacks: { [key: string]: string } = {
 };
 
 export const Icon: React.FC<IconProps> = ({ name, size = 24, color = '#000000', style }) => {
-  // If MaterialIcons is available, use it
-  if (hasIcons && MaterialIcons && typeof MaterialIcons === 'function') {
-    try {
-      return (
-        <MaterialIcons 
-          name={name} 
-          size={size} 
-          color={color} 
-          style={style}
-        />
-      );
-    } catch (error) {
-      // If MaterialIcons fails, fall through to fallback
-      console.log('MaterialIcons failed, using fallback for:', name);
-    }
-  }
+  // Always use emoji fallbacks for consistent experience
+  // (MaterialIcons code is commented out)
   
   // Fallback to text/emoji
   const fallbackText = iconFallbacks[name] || iconFallbacks['default'];
