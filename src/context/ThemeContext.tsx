@@ -108,7 +108,7 @@ const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const colorScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
+  const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
   const [isLoading, setIsLoading] = useState(true);
   
   // Load saved theme settings

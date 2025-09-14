@@ -6,13 +6,20 @@ import { StatusBar } from "expo-status-bar";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RateUsComponent } from "./components";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useSessionTracking } from "./hooks/useSessionTracking";
 import { LanguageProvider } from "./i18n";
 import RootNavigator from "./navigation/RootNavigator";
+// Conditionally import mobileAds to avoid Expo Go crashes
+let mobileAds: any;
+try {
+  mobileAds = require("react-native-google-mobile-ads").default;
+} catch (error) {
+  // AdMob not available in Expo Go
+  console.log('AdMob module not available');
+}
 
 const AppContent = () => {
   const { theme, isDarkMode } = useTheme();
@@ -23,10 +30,10 @@ const AppContent = () => {
   useEffect(() => {
     const initializeAdMob = async () => {
       try {
-        // Check if we're running in Expo Go using Constants
+        // Check if we're running in Expo Go using Constants or if mobileAds is not available
         const isExpoGo = Constants.appOwnership === "expo";
 
-        if (isExpoGo) {
+        if (isExpoGo || !mobileAds) {
           console.log("AdMob not available, showing placeholder");
           return;
         }

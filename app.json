@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
-      "buildNumber": "6",
+      "buildNumber": "7",
       "newArchEnabled": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -30,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.allentoronto888.betterdecision",
-      "versionCode": 3,
+      "versionCode": 14,
       "newArchEnabled": true,
       "softwareKeyboardLayoutMode": "pan"
     },
@@ -55,7 +55,8 @@
         {
           "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }
