@@ -5,6 +5,8 @@ interface ATTContextType {
   attPermissionGranted: boolean | null;
   /** Whether to show personalized ads based on ATT permission */
   showPersonalizedAds: boolean;
+  /** Function to update ATT permission status */
+  updateATTPermission: (granted: boolean) => void;
 }
 
 const ATTContext = createContext<ATTContextType | undefined>(undefined);
@@ -12,11 +14,13 @@ const ATTContext = createContext<ATTContextType | undefined>(undefined);
 interface ATTProviderProps {
   children: ReactNode;
   attPermissionGranted: boolean | null;
+  onATTPermissionUpdate: (granted: boolean) => void;
 }
 
 export const ATTProvider: React.FC<ATTProviderProps> = ({ 
   children, 
-  attPermissionGranted 
+  attPermissionGranted,
+  onATTPermissionUpdate
 }) => {
   // Only show personalized ads if ATT permission is explicitly granted
   const showPersonalizedAds = attPermissionGranted === true;
@@ -24,6 +28,7 @@ export const ATTProvider: React.FC<ATTProviderProps> = ({
   const value: ATTContextType = {
     attPermissionGranted,
     showPersonalizedAds,
+    updateATTPermission: onATTPermissionUpdate,
   };
 
   return (

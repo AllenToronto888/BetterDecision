@@ -69,14 +69,32 @@ const AppContent = () => {
   );
 };
 
+// Create a function to request ATT permission that can be called after onboarding
+export const requestATTPermission = async (): Promise<boolean> => {
+  try {
+    console.log("Requesting App Tracking Transparency permission...");
+    const { granted } = await requestTrackingPermissionsAsync();
+    
+    if (granted) {
+      console.log("✅ User granted tracking permission - enabling personalized ads");
+    } else {
+      console.log("❌ User denied tracking permission - keeping non-personalized ads only");
+    }
+    
+    return granted;
+  } catch (error) {
+    console.log("ATT permission request failed:", error instanceof Error ? error.message : String(error));
+    return false;
+  }
+};
+
 const App = () => {
   const [attPermissionGranted, setAttPermissionGranted] = useState<boolean | null>(null);
 
-  // Request App Tracking Transparency permission FIRST, then initialize AdMob
+  // Initialize AdMob without tracking first (for non-personalized ads)
   useEffect(() => {
-    const initializeAppWithATT = async () => {
+    const initializeAdMobOnly = async () => {
       try {
-        // Check if we're running in Expo Go using Constants or if mobileAds is not available
         const isExpoGo = Constants.appOwnership === "expo";
 
         if (isExpoGo || !mobileAds) {
@@ -85,40 +103,33 @@ const App = () => {
           return;
         }
 
-        // Request ATT permission FIRST before any data collection
-        console.log("Requesting App Tracking Transparency permission...");
-        const { granted } = await requestTrackingPermissionsAsync();
-        setAttPermissionGranted(granted);
-        
-        if (granted) {
-          console.log("✅ User granted tracking permission - initializing AdMob with personalized ads");
-        } else {
-          console.log("❌ User denied tracking permission - initializing AdMob with non-personalized ads only");
-        }
-
-        // Initialize AdMob SDK AFTER ATT permission is determined
+        // Initialize AdMob SDK with non-personalized ads first
         await mobileAds().initialize();
-        console.log("AdMob SDK initialized successfully");
+        console.log("AdMob SDK initialized with non-personalized ads");
+        setAttPermissionGranted(false); // Default to non-personalized
         
       } catch (error) {
-        // Silently handle errors and default to non-personalized ads
-        console.log(
-          "ATT/AdMob initialization failed:",
-          error instanceof Error ? error.message : String(error)
-        );
+        console.log("AdMob initialization failed:", error instanceof Error ? error.message : String(error));
         setAttPermissionGranted(false);
       }
     };
 
-    initializeAppWithATT();
+    initializeAdMobOnly();
   }, []);
+
+  const handleATTPermissionUpdate = (granted: boolean) => {
+    setAttPermissionGranted(granted);
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <LanguageProvider>
           <ThemeProvider>
-            <ATTProvider attPermissionGranted={attPermissionGranted}>
+            <ATTProvider 
+              attPermissionGranted={attPermissionGranted}
+              onATTPermissionUpdate={handleATTPermissionUpdate}
+            >
               <AppContent />
             </ATTProvider>
           </ThemeProvider>

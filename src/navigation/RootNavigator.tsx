@@ -1,6 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { requestATTPermission } from '../App';
+import { useATT } from '../context/ATTContext';
 import { useTheme } from '../context/ThemeContext';
 import OnboardingScreen1 from '../screens/onboarding/OnboardingScreen1';
 import OnboardingScreen2 from '../screens/onboarding/OnboardingScreen2';
@@ -12,6 +14,7 @@ const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
   const { theme } = useTheme();
+  const { updateATTPermission } = useATT();
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -32,6 +35,11 @@ const RootNavigator = () => {
   const handleOnboardingComplete = async () => {
     try {
       await setOnboardingCompleted();
+      
+      // Request ATT permission after onboarding is completed
+      const attGranted = await requestATTPermission();
+      updateATTPermission(attGranted);
+      
       setShowOnboarding(false);
     } catch (error) {
       console.error('Error completing onboarding:', error);
