@@ -1,5 +1,6 @@
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useATT } from '../context/ATTContext';
 
 // Conditionally import admob to avoid Expo Go crashes
 let admob: any;
@@ -24,7 +25,7 @@ interface AdMobBannerProps {
   style?: any;
   /** Banner size - defaults to FULL_BANNER */
   size?: any;
-  /** Whether to show personalized ads */
+  /** Whether to show personalized ads - defaults to false for privacy compliance */
   showPersonalizedAds?: boolean;
   /** iOS Banner Ad Unit ID */
   iosUnitId?: string;
@@ -35,10 +36,17 @@ interface AdMobBannerProps {
 const AdMobBanner: React.FC<AdMobBannerProps> = ({
   style,
   size = hasAdMob ? BannerAdSize?.FULL_BANNER : 'FULL_BANNER',
-  showPersonalizedAds = false,
+  showPersonalizedAds: propShowPersonalizedAds,
   iosUnitId = "ca-app-pub-9076576179831024/3257889898", // iOS Banner Unit ID
   androidUnitId = "ca-app-pub-9076576179831024/9927240025", // Android Banner Unit ID
 }) => {
+  // Use ATT context to determine if personalized ads should be shown
+  const { showPersonalizedAds: attShowPersonalizedAds } = useATT();
+  
+  // Use prop value if provided, otherwise use ATT context value
+  const showPersonalizedAds = propShowPersonalizedAds !== undefined 
+    ? propShowPersonalizedAds 
+    : attShowPersonalizedAds;
   // Use test ads in development, real ads in production
   const getAdUnitId = () => {
     if (__DEV__ && hasAdMob) {

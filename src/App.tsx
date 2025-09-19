@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RateUsComponent } from "./components";
+import { ATTProvider } from "./context/ATTContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useSessionTracking } from "./hooks/useSessionTracking";
 import { LanguageProvider } from "./i18n";
@@ -25,44 +26,6 @@ const AppContent = () => {
   const { theme, isDarkMode } = useTheme();
   const { shouldShowRateUs, sessionCount } = useSessionTracking();
   const [showRateUsModal, setShowRateUsModal] = useState(false);
-
-  // Initialize AdMob SDK without ATT (generic ads only)
-  useEffect(() => {
-    const initializeAdMob = async () => {
-      try {
-        // Check if we're running in Expo Go using Constants or if mobileAds is not available
-        const isExpoGo = Constants.appOwnership === "expo";
-
-        if (isExpoGo || !mobileAds) {
-          console.log("AdMob not available, showing placeholder");
-          return;
-        }
-
-        // Initialize AdMob SDK with generic ads (no tracking)
-        await mobileAds().initialize();
-        console.log("AdMob SDK initialized successfully with generic ads");
-      } catch (error) {
-        // Silently handle AdMob initialization errors
-        console.log(
-          "AdMob initialization failed:",
-          error instanceof Error ? error.message : String(error)
-        );
-      }
-    };
-
-    initializeAdMob();
-  }, []);
-  // Request App Tracking Transparency permission on iOS
-  useEffect(() => {
-    (async () => {
-      setTimeout(async () => {
-        const { granted } = await requestTrackingPermissionsAsync();
-        if (granted) {
-          console.log("Yay! I have user permission to track data");
-        }
-      }, 1000);
-    })();
-  }, []);
   // Show rate us modal when conditions are met
   React.useEffect(() => {
     if (shouldShowRateUs) {
@@ -107,12 +70,57 @@ const AppContent = () => {
 };
 
 const App = () => {
+  const [attPermissionGranted, setAttPermissionGranted] = useState<boolean | null>(null);
+
+  // Request App Tracking Transparency permission FIRST, then initialize AdMob
+  useEffect(() => {
+    const initializeAppWithATT = async () => {
+      try {
+        // Check if we're running in Expo Go using Constants or if mobileAds is not available
+        const isExpoGo = Constants.appOwnership === "expo";
+
+        if (isExpoGo || !mobileAds) {
+          console.log("AdMob not available, showing placeholder");
+          setAttPermissionGranted(false);
+          return;
+        }
+
+        // Request ATT permission FIRST before any data collection
+        console.log("Requesting App Tracking Transparency permission...");
+        const { granted } = await requestTrackingPermissionsAsync();
+        setAttPermissionGranted(granted);
+        
+        if (granted) {
+          console.log("✅ User granted tracking permission - initializing AdMob with personalized ads");
+        } else {
+          console.log("❌ User denied tracking permission - initializing AdMob with non-personalized ads only");
+        }
+
+        // Initialize AdMob SDK AFTER ATT permission is determined
+        await mobileAds().initialize();
+        console.log("AdMob SDK initialized successfully");
+        
+      } catch (error) {
+        // Silently handle errors and default to non-personalized ads
+        console.log(
+          "ATT/AdMob initialization failed:",
+          error instanceof Error ? error.message : String(error)
+        );
+        setAttPermissionGranted(false);
+      }
+    };
+
+    initializeAppWithATT();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <LanguageProvider>
           <ThemeProvider>
-            <AppContent />
+            <ATTProvider attPermissionGranted={attPermissionGranted}>
+              <AppContent />
+            </ATTProvider>
           </ThemeProvider>
         </LanguageProvider>
       </SafeAreaProvider>
