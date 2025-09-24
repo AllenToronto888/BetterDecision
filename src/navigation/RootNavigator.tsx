@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { requestATTPermission } from '../App';
 import { useATT } from '../context/ATTContext';
 import { useTheme } from '../context/ThemeContext';
 import OnboardingScreen1 from '../screens/onboarding/OnboardingScreen1';
 import OnboardingScreen2 from '../screens/onboarding/OnboardingScreen2';
 import OnboardingScreen3 from '../screens/onboarding/OnboardingScreen3';
+import { requestDelayedATTPermission } from '../utils/attHelpers';
 import { isOnboardingCompleted, setOnboardingCompleted } from '../utils/onboarding';
 import MainNavigator from './MainNavigator';
 
@@ -36,13 +36,18 @@ const RootNavigator = () => {
     try {
       await setOnboardingCompleted();
       
-      // Request ATT permission after onboarding is completed
-      const attGranted = await requestATTPermission();
-      updateATTPermission(attGranted);
+      // ENHANCED: Try to request ATT permission again after onboarding (if still undetermined)
+      // This provides better UX while ensuring immediate request already happened for Apple reviewers
+      const delayedResult = await requestDelayedATTPermission();
+      if (delayedResult) {
+        updateATTPermission(delayedResult.granted);
+      }
       
       setShowOnboarding(false);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error('❌ Error completing onboarding:', error);
+      // Don't block onboarding completion due to ATT errors
+      setShowOnboarding(false);
     }
   };
 

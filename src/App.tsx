@@ -1,9 +1,6 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { StatusBar } from "expo-status-bar";
-// Remove direct import to avoid iOS < 14 crashes
-// import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
-import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -13,6 +10,9 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useSessionTracking } from "./hooks/useSessionTracking";
 import { LanguageProvider } from "./i18n";
 import RootNavigator from "./navigation/RootNavigator";
+import {
+  requestImmediateATTPermission
+} from "./utils/attHelpers";
 // Conditionally import mobileAds to avoid Expo Go crashes
 let mobileAds: any;
 try {
@@ -69,55 +69,47 @@ const AppContent = () => {
   );
 };
 
-// Create a function to request ATT permission that can be called after onboarding
-export const requestATTPermission = async (): Promise<boolean> => {
-  try {
-    console.log("Requesting App Tracking Transparency permission...");
-    const { granted } = await requestTrackingPermissionsAsync();
-    
-    if (granted) {
-      console.log("✅ User granted tracking permission - enabling personalized ads");
-    } else {
-      console.log("❌ User denied tracking permission - keeping non-personalized ads only");
-    }
-    
-    return granted;
-  } catch (error) {
-    console.log("ATT permission request failed:", error instanceof Error ? error.message : String(error));
-    return false;
-  }
-};
-
 const App = () => {
   const [attPermissionGranted, setAttPermissionGranted] = useState<boolean | null>(null);
 
-  // Initialize AdMob without tracking first (for non-personalized ads)
+  // SOLUTION: Request ATT permission IMMEDIATELY when app starts (for Apple reviewers & iPadOS)
   useEffect(() => {
-    const initializeAdMobOnly = async () => {
+    const initializeAppWithImmediateATT = async () => {
       try {
         const isExpoGo = Constants.appOwnership === "expo";
 
         if (isExpoGo || !mobileAds) {
-          console.log("AdMob not available, showing placeholder");
           setAttPermissionGranted(false);
           return;
         }
 
-        // Initialize AdMob SDK with non-personalized ads first
+        const result = await requestImmediateATTPermission();
+        
+        // Log the result for debugging
+        
+        setAttPermissionGranted(result.granted);
+
         await mobileAds().initialize();
-        console.log("AdMob SDK initialized with non-personalized ads");
-        setAttPermissionGranted(false); // Default to non-personalized
         
       } catch (error) {
-        console.log("AdMob initialization failed:", error instanceof Error ? error.message : String(error));
+        console.log("❌ App initialization with ATT failed:", error instanceof Error ? error.message : String(error));
+        // Fallback: initialize without ATT permission
         setAttPermissionGranted(false);
+        
+        try {
+          await mobileAds().initialize();
+          console.log("📱 AdMob SDK initialized in fallback mode");
+        } catch (admobError) {
+          console.log("❌ AdMob initialization also failed:", admobError);
+        }
       }
     };
 
-    initializeAdMobOnly();
+    initializeAppWithImmediateATT();
   }, []);
 
   const handleATTPermissionUpdate = (granted: boolean) => {
+    console.log(`🔄 ATT permission updated: ${granted}`);
     setAttPermissionGranted(granted);
   };
 

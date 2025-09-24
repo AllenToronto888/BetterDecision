@@ -21,7 +21,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.allentoronto888.betterdecision",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "newArchEnabled": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
