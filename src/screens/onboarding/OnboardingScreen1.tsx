@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Icon } from '../../components';
 import { useTheme } from '../../context/ThemeContext';
@@ -35,12 +35,12 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({ onNext, onCancel 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Cancel Button (X) */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.cancelButton}
         onPress={onCancel}
       >
         <Icon name="close" size={36} color={theme.colors.tabBarInactive} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Content */}
       <View style={styles.content}>
