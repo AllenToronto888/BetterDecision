@@ -34,7 +34,6 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({ onNext, onCancel 
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Cancel Button (X) */}
       {/* <TouchableOpacity
         style={styles.cancelButton}
         onPress={onCancel}
